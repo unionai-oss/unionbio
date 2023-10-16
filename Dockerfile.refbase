@@ -1,0 +1,58 @@
+FROM python:3.12-slim-bookworm
+
+WORKDIR /ref
+
+ARG JRE_VER=17
+ARG REFSEQ_ASSEMBLY=GCF_000001405.40
+ARG SAMTOOLS_VER=1.17
+ARG FASTQC_VER=0.12.1
+ARG VCFTOOLS_VER=0.1.16
+
+# Update, install deps, clean up
+RUN apt-get update && apt-get install --no-install-recommends -y \
+ build-essential \
+ openjdk-${JRE_VER}-jre \
+ unzip \
+ curl \
+ wget \
+ libncurses5-dev \
+ libbz2-dev \
+ liblzma-dev \
+ libcurl4-gnutls-dev \
+ zlib1g-dev \
+ libssl-dev \
+ gcc \
+ make \
+ perl \
+ bzip2 \
+ gnuplot \
+ ca-certificates \
+ gawk \
+&& apt-get autoclean && rm -rf /var/lib/apt/lists/*
+
+# Download the reference
+RUN curl -OJX GET "https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/${REFSEQ_ASSEMBLY}/download?include_annotation_type=GENOME_FASTA,GENOME_GFF,RNA_FASTA,CDS_FASTA,PROT_FASTA,SEQUENCE_REPORT&filename=${REFSEQ_ASSEMBLY}.zip" -H "Accept: application/zip" 
+
+# Unzip and cleanup reference
+RUN unzip ${REFSEQ_ASSEMBLY}.zip \
+    && mv ncbi_dataset/data/${REFSEQ_ASSEMBLY}/${REFSEQ_ASSEMBLY}*.fna GRCh38.fasta \
+    && rm -rf ncbi_dataset ${REFSEQ_ASSEMBLY}.zip README.md
+
+# Install fastqc
+RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v${FASTQC_VER}.zip && \
+ unzip fastqc_v${FASTQC_VER}.zip && \
+ chmod +x FastQC/fastqc && \
+ mv /ref/FastQC/fastqc /usr/local/bin/fastqc && \
+ rm fastqc_v${FASTQC_VER}.zip
+
+# Install samtools
+RUN wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VER}/samtools-${SAMTOOLS_VER}.tar.bz2 && \
+ tar -xjf samtools-${SAMTOOLS_VER}.tar.bz2 && \
+ rm samtools-${SAMTOOLS_VER}.tar.bz2 && \
+ cd samtools-${SAMTOOLS_VER} && \
+ ./configure --prefix=/usr/local && \
+ make && \
+ make install && \
+ cd .. && \
+ rm -rf samtools-${SAMTOOLS_VER}
+ 
