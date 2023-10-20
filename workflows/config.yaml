@@ -1,0 +1,3 @@
+# Workflow-wide config
+base_image: 'ghcr.io/unionai/refbase:latest'
+reference_location: '/ref/GRCh38.fasta'
