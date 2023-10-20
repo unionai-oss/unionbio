@@ -5,8 +5,9 @@ from flytekit.types.directory import FlyteDirectory
 # from workflows import config, logger
 
 bowtie_image_spec = ImageSpec(
-    base_image="refbase:latest",
-    apt_packages=["bowtie2"]
+    name="bowtie2",
+    apt_packages=["bowtie2"],
+    registry="localhost:30000",
 )
 
 check_base_image = ShellTask(
@@ -19,6 +20,18 @@ check_base_image = ShellTask(
     inputs=kwtypes(),
     output_locs=[],
     container_image='localhost:30000/refbase:latest'
+)
+
+check_image_spec = ShellTask(
+    name="check-image-spec",
+    debug=True,
+    script=
+    """
+    which bowtie2
+    """,
+    inputs=kwtypes(),
+    output_locs=[],
+    container_image=bowtie_image_spec
 )
 
 bowtie2_index = ShellTask(
