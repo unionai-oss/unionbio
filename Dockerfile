@@ -1,6 +1,10 @@
 FROM python:3.10-slim-bookworm
 
-WORKDIR /ref
+WORKDIR /root
+ENV VENV /opt/venv
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+ENV PYTHONPATH /root
 
 ARG JRE_VER=17
 ARG SAMTOOLS_VER=1.17
@@ -34,7 +38,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v${FASTQC_VER}.zip && \
  unzip fastqc_v${FASTQC_VER}.zip && \
  chmod +x FastQC/fastqc && \
- mv /ref/FastQC/fastqc /usr/local/bin/fastqc && \
+ mv /root/FastQC/fastqc /usr/local/bin/fastqc && \
  rm -rf fastqc_v${FASTQC_VER}.zip FastQC
 
 # Install samtools
@@ -48,7 +52,14 @@ RUN wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VER}/
  cd .. && \
  rm -rf samtools-${SAMTOOLS_VER}
 
-# Copy code and install python dependencies
-WORKDIR /seq
-COPY . /seq
-RUN pip install -r requirements.txt
+# Install Python dependencies
+COPY requirements.txt /root
+RUN pip install -r /root/requirements.txt
+
+# Copy the actual code
+COPY . /root
+
+# This tag is supplied by the build script and will be used to determine the version
+# when registering tasks, workflows, and launch plans
+ARG tag
+ENV FLYTE_INTERNAL_IMAGE $tag

@@ -6,7 +6,7 @@ set -e
 REGISTRY=""
 
 # SET the appname here
-PROJECT_NAME="sequencing_demo"
+PROJECT_NAME="variant_discovery"
 
 while getopts a:r:v:h flag
 do
@@ -16,7 +16,7 @@ do
         v) VERSION=${OPTARG};;
         h) echo "Usage: ${0} [-h|[-p <project_name>][-r <registry_name>][-v <version>]]"
            echo "  h: help (this message)"
-           echo "  p: PROJECT_NAME for your workflows. Defaults to 'sequencing_demo'."
+           echo "  p: PROJECT_NAME for your workflows. Defaults to 'variant_discovery'."
            echo "  r: REGISTRY name where the docker container should be pushed. Defaults to none - localhost"
            echo "  v: VERSION of the build. Defaults to using the current git head SHA"
            exit 1;;

@@ -14,7 +14,7 @@ check_base_image = ShellTask(
     debug=True,
     script=
     """
-    ls -lah /ref
+    ls -lah /root/workflows
     """,
     inputs=kwtypes(),
     output_locs=[],
