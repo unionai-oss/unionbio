@@ -32,8 +32,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
  ca-certificates \
  gawk \
  git \
-#  bowtie2 \
-#  hisat2 \
 && apt-get autoclean && rm -rf /var/lib/apt/lists/*
 
 # Install fastqc

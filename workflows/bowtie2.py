@@ -8,6 +8,7 @@ bowtie_image_spec = ImageSpec(
     name="bowtie2",
     apt_packages=["bowtie2"],
     registry="localhost:30000",
+    base_image='ghcr.io/pryce-turner/variant-discovery:latest'
 )
 
 check_base_image = ShellTask(
@@ -28,6 +29,7 @@ check_image_spec = ShellTask(
     script=
     """
     which bowtie2
+    which fastqc
     """,
     inputs=kwtypes(),
     output_locs=[],
@@ -39,10 +41,11 @@ bowtie2_index = ShellTask(
     debug=True,
     script=
     """
+    mkdir {outputs.idx}
     bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_short
     """,
     inputs=kwtypes(ref=FlyteFile),
-    output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/ref/idx')],
+    output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/outputs')],
     container_image=bowtie_image_spec
 )
 
@@ -51,14 +54,15 @@ bowtie2_align_paired_reads = ShellTask(
     debug=True,
     script=
     """
-    bowtie2 -x {inputs.idx} -1 {inputs.read1} -2 {inputs.read2} -S {outputs.sam}
+    bowtie2 -x {inputs.idx}/GRCh38_short -1 {inputs.read1} -2 {inputs.read2} -S {outputs.sam}
     """,
-    inputs=kwtypes(idx=FlyteFile, read1=FlyteFile, read2=FlyteFile),
+    inputs=kwtypes(idx=FlyteDirectory, read1=FlyteFile, read2=FlyteFile),
     output_locs=[OutputLocation(var="sam", var_type=FlyteFile, location='out.sam')],
     container_image=bowtie_image_spec
 )
 
 @workflow
-def bowtie_wf() -> FlyteDirectory:
+def bowtie_wf() -> FlyteFile:
     idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
-    return idx
+    sam = bowtie2_align_paired_reads(idx=idx, read1='s3://my-s3-bucket/my-data/ERR250683_1.fastq.gz', read2='s3://my-s3-bucket/my-data/ERR250683_2.fastq.gz')
+    return sam
