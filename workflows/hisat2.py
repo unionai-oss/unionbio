@@ -8,6 +8,7 @@ hisat_image_spec = ImageSpec(
     name="hisat2",
     apt_packages=["hisat2"],
     registry="localhost:30000",
+    base_image='ghcr.io/pryce-turner/variant-discovery:latest'
 )
 
 hisat2_index = ShellTask(

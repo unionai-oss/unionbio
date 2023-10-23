@@ -38,9 +38,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v${FASTQC_VER}.zip && \
  unzip fastqc_v${FASTQC_VER}.zip && \
  chmod +x FastQC/fastqc && \
- mv /root/FastQC/fastqc /usr/local/bin/fastqc && \
- rm -rf fastqc_v${FASTQC_VER}.zip FastQC
+ ln -s /root/FastQC/fastqc /usr/local/bin/fastqc && \
+ rm -rf fastqc_v${FASTQC_VER}.zip
 
+# Install fastp
 RUN wget http://opengene.org/fastp/fastp.${FASTP_VER} && \
  mv fastp.${FASTP_VER} /usr/local/bin/fastp && \
  chmod a+x /usr/local/bin/fastp
