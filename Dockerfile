@@ -9,7 +9,7 @@ ENV PYTHONPATH /root
 ARG JRE_VER=17
 ARG SAMTOOLS_VER=1.17
 ARG FASTQC_VER=0.12.1
-ARG VCFTOOLS_VER=0.1.16
+ARG FASTP_VER=0.23.4
 
 # Update, install deps, clean up
 RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -40,6 +40,10 @@ RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v${FAS
  chmod +x FastQC/fastqc && \
  mv /root/FastQC/fastqc /usr/local/bin/fastqc && \
  rm -rf fastqc_v${FASTQC_VER}.zip FastQC
+
+RUN wget http://opengene.org/fastp/fastp.${FASTP_VER} && \
+ mv fastp.${FASTP_VER} /usr/local/bin/fastp && \
+ chmod a+x /usr/local/bin/fastp
 
 # Install samtools
 RUN wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VER}/samtools-${SAMTOOLS_VER}.tar.bz2 && \

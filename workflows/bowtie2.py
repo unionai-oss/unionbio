@@ -36,6 +36,7 @@ check_image_spec = ShellTask(
     container_image=bowtie_image_spec
 )
 
+# add caching to this task
 bowtie2_index = ShellTask(
     name="bowtie2-index",
     debug=True,
@@ -45,7 +46,7 @@ bowtie2_index = ShellTask(
     bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_short
     """,
     inputs=kwtypes(ref=FlyteFile),
-    output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/outputs')],
+    output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
     container_image=bowtie_image_spec
 )
 
