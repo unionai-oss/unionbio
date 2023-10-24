@@ -80,7 +80,6 @@ more-itertools==10.1.0
 msal==1.24.1
 msal-extensions==1.0.0
 multidict==6.0.4
-multiqc==1.16
 mypy-extensions==1.0.0
 natsort==8.4.0
 networkx==3.1

@@ -19,7 +19,7 @@ multiqc = ShellTask(
     """,
     inputs=kwtypes(report_dir=FlyteDirectory),
     output_locs=[OutputLocation(var="o", var_type=FlyteFile, location='/root/multiqc_report.html')],
-    container_image='localhost:30000/variant-discovery:latest'
+    container_image=multiqc_image_spec
 )
 
 @task(disable_deck=False)

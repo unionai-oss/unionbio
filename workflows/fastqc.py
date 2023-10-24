@@ -1,6 +1,5 @@
-from flytekit import kwtypes, task, workflow, ImageSpec
+from flytekit import kwtypes, workflow
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
-from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
 fastqc = ShellTask(
