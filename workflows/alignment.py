@@ -1,11 +1,19 @@
+import logging
 from flytekit import kwtypes, workflow, ImageSpec, Resources, current_context, task, dynamic
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from typing import List
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from dataclasses_json import dataclass_json
 from pathlib import Path
+
+# Setup the logger
+logger = logging.getLogger(__name__)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s"))
+logger.addHandler(console_handler)
+logger.setLevel(logging.DEBUG)
 
 base_image = 'ghcr.io/pryce-turner/variant-discovery:latest'
 
@@ -22,6 +30,7 @@ class FiltSample:
     sample: str
     filt_read1: FlyteFile
     filt_read2: FlyteFile
+    rep: FlyteFile
 
 # fastqc = ShellTask(
 #     name="fastqc",
@@ -38,7 +47,7 @@ class FiltSample:
 #     container_image=base_image
 # )
 
-@task
+@task(cache=True, cache_version="2")
 def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
     samples = {}
 
@@ -181,18 +190,25 @@ def run_fastp(samples: List[RawSample]):# -> List[FiltSample]:
     filtered_samples = []
     for sample in samples:
         out = fastp(i1=sample.raw_read1, i2=sample.raw_read2)
-        filtered_samples.append(FiltSample(
-            sample=sample.sample,
-            filt_read1=out.o1,
-            filt_read2=out.o2,
-        ))
-    # return samples
+        filtered_sample = FiltSample(
+                sample=sample.sample,
+                filt_read1=out.o1,
+                filt_read2=out.o2,
+                rep=out.rep
+            )
+        logger.info(f'Created filtered sample with {asdict(filtered_sample)}')
+        filtered_samples.append(filtered_sample)
+    # return filtered_samples
 
 # @dynamic(container_image=base_image)
 # def process_samples_bowtie2(samples: List[Sample]):
 #     for sample in samples:
-#         fastp_out = fastp(i1=sample.read1_og, i2=sample.read2_og)
-        # bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
+        # bowtie2_sam = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+        # return bowtie2_sam
+
+# @dynamic(container_image=base_image)
+# def process_samples_hisat2(samples: List[Sample]):
+#     for sample in samples:
         # bowtie2_sam = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
         # return bowtie2_sam
 
@@ -203,7 +219,7 @@ def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/sequences'):
     run_fastp(samples=samples)
     # fastp_out = fastp(i1='s3://my-s3-bucket/my-data/sequences/ERR250683_1.fastq.gz', i2='s3://my-s3-bucket/my-data/sequences/ERR250683_2.fastq.gz')
     # bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
-    # bowtie2_sam = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+    # bowtie2_alignments = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
     # hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
-    # hisat2_sam = hisat2_align_paired_reads(idx=hisat2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+    # hisat2_alignments = hisat2_align_paired_reads(idx=hisat2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
     # return hisat2_sam
