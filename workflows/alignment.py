@@ -49,7 +49,7 @@ class FiltSample(DataClassJSONMixin):
 #     container_image=base_image
 # )
 
-@task#(cache=True, cache_version="2")
+@task(cache=True, cache_version="3")
 def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
     samples = {}
 
@@ -81,7 +81,7 @@ def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
     return list(samples.values())
 
 fastp = ShellTask(
-    name="fastp-shell",
+    name="fastp",
     debug=True,
     # cache=True,
     # cache_version="1",
@@ -89,13 +89,13 @@ fastp = ShellTask(
     requests=Resources(cpu="1", mem="2Gi"),
     script=
     """
-    fastp -i {inputs.i1} -I {inputs.i2} -o {outputs.o1} -O /root/out2.fq.gz
+    fastp -i {inputs.i1} -I {inputs.i2} -o {outputs.o1} -O {outputs.o2} -j {outputs.rep}
     """,
     inputs=kwtypes(sample=str, i1=FlyteFile, i2=FlyteFile),
     output_locs=[
-        OutputLocation(var="o1", var_type=FlyteFile, location='/root/out1.fq.gz'),
-        OutputLocation(var="o2", var_type=FlyteFile, location='/root/out2.fq.gz'),
-        OutputLocation(var="rep", var_type=FlyteFile, location='/root/fastp.json'),
+        OutputLocation(var="o1", var_type=FlyteFile, location='/root/{inputs.sample}_1_filt.fq.gz'),
+        OutputLocation(var="o2", var_type=FlyteFile, location='/root/{inputs.sapmple}_2_filt.fq.gz'),
+        OutputLocation(var="rep", var_type=FlyteFile, location='/root/{inputs.sample}_fastp.json'),
         ]
 )
 
@@ -208,6 +208,7 @@ async def alignment(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single') 
                 filt_read2=out.o2,
                 rep=out.rep
             )
+        
         logger.info(f'Created filtered sample with {asdict(filtered_sample)}')
         filtered_samples.append(filtered_sample)
     return filtered_samples
