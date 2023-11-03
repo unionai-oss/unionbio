@@ -53,20 +53,20 @@ def subproc_raise(command: List[str]) -> str:
         print(f"Process timed out.\n{exc}")
 
     
-fastqc = ShellTask(
-    name="fastqc",
-    debug=True,
-    cache=True,
-    cache_version="1",
-    script=
-    """
-    mkdir {outputs.qc}
-    fastqc {inputs.seq_dir}/*.fastq.gz --outdir={outputs.qc}
-    """,
-    inputs=kwtypes(seq_dir=FlyteDirectory),
-    output_locs=[OutputLocation(var="qc", var_type=FlyteDirectory, location='/root/qc')],
-    container_image=base_image
-)
+# fastqc = ShellTask(
+#     name="fastqc",
+#     debug=True,
+#     cache=True,
+#     cache_version="1",
+#     script=
+#     """
+#     mkdir {outputs.qc}
+#     fastqc {inputs.seq_dir}/*.fastq.gz --outdir={outputs.qc}
+#     """,
+#     inputs=kwtypes(seq_dir=FlyteDirectory),
+#     output_locs=[OutputLocation(var="qc", var_type=FlyteDirectory, location='/root/qc')],
+#     container_image=base_image
+# )
 
 @task(cache=True, cache_version="6")
 def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
@@ -101,9 +101,7 @@ def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
 
 @task(
     requests=Resources(cpu="1", mem="2Gi"),
-    container_image=base_image,
-    cache=True,
-    cache_version="1"
+    container_image=base_image
     )
 def pyfastp(rs: RawSample) -> FiltSample:
 
@@ -130,25 +128,25 @@ def pyfastp(rs: RawSample) -> FiltSample:
         rep=FlyteFile(path=str(rep))
     )
 
-bowtie_image_spec = ImageSpec(
-    name="bowtie2",
-    apt_packages=["bowtie2"],
-    registry="localhost:30000",
-    base_image=base_image
-)
+# bowtie_image_spec = ImageSpec(
+#     name="bowtie2",
+#     apt_packages=["bowtie2"],
+#     registry="localhost:30000",
+#     base_image=base_image
+# )
 
-bowtie2_index = ShellTask(
-    name="bowtie2-index",
-    debug=True,
-    script=
-    """
-    mkdir {outputs.idx}
-    bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_short
-    """,
-    inputs=kwtypes(ref=FlyteFile),
-    output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
-    container_image=bowtie_image_spec
-)
+# bowtie2_index = ShellTask(
+#     name="bowtie2-index",
+#     debug=True,
+#     script=
+#     """
+#     mkdir {outputs.idx}
+#     bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_short
+#     """,
+#     inputs=kwtypes(ref=FlyteFile),
+#     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
+#     container_image=bowtie_image_spec
+# )
 
 # bowtie2_align_paired_reads = ShellTask(
 #     name="bowtie2-align-reads",
@@ -218,21 +216,31 @@ bowtie2_index = ShellTask(
 #     report_html = open(report, 'r').read()
 #     current_context().default_deck.append(report_html)
 
+# this should be map task
 @dynamic(container_image=base_image)
-def align(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -> List[FiltSample]:
-    
-    # Run FastQC on raw reads
-    fastqc_dir = fastqc(seq_dir=seq_dir)
-
-    # Encapsulate samples in dataclasses
-    samples = prepare_samples(seq_dir=seq_dir)
-
-    # Preprocess samples with FastP
+def run_fastp(samples: List[RawSample]):# -> List[FiltSample]:
     filtered_samples = []
     for sample in samples:
-        fs = pyfastp(rs=sample)
-        filtered_samples.append(fs)
-        logger.info(f'Created filtered sample with {fs}')
+        out = pyfastp(rs=sample)
+        logger.info(f'Created filtered sample with {out}')
+    # return filtered_samples
 
-    # Create Bowtie2 index
-    bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
+# @dynamic(container_image=base_image)
+# def process_samples_bowtie2(samples: List[Sample]):
+#     # map em out
+#     for sample in samples:
+#         bowtie2_sam = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+#         hisat2_sam = hisat2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+#         return bowtie2_sam
+
+@workflow
+def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -> FlyteFile:
+    # qc = fastqc(seq_dir=seq_dir)
+    samples = prepare_samples(seq_dir=seq_dir)
+    run_fastp(samples=samples)
+    # fastp_out = fastp(i1='s3://my-s3-bucket/my-data/sequences/ERR250683_1.fastq.gz', i2='s3://my-s3-bucket/my-data/sequences/ERR250683_2.fastq.gz')
+    # bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
+    # bowtie2_alignments = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+    # hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
+    # hisat2_alignments = hisat2_align_paired_reads(idx=hisat2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+    # return hisat2_sam
