@@ -1,3 +1,4 @@
+import subprocess
 import logging
 from flytekit import kwtypes, workflow, ImageSpec, Resources, current_context, task, dynamic
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
@@ -7,6 +8,7 @@ from typing import List
 from dataclasses import dataclass, asdict
 from dataclasses_json import dataclass_json
 from pathlib import Path
+from mashumaro.mixins.json import DataClassJSONMixin
 
 # Setup the logger
 logger = logging.getLogger(__name__)
@@ -17,21 +19,40 @@ logger.setLevel(logging.DEBUG)
 
 base_image = 'ghcr.io/pryce-turner/variant-discovery:latest'
 
-@dataclass_json
 @dataclass
-class RawSample:
+class RawSample(DataClassJSONMixin):
     sample: str
-    raw_read1: FlyteFile
-    raw_read2: FlyteFile
+    raw_r1: FlyteFile
+    raw_r2: FlyteFile
 
-@dataclass_json
 @dataclass
-class FiltSample:
+class FiltSample(DataClassJSONMixin):
     sample: str
-    filt_read1: FlyteFile
-    filt_read2: FlyteFile
+    filt_r1: FlyteFile
+    filt_r2: FlyteFile
     rep: FlyteFile
 
+def subproc_raise(command: List[str]) -> str:
+    """Execute a command and capture stdout and stderr."""
+    try:
+        # Execute the command and capture stdout and stderr
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+
+        # Access the stdout and stderr output
+        # stdout_output = result.stdout
+        # stderr_output = result.stderr
+
+    except FileNotFoundError as exc:
+        print(f"Process failed because the executable could not be found.\n{exc}")
+    except subprocess.CalledProcessError as exc:
+        print(
+            f"Process failed because did not return a successful return code. "
+            f"Returned {exc.returncode}\n{exc}"
+        )
+    except subprocess.TimeoutExpired as exc:
+        print(f"Process timed out.\n{exc}")
+
+    
 # fastqc = ShellTask(
 #     name="fastqc",
 #     debug=True,
@@ -47,7 +68,7 @@ class FiltSample:
 #     container_image=base_image
 # )
 
-@task(cache=True, cache_version="2")
+@task(cache=True, cache_version="6")
 def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
     samples = {}
 
@@ -66,17 +87,46 @@ def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
         if not samples.get(sample):
             samples[sample] = RawSample(
                 sample=sample,
-                raw_read1=FlyteFile(path='/dev/null'),
-                raw_read2=FlyteFile(path='/dev/null'),
+                raw_r1=FlyteFile(path='/dev/null'),
+                raw_r2=FlyteFile(path='/dev/null'),
             )
 
         print(f'Working on {fn} with mate {mate} for sample {sample}')
         if mate == '1':
-            setattr(samples[sample], 'raw_read1', FlyteFile(path=str(fp)))
+            setattr(samples[sample], 'raw_r1', FlyteFile(path=str(fp)))
         elif mate == '2':
-            setattr(samples[sample], 'raw_read2', FlyteFile(path=str(fp)))
+            setattr(samples[sample], 'raw_r2', FlyteFile(path=str(fp)))
 
     return list(samples.values())
+
+@task(
+    requests=Resources(cpu="1", mem="2Gi"),
+    container_image=base_image
+    )
+def pyfastp(rs: RawSample) -> FiltSample:
+
+    ldir = Path(current_context().working_directory)
+    o1p = ldir.joinpath(f'{rs.sample}_1_filt.fq.gz')
+    o2p = ldir.joinpath(f'{rs.sample}_2_filt.fq.gz')
+    rep = ldir.joinpath(f'{rs.sample}_report.json')
+
+    cmd = [
+    "fastp",
+    "-i", rs.raw_r1,
+    "-I", rs.raw_r2,
+    "-o", o1p,
+    "-O", o2p,
+    "-j", rep
+    ]
+    
+    subproc_raise(cmd)
+
+    return FiltSample(
+        sample=rs.sample,
+        filt_r1=FlyteFile(path=str(o1p)),
+        filt_r2=FlyteFile(path=str(o2p)),
+        rep=FlyteFile(path=str(rep))
+    )
 
 fastp = ShellTask(
     name="fastp",
@@ -86,7 +136,7 @@ fastp = ShellTask(
     requests=Resources(cpu="1", mem="2Gi"),
     script=
     """
-    fastp -i {inputs.i1} -I {inputs.i2} -o {outputs.o1} -O /root/out2.fq.gz
+    fastp -i {rs.raw_r1} -I {rs.raw_r2} -o {outputs.o1} -O {outputs.o2} -j {outputs.rep}
     """,
     inputs=kwtypes(i1=FlyteFile, i2=FlyteFile),
     output_locs=[
@@ -189,15 +239,8 @@ fastp = ShellTask(
 def run_fastp(samples: List[RawSample]):# -> List[FiltSample]:
     filtered_samples = []
     for sample in samples:
-        out = fastp(i1=sample.raw_read1, i2=sample.raw_read2)
-        filtered_sample = FiltSample(
-                sample=sample.sample,
-                filt_read1=out.o1,
-                filt_read2=out.o2,
-                rep=out.rep
-            )
-        logger.info(f'Created filtered sample with {asdict(filtered_sample)}')
-        filtered_samples.append(filtered_sample)
+        out = pyfastp(rs=sample)
+        logger.info(f'Created filtered sample with {out}')
     # return filtered_samples
 
 # @dynamic(container_image=base_image)
@@ -213,7 +256,7 @@ def run_fastp(samples: List[RawSample]):# -> List[FiltSample]:
         # return bowtie2_sam
 
 @workflow
-def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/sequences'):# -> FlyteFile:
+def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -> FlyteFile:
     # qc = fastqc(seq_dir=seq_dir)
     samples = prepare_samples(seq_dir=seq_dir)
     run_fastp(samples=samples)
