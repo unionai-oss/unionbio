@@ -3,10 +3,14 @@ from flytekit import kwtypes, workflow, ImageSpec, Resources, current_context, t
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
+from flytekit.experimental import eager
 from typing import List
 from dataclasses import dataclass, asdict
 from dataclasses_json import dataclass_json
 from pathlib import Path
+from flytekit.configuration import Config
+from flytekit.remote import FlyteRemote
+from mashumaro.mixins.json import DataClassJSONMixin
 
 # Setup the logger
 logger = logging.getLogger(__name__)
@@ -15,18 +19,16 @@ console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(nam
 logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-base_image = 'ghcr.io/pryce-turner/variant-discovery:latest'
+base_image = 'localhost:30000/variant-discovery:latest'
 
-@dataclass_json
 @dataclass
-class RawSample:
+class RawSample(DataClassJSONMixin):
     sample: str
     raw_read1: FlyteFile
     raw_read2: FlyteFile
 
-@dataclass_json
 @dataclass
-class FiltSample:
+class FiltSample(DataClassJSONMixin):
     sample: str
     filt_read1: FlyteFile
     filt_read2: FlyteFile
@@ -47,7 +49,7 @@ class FiltSample:
 #     container_image=base_image
 # )
 
-@task(cache=True, cache_version="2")
+@task#(cache=True, cache_version="2")
 def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
     samples = {}
 
@@ -79,22 +81,22 @@ def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
     return list(samples.values())
 
 fastp = ShellTask(
-    name="fastp",
+    name="fastp-shell",
     debug=True,
     # cache=True,
     # cache_version="1",
+    container_image=base_image,
     requests=Resources(cpu="1", mem="2Gi"),
     script=
     """
     fastp -i {inputs.i1} -I {inputs.i2} -o {outputs.o1} -O /root/out2.fq.gz
     """,
-    inputs=kwtypes(i1=FlyteFile, i2=FlyteFile),
+    inputs=kwtypes(sample=str, i1=FlyteFile, i2=FlyteFile),
     output_locs=[
         OutputLocation(var="o1", var_type=FlyteFile, location='/root/out1.fq.gz'),
         OutputLocation(var="o2", var_type=FlyteFile, location='/root/out2.fq.gz'),
         OutputLocation(var="rep", var_type=FlyteFile, location='/root/fastp.json'),
-        ],
-    container_image=base_image
+        ]
 )
 
 # bowtie_image_spec = ImageSpec(
@@ -185,11 +187,21 @@ fastp = ShellTask(
 #     report_html = open(report, 'r').read()
 #     current_context().default_deck.append(report_html)
 
-@dynamic(container_image=base_image)
-def run_fastp(samples: List[RawSample]):# -> List[FiltSample]:
+@eager(
+    container_image=base_image,
+    remote=FlyteRemote(
+        config=Config.for_sandbox(),
+        default_project="flytesnacks",
+        default_domain="development",
+    )
+)
+async def alignment(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single') -> List[FiltSample]:
+    # qc = fastqc(seq_dir=seq_dir)
+    samples = await prepare_samples(seq_dir=seq_dir)
     filtered_samples = []
     for sample in samples:
-        out = fastp(i1=sample.raw_read1, i2=sample.raw_read2)
+        out = await fastp(i1=sample.raw_read1, i2=sample.raw_read2)
+    
         filtered_sample = FiltSample(
                 sample=sample.sample,
                 filt_read1=out.o1,
@@ -198,7 +210,7 @@ def run_fastp(samples: List[RawSample]):# -> List[FiltSample]:
             )
         logger.info(f'Created filtered sample with {asdict(filtered_sample)}')
         filtered_samples.append(filtered_sample)
-    # return filtered_samples
+    return filtered_samples
 
 # @dynamic(container_image=base_image)
 # def process_samples_bowtie2(samples: List[Sample]):
@@ -212,11 +224,9 @@ def run_fastp(samples: List[RawSample]):# -> List[FiltSample]:
         # bowtie2_sam = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
         # return bowtie2_sam
 
-@workflow
-def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/sequences'):# -> FlyteFile:
-    # qc = fastqc(seq_dir=seq_dir)
-    samples = prepare_samples(seq_dir=seq_dir)
-    run_fastp(samples=samples)
+# @workflow
+# def alignment_wf(seq_dir: FlyteDirectory):# -> FlyteFile:
+    
     # fastp_out = fastp(i1='s3://my-s3-bucket/my-data/sequences/ERR250683_1.fastq.gz', i2='s3://my-s3-bucket/my-data/sequences/ERR250683_2.fastq.gz')
     # bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
     # bowtie2_alignments = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
