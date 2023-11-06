@@ -53,22 +53,22 @@ def subproc_raise(command: List[str]) -> str:
         print(f"Process timed out.\n{exc}")
 
     
-# fastqc = ShellTask(
-#     name="fastqc",
-#     debug=True,
-#     cache=True,
-#     cache_version="1",
-#     script=
-#     """
-#     mkdir {outputs.qc}
-#     fastqc {inputs.seq_dir}/*.fastq.gz --outdir={outputs.qc}
-#     """,
-#     inputs=kwtypes(seq_dir=FlyteDirectory),
-#     output_locs=[OutputLocation(var="qc", var_type=FlyteDirectory, location='/root/qc')],
-#     container_image=base_image
-# )
+fastqc = ShellTask(
+    name="fastqc",
+    debug=True,
+    cache=True,
+    cache_version="1",
+    script=
+    """
+    mkdir {outputs.qc}
+    fastqc {inputs.seq_dir}/*.fastq.gz --outdir={outputs.qc}
+    """,
+    inputs=kwtypes(seq_dir=FlyteDirectory),
+    output_locs=[OutputLocation(var="qc", var_type=FlyteDirectory, location='/root/qc')],
+    container_image=base_image
+)
 
-@task(cache=True, cache_version="6")
+@task(container_image=base_image)
 def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
     samples = {}
 
@@ -128,25 +128,55 @@ def pyfastp(rs: RawSample) -> FiltSample:
         rep=FlyteFile(path=str(rep))
     )
 
-# bowtie_image_spec = ImageSpec(
-#     name="bowtie2",
-#     apt_packages=["bowtie2"],
-#     registry="localhost:30000",
-#     base_image=base_image
-# )
+# this should be map task
+@dynamic(container_image=base_image)
+def run_fastp(samples: List[RawSample]) -> List[FiltSample]:
+    filtered_samples = []
+    for sample in samples:
+        fs = pyfastp(rs=sample)
+        filtered_samples.append(fs)
+        logger.info(f'Created filtered sample with {fs}')
+    return filtered_samples
 
-# bowtie2_index = ShellTask(
-#     name="bowtie2-index",
-#     debug=True,
-#     script=
-#     """
-#     mkdir {outputs.idx}
-#     bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_short
-#     """,
-#     inputs=kwtypes(ref=FlyteFile),
-#     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
-#     container_image=bowtie_image_spec
-# )
+
+bowtie2_image_spec = ImageSpec(
+    name="bowtie2",
+    apt_packages=["bowtie2"],
+    registry="localhost:30000",
+    base_image=base_image
+)
+
+bowtie2_index = ShellTask(
+    name="bowtie2-index",
+    debug=True,
+    container_image=bowtie2_image_spec,
+    script=
+    """
+    mkdir {outputs.idx}
+    bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_short
+    """,
+    inputs=kwtypes(ref=FlyteFile),
+    output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
+)
+
+@task(container_image=bowtie2_image_spec)
+def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> FlyteFile:
+
+    idx.download()
+    ldir = Path(current_context().working_directory)
+    sam = ldir.joinpath(f'{fs.sample}_bowtie2.sam')
+    
+    cmd = [
+        "bowtie2",
+        "-x", f"{idx.path}/GRCh38_short",
+        "-1", fs.filt_r1,
+        "-2", fs.filt_r2,
+        "-S", sam
+    ]
+
+    subproc_raise(cmd)
+    
+    return FlyteFile(path=str(sam))
 
 # bowtie2_align_paired_reads = ShellTask(
 #     name="bowtie2-align-reads",
@@ -192,6 +222,14 @@ def pyfastp(rs: RawSample) -> FiltSample:
 #     container_image=hisat_image_spec
 # )
 
+# @dynamic(container_image=base_image)
+# def compare_aligners(samples: List[Sample]):
+#     # map em out
+#     for sample in samples:
+#         bowtie2_sam = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+#         hisat2_sam = hisat2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+#         return bowtie2_sam, hisat2_sam
+
 # multiqc_image_spec = ImageSpec(
 #     name="multiqc",
 #     packages=["multiqc"],
@@ -216,31 +254,21 @@ def pyfastp(rs: RawSample) -> FiltSample:
 #     report_html = open(report, 'r').read()
 #     current_context().default_deck.append(report_html)
 
-# this should be map task
-@dynamic(container_image=base_image)
-def run_fastp(samples: List[RawSample]):# -> List[FiltSample]:
-    filtered_samples = []
+@dynamic(container_image=bowtie2_image_spec)
+def bowtie2_align(idx: FlyteDirectory, samples: List[FiltSample]) -> List[FlyteFile]:
+    sams = []
     for sample in samples:
-        out = pyfastp(rs=sample)
-        logger.info(f'Created filtered sample with {out}')
-    # return filtered_samples
-
-# @dynamic(container_image=base_image)
-# def process_samples_bowtie2(samples: List[Sample]):
-#     # map em out
-#     for sample in samples:
-#         bowtie2_sam = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
-#         hisat2_sam = hisat2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
-#         return bowtie2_sam
+        sam = bowtie2_align_paired_reads(idx=idx, fs=sample)
+        sams.append(sam)
+    return sams
 
 @workflow
 def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -> FlyteFile:
     # qc = fastqc(seq_dir=seq_dir)
     samples = prepare_samples(seq_dir=seq_dir)
-    run_fastp(samples=samples)
-    # fastp_out = fastp(i1='s3://my-s3-bucket/my-data/sequences/ERR250683_1.fastq.gz', i2='s3://my-s3-bucket/my-data/sequences/ERR250683_2.fastq.gz')
-    # bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
-    # bowtie2_alignments = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+    filtered_samples = run_fastp(samples=samples)
+    bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
+    sams = bowtie2_align(idx=bowtie2_idx, samples=filtered_samples)
     # hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
-    # hisat2_alignments = hisat2_align_paired_reads(idx=hisat2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
+    # bowtie2_sam, hisat2_sam = compare_aligners(samples=filtered_samples)
     # return hisat2_sam
