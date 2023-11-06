@@ -32,6 +32,18 @@ class FiltSample(DataClassJSONMixin):
     filt_r2: FlyteFile
     rep: FlyteFile
 
+@task(container_image=base_image)
+def make_filt_sample(indir: FlyteDirectory= 's3://my-s3-bucket/my-data/filt-sample') -> FiltSample:
+    indir.download()
+    print(type(indir.path))
+    print(indir.path)
+    return FiltSample(
+        sample='ERR250683',
+        filt_r1=FlyteFile(path=f'{indir.path}/ERR250683_1_filt.fq.gz'),
+        filt_r2=FlyteFile(path=f'{indir.path}/ERR250683_2_filt.fq.gz'),
+        rep=FlyteFile(path=f'{indir.path}/ERR250683_report.json')
+    )
+
 def subproc_raise(command: List[str]) -> str:
     """Execute a command and capture stdout and stderr."""
     try:
