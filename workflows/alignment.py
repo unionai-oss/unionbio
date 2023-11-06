@@ -33,7 +33,7 @@ class FiltSample(DataClassJSONMixin):
     rep: FlyteFile
 
 @task(container_image=base_image)
-def make_filt_sample(indir: FlyteDirectory= 's3://my-s3-bucket/my-data/filt-sample') -> FiltSample:
+def make_filt_sample(indir: FlyteDirectory='s3://my-s3-bucket/my-data/filt-sample') -> FiltSample:
     indir.download()
     print(type(indir.path))
     print(indir.path)
@@ -266,21 +266,23 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> FlyteFile
 #     report_html = open(report, 'r').read()
 #     current_context().default_deck.append(report_html)
 
-@dynamic(container_image=bowtie2_image_spec)
-def bowtie2_align(idx: FlyteDirectory, samples: List[FiltSample]) -> List[FlyteFile]:
-    sams = []
-    for sample in samples:
-        sam = bowtie2_align_paired_reads(idx=idx, fs=sample)
-        sams.append(sam)
-    return sams
+@dynamic
+def bowtie2_align(idx: FlyteDirectory, sample: FiltSample):#samples: List[FiltSample]) -> List[FlyteFile]:
+    # sams = []
+    # for sample in samples:
+    sam = bowtie2_align_paired_reads(idx=idx, fs=sample)
+    #     sams.append(sam)
+    # return sams
 
 @workflow
 def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -> FlyteFile:
     # qc = fastqc(seq_dir=seq_dir)
-    samples = prepare_samples(seq_dir=seq_dir)
-    filtered_samples = run_fastp(samples=samples)
+    # samples = prepare_samples(seq_dir=seq_dir)
+    # filtered_samples = run_fastp(samples=samples)
+    fs = make_filt_sample(indir='s3://my-s3-bucket/my-data/filt-sample')
     bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
-    sams = bowtie2_align(idx=bowtie2_idx, samples=filtered_samples)
+    # bowtie2_align_paired_reads(idx=bowtie2_idx, fs=fs)
+    bowtie2_align(idx=bowtie2_idx, sample=fs)
     # hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
     # bowtie2_sam, hisat2_sam = compare_aligners(samples=filtered_samples)
     # return hisat2_sam
