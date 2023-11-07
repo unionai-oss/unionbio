@@ -1,5 +1,7 @@
 import subprocess
 import logging
+import gzip
+import shutil
 from flytekit import kwtypes, workflow, ImageSpec, Resources, current_context, task, dynamic
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
@@ -163,7 +165,7 @@ bowtie2_index = ShellTask(
     script=
     """
     mkdir {outputs.idx}
-    bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_short
+    bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_bt2_short
     """,
     inputs=kwtypes(ref=FlyteFile),
     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
@@ -179,7 +181,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     
     cmd = [
         "bowtie2",
-        "-x", f"{idx.path}/GRCh38_short",
+        "-x", f"{idx.path}/GRCh38_bt2_short",
         "-1", fs.filt_r1,
         "-2", fs.filt_r2,
         "-S", sam
@@ -196,30 +198,51 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         report=FlyteFile(path=str(rep))
     )
 
-# hisat2_index = ShellTask(
-#     name="hisat2-index",
-#     debug=True,
-#     script=
-#     """
-#     mkdir {outputs.idx}
-#     hisat2-build {inputs.ref} {outputs.idx}/GRCh38_short
-#     """,
-#     inputs=kwtypes(ref=FlyteFile),
-#     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
-#     container_image=hisat_image_spec
-# )
+hisat2_index = ShellTask(
+    name="hisat2-index",
+    debug=True,
+    container_image=base_image,
+    script=
+    """
+    mkdir {outputs.idx}
+    hisat2-build {inputs.ref} {outputs.idx}/GRCh38_hs2_short
+    """,
+    inputs=kwtypes(ref=FlyteFile),
+    output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
+)
 
-# hisat2_align_paired_reads = ShellTask(
-#     name="hisat2-align-reads",
-#     debug=True,
-#     script=
-#     """
-#     hisat2 -x {inputs.idx}/GRCh38_short -1 {inputs.read1} -2 {inputs.read2} -S {outputs.sam}
-#     """,
-#     inputs=kwtypes(idx=FlyteDirectory, read1=FlyteFile, read2=FlyteFile),
-#     output_locs=[OutputLocation(var="sam", var_type=FlyteFile, location='out.sam')],
-#     container_image=hisat_image_spec
-# )
+@task(container_image=base_image)
+def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
+
+    idx.download()
+    ldir = Path(current_context().working_directory)
+    sam = ldir.joinpath(f'{fs.sample}_hisat2.sam')
+    rep = ldir.joinpath(f'{fs.sample}_hisat2_report.txt')
+    unc_r1 = ldir.joinpath(f'{fs.sample}_1.fq')
+    unc_r2 = ldir.joinpath(f'{fs.sample}_2.fq')
+    
+    with gzip.open(fs.filt_r1, 'rb') as gz_file, open(unc_r1, 'wb') as out_file:
+        shutil.copyfileobj(gz_file, out_file)
+
+    with gzip.open(fs.filt_r2, 'rb') as gz_file, open(unc_r2, 'wb') as out_file:
+        shutil.copyfileobj(gz_file, out_file)
+
+    cmd = [
+        "hisat2",
+        "-x", f"{idx.path}/GRCh38_hs2_short",
+        "-1", unc_r1,
+        "-2", unc_r2,
+        "-S", sam,
+        "--summary-file", rep
+    ]
+
+    stdout, stderr = subproc_raise(cmd)
+
+    return SamFile(
+        sample=fs.sample,
+        sam=FlyteFile(path=str(sam)),
+        report=FlyteFile(path=str(rep))
+    )
 
 # @dynamic(container_image=base_image)
 # def compare_aligners(samples: List[Sample]):
@@ -229,12 +252,23 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 #         hisat2_sam = hisat2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
 #         return bowtie2_sam, hisat2_sam
 
-# multiqc_image_spec = ImageSpec(
-#     name="multiqc",
-#     packages=["multiqc"],
-#     registry="localhost:30000",
-#     base_image='ghcr.io/pryce-turner/variant-discovery:latest'
-# )
+multiqc_image_spec = ImageSpec(
+    name="multiqc",
+    packages=["multiqc"],
+    registry="localhost:30000",
+    base_image='ghcr.io/pryce-turner/variant-discovery:latest'
+)
+
+@task
+def prep_multiqc_ins(fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[SamFile]) -> FlyteDirectory:
+    # download all the things
+    ldir = Path(current_context().working_directory)
+    fqc.download()
+    for filt_rep in filt_reps:
+        filt_rep.rep.download()
+    for sam in sams:
+        sam.report.download()
+    return FlyteDirectory(path=str(ldir))
 
 # multiqc = ShellTask(
 #     name="multiqc",
@@ -261,15 +295,24 @@ def bowtie2_align(idx: FlyteDirectory, samples: List[FiltSample]) -> List[SamFil
         sams.append(sam)
     return sams
 
+@dynamic
+def hisat2_align(idx: FlyteDirectory, samples: List[FiltSample]) -> List[SamFile]:
+    sams = []
+    for sample in samples:
+        sam = hisat2_align_paired_reads(idx=idx, fs=sample)
+        sams.append(sam)
+    return sams
+
 @workflow
 def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -> FlyteFile:
     # qc = fastqc(seq_dir=seq_dir)
     samples = prepare_samples(seq_dir=seq_dir)
     filtered_samples = run_fastp(samples=samples)
     # fs = make_filt_sample(indir='s3://my-s3-bucket/my-data/filt-sample')
-    bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
+    # bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
     # bowtie2_align_paired_reads(idx=bowtie2_idx, fs=fs)
-    bowtie2_align(idx=bowtie2_idx, samples=filtered_samples)
-    # hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
+    # bowtie2_align(idx=bowtie2_idx, samples=filtered_samples)
+    hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
+    hisat2_align(idx=hisat2_idx, samples=filtered_samples)
     # bowtie2_sam, hisat2_sam = compare_aligners(samples=filtered_samples)
     # return hisat2_sam
