@@ -4,7 +4,7 @@ from flytekit import kwtypes, workflow, ImageSpec, Resources, current_context, t
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from typing import List
+from typing import List, Tuple
 from dataclasses import dataclass, asdict
 from dataclasses_json import dataclass_json
 from pathlib import Path
@@ -17,7 +17,7 @@ console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(nam
 logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-base_image = 'ghcr.io/pryce-turner/variant-discovery:latest'
+base_image = 'localhost:30000/variant-discovery:latest'
 
 @dataclass
 class RawSample(DataClassJSONMixin):
@@ -32,6 +32,12 @@ class FiltSample(DataClassJSONMixin):
     filt_r2: FlyteFile
     rep: FlyteFile
 
+@dataclass
+class SamFile(DataClassJSONMixin):
+    sample: str
+    sam: FlyteFile
+    report: FlyteFile
+
 @task(container_image=base_image)
 def make_filt_sample(indir: FlyteDirectory='s3://my-s3-bucket/my-data/filt-sample') -> FiltSample:
     indir.download()
@@ -44,27 +50,27 @@ def make_filt_sample(indir: FlyteDirectory='s3://my-s3-bucket/my-data/filt-sampl
         rep=FlyteFile(path=f'{indir.path}/ERR250683_report.json')
     )
 
-def subproc_raise(command: List[str]) -> str:
+def subproc_raise(command: List[str]) -> Tuple[str, str]:
     """Execute a command and capture stdout and stderr."""
     try:
         # Execute the command and capture stdout and stderr
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
 
         # Access the stdout and stderr output
-        # stdout_output = result.stdout
-        # stderr_output = result.stderr
+        return result.stdout, result.stderr
 
-    except FileNotFoundError as exc:
-        print(f"Process failed because the executable could not be found.\n{exc}")
     except subprocess.CalledProcessError as exc:
-        print(
-            f"Process failed because did not return a successful return code. "
-            f"Returned {exc.returncode}\n{exc}"
-        )
-    except subprocess.TimeoutExpired as exc:
-        print(f"Process timed out.\n{exc}")
-
+        raise exc from None
     
+    # except FileNotFoundError as exc:
+    #     print(f"Process failed because the executable could not be found.\n{exc}")
+    # except subprocess.TimeoutExpired as exc:
+    #     print(f"Process timed out.\n{exc}")
+
+
+# human in the loop after fastqc?
+# surafce report in flytedeck
+# or just have conditional for quality counts before proceeding
 fastqc = ShellTask(
     name="fastqc",
     debug=True,
@@ -150,18 +156,10 @@ def run_fastp(samples: List[RawSample]) -> List[FiltSample]:
         logger.info(f'Created filtered sample with {fs}')
     return filtered_samples
 
-
-bowtie2_image_spec = ImageSpec(
-    name="bowtie2",
-    apt_packages=["bowtie2"],
-    registry="localhost:30000",
-    base_image=base_image
-)
-
 bowtie2_index = ShellTask(
     name="bowtie2-index",
     debug=True,
-    container_image=bowtie2_image_spec,
+    container_image=base_image,
     script=
     """
     mkdir {outputs.idx}
@@ -171,12 +169,13 @@ bowtie2_index = ShellTask(
     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
 )
 
-@task(container_image=bowtie2_image_spec)
-def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> FlyteFile:
+@task(container_image=base_image)
+def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 
     idx.download()
     ldir = Path(current_context().working_directory)
     sam = ldir.joinpath(f'{fs.sample}_bowtie2.sam')
+    rep = ldir.joinpath(f'{fs.sample}_bowtie2_report.txt')
     
     cmd = [
         "bowtie2",
@@ -186,28 +185,16 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> FlyteFile
         "-S", sam
     ]
 
-    subproc_raise(cmd)
+    stdout, stderr = subproc_raise(cmd)
     
-    return FlyteFile(path=str(sam))
+    with open(rep, 'w') as f:
+        f.write(stderr)
 
-# bowtie2_align_paired_reads = ShellTask(
-#     name="bowtie2-align-reads",
-#     debug=True,
-#     script=
-#     """
-#     bowtie2 -x {inputs.idx}/GRCh38_short -1 {inputs.read1} -2 {inputs.read2} -S {outputs.sam}
-#     """,
-#     inputs=kwtypes(idx=FlyteDirectory, read1=FlyteFile, read2=FlyteFile),
-#     output_locs=[OutputLocation(var="sam", var_type=FlyteFile, location='out.sam')],
-#     container_image=bowtie_image_spec
-# )
-
-# hisat_image_spec = ImageSpec(
-#     name="hisat2",
-#     apt_packages=["hisat2"],
-#     registry="localhost:30000",
-#     base_image='ghcr.io/pryce-turner/variant-discovery:latest'
-# )
+    return SamFile(
+        sample=fs.sample,
+        sam=FlyteFile(path=str(sam)),
+        report=FlyteFile(path=str(rep))
+    )
 
 # hisat2_index = ShellTask(
 #     name="hisat2-index",
@@ -267,22 +254,22 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> FlyteFile
 #     current_context().default_deck.append(report_html)
 
 @dynamic
-def bowtie2_align(idx: FlyteDirectory, sample: FiltSample):#samples: List[FiltSample]) -> List[FlyteFile]:
-    # sams = []
-    # for sample in samples:
-    sam = bowtie2_align_paired_reads(idx=idx, fs=sample)
-    #     sams.append(sam)
-    # return sams
+def bowtie2_align(idx: FlyteDirectory, samples: List[FiltSample]) -> List[SamFile]:
+    sams = []
+    for sample in samples:
+        sam = bowtie2_align_paired_reads(idx=idx, fs=sample)
+        sams.append(sam)
+    return sams
 
 @workflow
 def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -> FlyteFile:
     # qc = fastqc(seq_dir=seq_dir)
-    # samples = prepare_samples(seq_dir=seq_dir)
-    # filtered_samples = run_fastp(samples=samples)
-    fs = make_filt_sample(indir='s3://my-s3-bucket/my-data/filt-sample')
+    samples = prepare_samples(seq_dir=seq_dir)
+    filtered_samples = run_fastp(samples=samples)
+    # fs = make_filt_sample(indir='s3://my-s3-bucket/my-data/filt-sample')
     bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
     # bowtie2_align_paired_reads(idx=bowtie2_idx, fs=fs)
-    bowtie2_align(idx=bowtie2_idx, sample=fs)
+    bowtie2_align(idx=bowtie2_idx, samples=filtered_samples)
     # hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
     # bowtie2_sam, hisat2_sam = compare_aligners(samples=filtered_samples)
     # return hisat2_sam
