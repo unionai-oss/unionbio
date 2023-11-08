@@ -7,7 +7,7 @@ from flytekit.experimental import map_task
 from typing import List, Tuple
 from pathlib import Path
 
-from .config import ref_loc
+from .config import ref_loc, seq_dir
 from .sample_types import FiltSample, SamFile
 from .fastqc import fastqc
 from .fastp import pyfastp
@@ -27,7 +27,7 @@ def compare_aligners(bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: 
     return sams
 
 @workflow
-def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):
+def alignment_wf(seq_dir: FlyteDirectory=seq_dir):
     qc = fastqc(seq_dir=seq_dir)
     samples = prepare_samples(seq_dir=seq_dir)
     filtered_samples = map_task(pyfastp)(rs=samples)
