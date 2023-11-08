@@ -4,9 +4,9 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from alignment import ref_hash, base_image
-from sample_types import FiltSample, RawSample
-from utils import subproc_raise
+from .config import base_image
+from .sample_types import FiltSample, RawSample
+from .utils import subproc_raise
 
 @task(
     requests=Resources(cpu="1", mem="2Gi"),

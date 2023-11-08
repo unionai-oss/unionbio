@@ -7,17 +7,14 @@ from flytekit.experimental import map_task
 from typing import List, Tuple
 from pathlib import Path
 
-from sample_types import FiltSample, SamFile
-from fastqc import fastqc
-from fastp import pyfastp
-from utils import prepare_samples
-from bowtie2 import bowtie2_align_paired_reads, bowtie2_index
-from hisat2 import hisat2_align_paired_reads, hisat2_index
-from multiqc import prep_multiqc_ins, multiqc, render_multiqc
-
-base_image = 'localhost:30000/variant-discovery:latest'
-ref_loc = 's3://my-s3-bucket/my-data/refs/GRCh38_short.fasta'
-ref_hash = str(hash(ref_loc))[:4]
+from .config import ref_loc
+from .sample_types import FiltSample, SamFile
+from .fastqc import fastqc
+from .fastp import pyfastp
+from .utils import prepare_samples
+from .bowtie2 import bowtie2_align_paired_reads, bowtie2_index
+from .hisat2 import hisat2_align_paired_reads, hisat2_index
+from .multiqc import prep_multiqc_ins, multiqc, render_multiqc
 
 @dynamic
 def compare_aligners(bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: List[FiltSample]) -> List[List[SamFile]]:

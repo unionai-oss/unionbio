@@ -2,7 +2,7 @@ from flytekit import kwtypes
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
 
-from alignment import base_image
+from .config import base_image
 
 # human in the loop after fastqc?
 # surafce report in flytedeck

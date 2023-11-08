@@ -8,15 +8,8 @@ from flytekit.types.file import FlyteFile
 from flytekit.configuration import Config
 from flytekit.remote import FlyteRemote
 
-from alignment import base_image
-from sample_types import FiltSample, RawSample
-
-# Setup the logger
-logger = logging.getLogger(__name__)
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s"))
-logger.addHandler(console_handler)
-logger.setLevel(logging.DEBUG)
+from .config import base_image
+from .sample_types import FiltSample, RawSample
 
 def get_remote(local=None, config_file=None):
     return FlyteRemote(

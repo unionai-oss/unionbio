@@ -4,9 +4,9 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from alignment import ref_hash, base_image
-from sample_types import FiltSample, SamFile
-from utils import subproc_raise
+from .config import ref_hash, base_image
+from .sample_types import FiltSample, SamFile
+from .utils import subproc_raise
 
 bowtie2_index = ShellTask(
     name="bowtie2-index",

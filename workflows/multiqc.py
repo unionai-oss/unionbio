@@ -7,7 +7,7 @@ from flytekit.types.file import FlyteFile
 from typing import List
 from pathlib import Path
 
-from sample_types import FiltSample, SamFile
+from .sample_types import FiltSample, SamFile
 
 multiqc_image_spec = ImageSpec(
     name="multiqc",
