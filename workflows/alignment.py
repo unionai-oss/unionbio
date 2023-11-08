@@ -162,11 +162,14 @@ def run_fastp(samples: List[RawSample]) -> List[FiltSample]:
 bowtie2_index = ShellTask(
     name="bowtie2-index",
     debug=True,
+    cache=True,
+    cache_version="1",
+    requests=Resources(cpu="4", mem="10Gi"),
     container_image=base_image,
     script=
     """
     mkdir {outputs.idx}
-    bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_bt2_short
+    bowtie2-build {inputs.ref} {outputs.idx}/bt2_idx
     """,
     inputs=kwtypes(ref=FlyteFile),
     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
@@ -182,7 +185,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     
     cmd = [
         "bowtie2",
-        "-x", f"{idx.path}/GRCh38_bt2_short",
+        "-x", f"{idx.path}/bt2_idx",
         "-1", fs.filt_r1,
         "-2", fs.filt_r2,
         "-S", sam
@@ -202,11 +205,14 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 hisat2_index = ShellTask(
     name="hisat2-index",
     debug=True,
+    cache=True,
+    cache_version="1",
+    requests=Resources(cpu="4", mem="10Gi"),
     container_image=base_image,
     script=
     """
     mkdir {outputs.idx}
-    hisat2-build {inputs.ref} {outputs.idx}/GRCh38_hs2_short
+    hisat2-build {inputs.ref} {outputs.idx}/hs2_idx
     """,
     inputs=kwtypes(ref=FlyteFile),
     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
@@ -230,7 +236,7 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 
     cmd = [
         "hisat2",
-        "-x", f"{idx.path}/GRCh38_hs2_short",
+        "-x", f"{idx.path}/hs2_idx",
         "-1", unc_r1,
         "-2", unc_r2,
         "-S", sam,
@@ -303,16 +309,13 @@ def compare_aligners(bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: 
     return sams
 
 @workflow
-def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -> FlyteFile:
+def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/sequences'):
     qc = fastqc(seq_dir=seq_dir)
     samples = prepare_samples(seq_dir=seq_dir)
     filtered_samples = run_fastp(samples=samples)
-    # fs = make_filt_sample(indir='s3://my-s3-bucket/my-data/filt-sample')
-    bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
-    hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
+    bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38.fasta')
+    hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38.fasta')
     sams = compare_aligners(bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples)
     mqc_prep = prep_multiqc_ins(fqc=qc, filt_reps=filtered_samples, sams=sams)
     mqc = multiqc(report_dir=mqc_prep)
     render_multiqc(report=mqc)
-    # bowtie2_sam, hisat2_sam = compare_aligners(samples=filtered_samples)
-    # return hisat2_sam
