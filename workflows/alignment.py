@@ -4,10 +4,11 @@ import logging
 import gzip
 import hashlib
 import shutil
-from flytekit import kwtypes, workflow, ImageSpec, Resources, current_context, task, dynamic, map_task
+from flytekit import kwtypes, workflow, ImageSpec, Resources, current_context, task, dynamic
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
+from flytekit.experimental import map_task
 from typing import List, Tuple
 from dataclasses import dataclass, asdict
 from dataclasses_json import dataclass_json
@@ -309,10 +310,10 @@ def render_multiqc(report: FlyteFile):
     current_context().default_deck.append(report_html)
 
 @workflow
-def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):
+def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/sequences'):
     qc = fastqc(seq_dir=seq_dir)
     samples = prepare_samples(seq_dir=seq_dir)
-    filtered_samples = run_fastp(samples=samples)
+    filtered_samples = map_task(pyfastp)(rs=samples)
     # bowtie2_idx = bowtie2_index(ref=ref_loc)
     # hisat2_idx = hisat2_index(ref=ref_loc)
     # sams = compare_aligners(bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples)
