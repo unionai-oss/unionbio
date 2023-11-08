@@ -1,3 +1,4 @@
+import os
 import subprocess
 import logging
 import gzip
@@ -32,7 +33,7 @@ class FiltSample(DataClassJSONMixin):
     sample: str
     filt_r1: FlyteFile
     filt_r2: FlyteFile
-    rep: FlyteFile
+    report: FlyteFile
 
 @dataclass
 class SamFile(DataClassJSONMixin):
@@ -49,7 +50,7 @@ def make_filt_sample(indir: FlyteDirectory='s3://my-s3-bucket/my-data/filt-sampl
         sample='ERR250683',
         filt_r1=FlyteFile(path=f'{indir.path}/ERR250683_1_filt.fq.gz'),
         filt_r2=FlyteFile(path=f'{indir.path}/ERR250683_2_filt.fq.gz'),
-        rep=FlyteFile(path=f'{indir.path}/ERR250683_report.json')
+        report=FlyteFile(path=f'{indir.path}/ERR250683_report.json')
     )
 
 def subproc_raise(command: List[str]) -> Tuple[str, str]:
@@ -145,7 +146,7 @@ def pyfastp(rs: RawSample) -> FiltSample:
         sample=rs.sample,
         filt_r1=FlyteFile(path=str(o1p)),
         filt_r2=FlyteFile(path=str(o2p)),
-        rep=FlyteFile(path=str(rep))
+        report=FlyteFile(path=str(rep))
     )
 
 # this should be map task
@@ -244,14 +245,6 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         report=FlyteFile(path=str(rep))
     )
 
-# @dynamic(container_image=base_image)
-# def compare_aligners(samples: List[Sample]):
-#     # map em out
-#     for sample in samples:
-#         bowtie2_sam = bowtie2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
-#         hisat2_sam = hisat2_align_paired_reads(idx=bowtie2_idx, read1=fastp_out.o1, read2=fastp_out.o2)
-#         return bowtie2_sam, hisat2_sam
-
 multiqc_image_spec = ImageSpec(
     name="multiqc",
     packages=["multiqc"],
@@ -260,14 +253,26 @@ multiqc_image_spec = ImageSpec(
 )
 
 @task
-def prep_multiqc_ins(fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[SamFile]) -> FlyteDirectory:
+def prep_multiqc_ins(fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[List[SamFile]]) -> FlyteDirectory:
     # download all the things
     ldir = Path(current_context().working_directory)
+    
     fqc.download()
+    for f in os.listdir(fqc.path):
+        src = os.path.join(fqc.path, f)
+        dest = os.path.join(ldir, f)
+        shutil.move(src, dest)
+
     for filt_rep in filt_reps:
-        filt_rep.rep.download()
-    for sam in sams:
-        sam.report.download()
+        filt_rep.report.download()
+        shutil.move(filt_rep.report.path, ldir)
+
+    for pair in sams:
+        pair[0].report.download()
+        shutil.move(pair[0].report.path, ldir)
+        pair[1].report.download()
+        shutil.move(pair[1].report.path, ldir)
+
     return FlyteDirectory(path=str(ldir))
 
 # multiqc = ShellTask(
@@ -288,31 +293,24 @@ def prep_multiqc_ins(fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: Lis
 #     current_context().default_deck.append(report_html)
 
 @dynamic
-def bowtie2_align(idx: FlyteDirectory, samples: List[FiltSample]) -> List[SamFile]:
+def compare_aligners(bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: List[FiltSample]) -> List[List[SamFile]]:
     sams = []
     for sample in samples:
-        sam = bowtie2_align_paired_reads(idx=idx, fs=sample)
-        sams.append(sam)
-    return sams
-
-@dynamic
-def hisat2_align(idx: FlyteDirectory, samples: List[FiltSample]) -> List[SamFile]:
-    sams = []
-    for sample in samples:
-        sam = hisat2_align_paired_reads(idx=idx, fs=sample)
-        sams.append(sam)
+        bt2_sam = bowtie2_align_paired_reads(idx=bt2_idx, fs=sample)
+        hs2_sam = hisat2_align_paired_reads(idx=hs2_idx, fs=sample)
+        pair = [bt2_sam, hs2_sam]
+        sams.append(pair)
     return sams
 
 @workflow
 def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -> FlyteFile:
-    # qc = fastqc(seq_dir=seq_dir)
+    qc = fastqc(seq_dir=seq_dir)
     samples = prepare_samples(seq_dir=seq_dir)
     filtered_samples = run_fastp(samples=samples)
     # fs = make_filt_sample(indir='s3://my-s3-bucket/my-data/filt-sample')
-    # bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
-    # bowtie2_align_paired_reads(idx=bowtie2_idx, fs=fs)
-    # bowtie2_align(idx=bowtie2_idx, samples=filtered_samples)
+    bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
     hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
-    hisat2_align(idx=hisat2_idx, samples=filtered_samples)
+    sams = compare_aligners(bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples)
+    mqc_prep = prep_multiqc_ins(fqc=qc, filt_reps=filtered_samples, sams=sams)
     # bowtie2_sam, hisat2_sam = compare_aligners(samples=filtered_samples)
     # return hisat2_sam
