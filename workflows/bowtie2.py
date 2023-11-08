@@ -1,69 +1,52 @@
-from flytekit import kwtypes, task, workflow, ImageSpec
+from pathlib import Path
+from flytekit import kwtypes, task, Resources, current_context
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
-# from workflows import config, logger
 
-# bowtie_image_spec = ImageSpec(
-#     name="bowtie2",
-#     apt_packages=["bowtie2"],
-#     registry="localhost:30000",
-#     base_image='ghcr.io/pryce-turner/variant-discovery:latest'
-# )
+from alignment import ref_hash, base_image
+from sample_types import FiltSample, SamFile
+from utils import subproc_raise
 
-# check_base_image = ShellTask(
-#     name="check-base-image",
-#     debug=True,
-#     script=
-#     """
-#     ls -lah /root/workflows
-#     """,
-#     inputs=kwtypes(),
-#     output_locs=[],
-#     container_image='localhost:30000/refbase:latest'
-# )
+bowtie2_index = ShellTask(
+    name="bowtie2-index",
+    debug=True,
+    cache=True,
+    cache_version=ref_hash,
+    requests=Resources(cpu="4", mem="10Gi"),
+    container_image=base_image,
+    script=
+    """
+    mkdir {outputs.idx}
+    bowtie2-build {inputs.ref} {outputs.idx}/bt2_idx
+    """,
+    inputs=kwtypes(ref=FlyteFile),
+    output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
+)
 
-# check_image_spec = ShellTask(
-#     name="check-image-spec",
-#     debug=True,
-#     script=
-#     """
-#     which bowtie2
-#     which fastqc
-#     """,
-#     inputs=kwtypes(),
-#     output_locs=[],
-#     container_image=bowtie_image_spec
-# )
+@task(container_image=base_image, requests=Resources(cpu="4", mem="10Gi"))
+def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 
-# # add caching to this task
-# bowtie2_index = ShellTask(
-#     name="bowtie2-index",
-#     debug=True,
-#     script=
-#     """
-#     mkdir {outputs.idx}
-#     bowtie2-build {inputs.ref} {outputs.idx}/GRCh38_short
-#     """,
-#     inputs=kwtypes(ref=FlyteFile),
-#     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
-#     container_image=bowtie_image_spec
-# )
+    idx.download()
+    ldir = Path(current_context().working_directory)
+    sam = ldir.joinpath(f'{fs.sample}_bowtie2.sam')
+    rep = ldir.joinpath(f'{fs.sample}_bowtie2_report.txt')
+    
+    cmd = [
+        "bowtie2",
+        "-x", f"{idx.path}/bt2_idx",
+        "-1", fs.filt_r1,
+        "-2", fs.filt_r2,
+        "-S", sam
+    ]
 
-# bowtie2_align_paired_reads = ShellTask(
-#     name="bowtie2-align-reads",
-#     debug=True,
-#     script=
-#     """
-#     bowtie2 -x {inputs.idx}/GRCh38_short -1 {inputs.read1} -2 {inputs.read2} -S {outputs.sam}
-#     """,
-#     inputs=kwtypes(idx=FlyteDirectory, read1=FlyteFile, read2=FlyteFile),
-#     output_locs=[OutputLocation(var="sam", var_type=FlyteFile, location='out.sam')],
-#     container_image=bowtie_image_spec
-# )
+    stdout, stderr = subproc_raise(cmd)
+    
+    with open(rep, 'w') as f:
+        f.write(stderr)
 
-# @workflow
-# def bowtie_wf() -> FlyteFile:
-#     idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/GRCh38_short.fasta')
-#     sam = bowtie2_align_paired_reads(idx=idx, read1='s3://my-s3-bucket/my-data/ERR250683_1.fastq.gz', read2='s3://my-s3-bucket/my-data/ERR250683_2.fastq.gz')
-#     return sam
+    return SamFile(
+        sample=fs.sample,
+        sam=FlyteFile(path=str(sam)),
+        report=FlyteFile(path=str(rep))
+    )
