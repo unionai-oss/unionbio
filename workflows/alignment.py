@@ -275,22 +275,22 @@ def prep_multiqc_ins(fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: Lis
 
     return FlyteDirectory(path=str(ldir))
 
-# multiqc = ShellTask(
-#     name="multiqc",
-#     debug=True,
-#     script=
-#     """
-#     multiqc {inputs.report_dir} -n {outputs.o}
-#     """,
-#     inputs=kwtypes(report_dir=FlyteDirectory),
-#     output_locs=[OutputLocation(var="o", var_type=FlyteFile, location='/root/multiqc_report.html')],
-#     container_image=multiqc_image_spec
-# )
+multiqc = ShellTask(
+    name="multiqc",
+    debug=True,
+    script=
+    """
+    multiqc {inputs.report_dir} -n {outputs.o}
+    """,
+    inputs=kwtypes(report_dir=FlyteDirectory),
+    output_locs=[OutputLocation(var="o", var_type=FlyteFile, location='/root/multiqc_report.html')],
+    container_image=multiqc_image_spec
+)
 
-# @task(disable_deck=False)
-# def render_multiqc(report: FlyteFile):
-#     report_html = open(report, 'r').read()
-#     current_context().default_deck.append(report_html)
+@task(disable_deck=False)
+def render_multiqc(report: FlyteFile):
+    report_html = open(report, 'r').read()
+    current_context().default_deck.append(report_html)
 
 @dynamic
 def compare_aligners(bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: List[FiltSample]) -> List[List[SamFile]]:
@@ -312,5 +312,7 @@ def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):# -
     hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta')
     sams = compare_aligners(bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples)
     mqc_prep = prep_multiqc_ins(fqc=qc, filt_reps=filtered_samples, sams=sams)
+    mqc = multiqc(report_dir=mqc_prep)
+    render_multiqc(report=mqc)
     # bowtie2_sam, hisat2_sam = compare_aligners(samples=filtered_samples)
     # return hisat2_sam
