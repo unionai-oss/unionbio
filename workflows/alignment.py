@@ -2,8 +2,9 @@ import os
 import subprocess
 import logging
 import gzip
+import hashlib
 import shutil
-from flytekit import kwtypes, workflow, ImageSpec, Resources, current_context, task, dynamic
+from flytekit import kwtypes, workflow, ImageSpec, Resources, current_context, task, dynamic, map_task
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
@@ -21,6 +22,8 @@ logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
 base_image = 'localhost:30000/variant-discovery:latest'
+ref_loc = 's3://my-s3-bucket/my-data/refs/GRCh38_short.fasta'
+ref_hash = str(hash(ref_loc))[:4]
 
 @dataclass
 class RawSample(DataClassJSONMixin):
@@ -62,13 +65,12 @@ def subproc_raise(command: List[str]) -> Tuple[str, str]:
         # Access the stdout and stderr output
         return result.stdout, result.stderr
 
-    except subprocess.CalledProcessError as exc:
-        raise exc from None
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"Command: {e.cmd}\nFailed with return code {e.returncode}:\n{e.stderr}")
     
-    # except FileNotFoundError as exc:
-    #     print(f"Process failed because the executable could not be found.\n{exc}")
-    # except subprocess.TimeoutExpired as exc:
-    #     print(f"Process timed out.\n{exc}")
+    except FileNotFoundError as e:
+        raise Exception(f"Process failed because the executable could not be found. \
+        Did you specify a container image in the task definition if using custom dependencies?\n{e}")
 
 
 # human in the loop after fastqc?
@@ -77,8 +79,6 @@ def subproc_raise(command: List[str]) -> Tuple[str, str]:
 fastqc = ShellTask(
     name="fastqc",
     debug=True,
-    cache=True,
-    cache_version="1",
     script=
     """
     mkdir {outputs.qc}
@@ -150,7 +150,7 @@ def pyfastp(rs: RawSample) -> FiltSample:
     )
 
 # this should be map task
-@dynamic(container_image=base_image)
+@dynamic
 def run_fastp(samples: List[RawSample]) -> List[FiltSample]:
     filtered_samples = []
     for sample in samples:
@@ -163,7 +163,7 @@ bowtie2_index = ShellTask(
     name="bowtie2-index",
     debug=True,
     cache=True,
-    cache_version="1",
+    cache_version=ref_hash,
     requests=Resources(cpu="4", mem="10Gi"),
     container_image=base_image,
     script=
@@ -175,7 +175,7 @@ bowtie2_index = ShellTask(
     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
 )
 
-@task(container_image=base_image)
+@task(container_image=base_image, requests=Resources(cpu="4", mem="10Gi"))
 def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 
     idx.download()
@@ -206,7 +206,7 @@ hisat2_index = ShellTask(
     name="hisat2-index",
     debug=True,
     cache=True,
-    cache_version="1",
+    cache_version=ref_hash,
     requests=Resources(cpu="4", mem="10Gi"),
     container_image=base_image,
     script=
@@ -218,7 +218,7 @@ hisat2_index = ShellTask(
     output_locs=[OutputLocation(var="idx", var_type=FlyteDirectory, location='/root/idx')],
 )
 
-@task(container_image=base_image)
+@task(container_image=base_image, requests=Resources(cpu="4", mem="10Gi"))
 def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 
     idx.download()
@@ -250,6 +250,16 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         sam=FlyteFile(path=str(sam)),
         report=FlyteFile(path=str(rep))
     )
+
+@dynamic
+def compare_aligners(bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: List[FiltSample]) -> List[List[SamFile]]:
+    sams = []
+    for sample in samples:
+        bt2_sam = bowtie2_align_paired_reads(idx=bt2_idx, fs=sample)
+        hs2_sam = hisat2_align_paired_reads(idx=hs2_idx, fs=sample)
+        pair = [bt2_sam, hs2_sam]
+        sams.append(pair)
+    return sams
 
 multiqc_image_spec = ImageSpec(
     name="multiqc",
@@ -298,24 +308,14 @@ def render_multiqc(report: FlyteFile):
     report_html = open(report, 'r').read()
     current_context().default_deck.append(report_html)
 
-@dynamic
-def compare_aligners(bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: List[FiltSample]) -> List[List[SamFile]]:
-    sams = []
-    for sample in samples:
-        bt2_sam = bowtie2_align_paired_reads(idx=bt2_idx, fs=sample)
-        hs2_sam = hisat2_align_paired_reads(idx=hs2_idx, fs=sample)
-        pair = [bt2_sam, hs2_sam]
-        sams.append(pair)
-    return sams
-
 @workflow
-def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/sequences'):
+def alignment_wf(seq_dir: FlyteDirectory='s3://my-s3-bucket/my-data/single'):
     qc = fastqc(seq_dir=seq_dir)
     samples = prepare_samples(seq_dir=seq_dir)
     filtered_samples = run_fastp(samples=samples)
-    bowtie2_idx = bowtie2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38.fasta')
-    hisat2_idx = hisat2_index(ref='s3://my-s3-bucket/my-data/refs/GRCh38.fasta')
-    sams = compare_aligners(bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples)
-    mqc_prep = prep_multiqc_ins(fqc=qc, filt_reps=filtered_samples, sams=sams)
-    mqc = multiqc(report_dir=mqc_prep)
-    render_multiqc(report=mqc)
+    # bowtie2_idx = bowtie2_index(ref=ref_loc)
+    # hisat2_idx = hisat2_index(ref=ref_loc)
+    # sams = compare_aligners(bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples)
+    # mqc_prep = prep_multiqc_ins(fqc=qc, filt_reps=filtered_samples, sams=sams)
+    # mqc = multiqc(report_dir=mqc_prep)
+    # render_multiqc(report=mqc)
