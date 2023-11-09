@@ -67,10 +67,6 @@ def make_filt_sample(indir: FlyteDirectory='s3://my-s3-bucket/my-data/filt-sampl
         report=FlyteFile(path=f'{indir.path}/ERR250683_report.json')
     )
 
-@task
-def pass_qc(report: FlyteFile) -> bool:
-    return True
-
 def subproc_raise(command: List[str]) -> Tuple[str, str]:
     """Execute a command and capture stdout and stderr."""
     try:
