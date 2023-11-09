@@ -67,6 +67,10 @@ def make_filt_sample(indir: FlyteDirectory='s3://my-s3-bucket/my-data/filt-sampl
         report=FlyteFile(path=f'{indir.path}/ERR250683_report.json')
     )
 
+@task
+def pass_qc(report: FlyteFile) -> bool:
+    return True
+
 def subproc_raise(command: List[str]) -> Tuple[str, str]:
     """Execute a command and capture stdout and stderr."""
     try:
@@ -80,5 +84,8 @@ def subproc_raise(command: List[str]) -> Tuple[str, str]:
         raise Exception(f"Command: {e.cmd}\nFailed with return code {e.returncode}:\n{e.stderr}")
     
     except FileNotFoundError as e:
-        raise Exception(f"Process failed because the executable could not be found. \
-        Did you specify a container image in the task definition if using custom dependencies?\n{e}")
+        raise Exception(
+            f"""Process failed because the executable could not be found. 
+            Did you specify a container image in the task definition if using 
+            custom dependencies?\n{e}"""
+            )
