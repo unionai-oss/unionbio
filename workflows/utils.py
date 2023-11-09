@@ -12,6 +12,22 @@ from .sample_types import FiltSample, RawSample
 
 
 def get_remote(local=None, config_file=None):
+    """
+    Get remote configuration settings and return a remote object.
+
+    This function retrieves remote configuration settings, including the local flag and
+    a configuration file, and uses them to create and return a remote object.
+
+    Args:
+        local (bool, optional): A flag indicating whether to use local settings. If True,
+            the function will use local settings; if False, it will use remote settings.
+            Defaults to None, which implies the use of default settings.
+        config_file (str, optional): The path to a custom configuration file. If provided,
+            this file will be used for configuration settings. Defaults to None.
+
+    Returns:
+        Remote: A remote object configured with the specified settings.
+    """
     return FlyteRemote(
         config=Config.auto(
             config_file=(
@@ -29,6 +45,18 @@ def get_remote(local=None, config_file=None):
 
 @task(container_image=base_image)
 def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
+    """
+    Prepare and process raw sequencing data to create a list of RawSample objects.
+
+    This function processes raw sequencing data located in the specified input directory
+    and prepares it to create a list of RawSample objects.
+
+    Args:
+        seq_dir (FlyteDirectory): The input directory containing raw sequencing data.
+
+    Returns:
+        List[RawSample]: A list of RawSample objects representing the processed sequencing data.
+    """
     samples = {}
 
     # Fetch FlyteDirectory from object storage and make
@@ -59,9 +87,17 @@ def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
 
 
 @task(container_image=base_image)
-def make_filt_sample(
-    indir: FlyteDirectory = "s3://my-s3-bucket/my-data/filt-sample"
-) -> FiltSample:
+def make_filt_sample(indir: FlyteDirectory) -> FiltSample:
+    """
+    Create a FiltSample object from input directory.
+
+    This function is used to create a FiltSample object by specifying the input directory
+    containing filtered sample data.
+
+    Args:
+        indir (FlyteDirectory, optional): The input directory containing filtered sample data.
+            Defaults to "s3://my-s3-bucket/my-data/filt-sample".
+    """
     indir.download()
     print(type(indir.path))
     print(indir.path)
@@ -74,7 +110,19 @@ def make_filt_sample(
 
 
 def subproc_raise(command: List[str]) -> Tuple[str, str]:
-    """Execute a command and capture stdout and stderr."""
+    """
+    Execute a command and capture its stdout and stderr.
+    Args:
+        command (List[str]): The command to be executed as a list of strings.
+    Returns:
+        Tuple[str, str]: A tuple containing the stdout and stderr output of the command.
+    Raises:
+        Exception: If the command execution fails, this exception is raised with
+            details about the command, return code, and stderr output.
+        Exception: If the executable is not found, this exception is raised with
+            guidance on specifying a container image in the task definition when
+            using custom dependencies.
+    """
     try:
         # Execute the command and capture stdout and stderr
         result = subprocess.run(

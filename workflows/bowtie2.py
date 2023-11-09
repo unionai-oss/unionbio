@@ -8,11 +8,21 @@ from .config import ref_hash, base_image
 from .sample_types import FiltSample, SamFile
 from .utils import subproc_raise
 
+
+"""
+Generate Bowtie2 index files from a reference genome.
+
+Args:
+    ref (FlyteFile): A FlyteFile object representing the input reference file.
+
+Returns:
+    FlyteDirectory: A FlyteDirectory object containing the index files.
+"""
 bowtie2_index = ShellTask(
     name="bowtie2-index",
     debug=True,
     requests=Resources(cpu="4", mem="10Gi"),
-    metadata=TaskMetadata(retries=3, cache=True, cache_version=ref_hash), 
+    metadata=TaskMetadata(retries=3, cache=True, cache_version=ref_hash),
     container_image=base_image,
     script="""
     mkdir {outputs.idx}
@@ -27,6 +37,20 @@ bowtie2_index = ShellTask(
 
 @task(container_image=base_image, requests=Resources(cpu="4", mem="10Gi"))
 def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
+    """
+    Perform paired-end alignment using Bowtie 2 on a filtered sample.
+
+    This function takes a FlyteDirectory object representing the Bowtie 2 index and a
+    FiltSample object containing filtered sample data. It performs paired-end alignment
+    using Bowtie 2 and returns a SamFile object representing the resulting alignment.
+
+    Args:
+        idx (FlyteDirectory): A FlyteDirectory object representing the Bowtie 2 index.
+        fs (FiltSample): A FiltSample object containing filtered sample data to be aligned.
+
+    Returns:
+        SamFile: A SamFile object representing the alignment result in SAM format.
+    """
     idx.download()
     ldir = Path(current_context().working_directory)
     sam = ldir.joinpath(f"{fs.sample}_bowtie2.sam")

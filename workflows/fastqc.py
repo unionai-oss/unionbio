@@ -4,9 +4,19 @@ from flytekit.types.directory import FlyteDirectory
 
 from .config import base_image
 
-# human in the loop after fastqc?
-# surafce report in flytedeck
-# or just have conditional for quality counts before proceeding
+"""
+Perform quality control using FastQC.
+
+This function takes a FlyteDirectory object containing raw sequencing data, 
+gathers QC metrics using FastQC, and returns a FlyteDirectory object that
+can be crawled with MultiQC to generate a report.
+
+Args:
+    seq_dir (FlyteDirectory): An S3 prefix containing raw sequencing data to be processed.
+
+Returns:
+    qc (FlyteDirectory): A directory containing fastqc report output.
+"""
 fastqc = ShellTask(
     name="fastqc",
     debug=True,

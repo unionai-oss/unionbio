@@ -9,6 +9,7 @@ from pathlib import Path
 from .sample_types import FiltSample, SamFile
 from .utils import subproc_raise
 
+# Add MultiQC to the base image
 multiqc_image_spec = ImageSpec(
     name="multiqc",
     packages=["multiqc"],
@@ -21,7 +22,23 @@ multiqc_image_spec = ImageSpec(
 def render_multiqc(
     fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[List[SamFile]]
 ) -> FlyteFile:
-    # download all the things
+    """
+    Generate MultiQC report by rendering quality and alignment data.
+
+    Takes a FlyteDirectory object containing FastQC reports (`fqc`),
+    a list of FiltSample objects containing reports (`filt_reps`), and a
+    list of lists of SamFile objects representing alignment results (`sams`). It generates
+    a MultiQC report by rendering quality and alignment data and returns a FlyteFile object
+    of the report.
+
+    Args:
+        fqc (FlyteDirectory): A FlyteDirectory object containing FastQC reports.
+        filt_reps (List[FiltSample]): A list of FiltSample objects representing filtered samples.
+        sams (List[List[SamFile]]): A list of lists of SamFile objects representing alignment results.
+
+    Returns:
+        FlyteFile: A FlyteFile object representing the MultiQC report.
+    """
     ldir = Path(current_context().working_directory)
 
     fqc.download()

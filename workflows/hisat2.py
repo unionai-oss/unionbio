@@ -10,6 +10,15 @@ from .config import ref_hash, base_image
 from .sample_types import FiltSample, SamFile
 from .utils import subproc_raise
 
+"""
+Generate Hisat2 index files from a reference genome.
+
+Args:
+    ref (FlyteFile): A FlyteFile object representing the input reference file.
+
+Returns:
+    FlyteDirectory: A FlyteDirectory object containing the index files.
+"""
 hisat2_index = ShellTask(
     name="hisat2-index",
     debug=True,
@@ -29,6 +38,20 @@ hisat2_index = ShellTask(
 
 @task(container_image=base_image, requests=Resources(cpu="4", mem="10Gi"))
 def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
+    """
+    Perform paired-end alignment using Hisat 2 on a filtered sample.
+
+    This function takes a FlyteDirectory object representing the Hisat 2 index and a
+    FiltSample object containing filtered sample data. It performs paired-end alignment
+    using Hisat 2 and returns a SamFile object representing the resulting alignment.
+
+    Args:
+        idx (FlyteDirectory): A FlyteDirectory object representing the Hisat 2 index.
+        fs (FiltSample): A FiltSample object containing filtered sample data to be aligned.
+
+    Returns:
+        SamFile: A SamFile object representing the alignment result in SAM format.
+    """
     idx.download()
     ldir = Path(current_context().working_directory)
     sam = ldir.joinpath(f"{fs.sample}_hisat2.sam")

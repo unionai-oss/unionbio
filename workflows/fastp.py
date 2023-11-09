@@ -9,6 +9,19 @@ from .utils import subproc_raise
 
 @task(requests=Resources(cpu="1", mem="2Gi"), container_image=base_image)
 def pyfastp(rs: RawSample) -> FiltSample:
+    """
+    Perform quality filtering and preprocessing using Fastp on a RawSample.
+
+    This function takes a RawSample object containing raw sequencing data, performs quality
+    filtering and preprocessing using the pyfastp tool, and returns a FiltSample object
+    representing the filtered and processed data.
+
+    Args:
+        rs (RawSample): A RawSample object containing raw sequencing data to be processed.
+
+    Returns:
+        FiltSample: A FiltSample object representing the filtered and preprocessed data.
+    """
     ldir = Path(current_context().working_directory)
     o1p = ldir.joinpath(f"{rs.sample}_1_filt.fq.gz")
     o2p = ldir.joinpath(f"{rs.sample}_2_filt.fq.gz")
