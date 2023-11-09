@@ -1,7 +1,6 @@
 import os
 import shutil
-from flytekit import kwtypes, ImageSpec, current_context, task
-from flytekit.extras.tasks.shell import OutputLocation, ShellTask
+from flytekit import ImageSpec, current_context, task
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from typing import List
@@ -14,15 +13,17 @@ multiqc_image_spec = ImageSpec(
     name="multiqc",
     packages=["multiqc"],
     registry="localhost:30000",
-    base_image='ghcr.io/pryce-turner/variant-discovery:latest'
+    base_image="ghcr.io/pryce-turner/variant-discovery:latest",
 )
 
+
 @task(container_image=multiqc_image_spec, disable_deck=False)
-def render_multiqc(fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[List[SamFile]]) -> FlyteFile:
-    
+def render_multiqc(
+    fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[List[SamFile]]
+) -> FlyteFile:
     # download all the things
     ldir = Path(current_context().working_directory)
-    
+
     fqc.download()
     for f in os.listdir(fqc.path):
         src = ldir.joinpath(fqc.path, f)
@@ -40,16 +41,10 @@ def render_multiqc(fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[
         shutil.move(pair[1].report.path, ldir)
 
     final_report = ldir.joinpath("multiqc_report.html")
-    mqc_cmd = [
-        "multiqc",
-        str(ldir),
-        "-n",
-        str(final_report)
-    ]
+    mqc_cmd = ["multiqc", str(ldir), "-n", str(final_report)]
     subproc_raise(mqc_cmd)
-    
-    report_html = open(final_report, 'r').read()
+
+    report_html = open(final_report, "r").read()
     current_context().default_deck.append(report_html)
 
     return FlyteFile(path=str(final_report))
-    

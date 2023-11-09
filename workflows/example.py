@@ -19,6 +19,7 @@ def greeting_length(greeting: str) -> int:
     """A task the counts the length of a greeting."""
     return len(greeting)
 
+
 @workflow
 def wf(name: str = "union") -> typing.Tuple[str, int]:
     """Declare workflow called `wf`.

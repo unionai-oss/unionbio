@@ -10,12 +10,13 @@ from .config import base_image
 fastqc = ShellTask(
     name="fastqc",
     debug=True,
-    script=
-    """
+    script="""
     mkdir {outputs.qc}
     fastqc {inputs.seq_dir}/*.fastq.gz --outdir={outputs.qc}
     """,
     inputs=kwtypes(seq_dir=FlyteDirectory),
-    output_locs=[OutputLocation(var="qc", var_type=FlyteDirectory, location='/root/qc')],
-    container_image=base_image
+    output_locs=[
+        OutputLocation(var="qc", var_type=FlyteDirectory, location="/root/qc")
+    ],
+    container_image=base_image,
 )
