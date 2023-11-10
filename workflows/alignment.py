@@ -5,7 +5,7 @@ from flytekit.types.file import FlyteFile
 from flytekit.experimental import map_task
 from typing import List
 
-from .config import ref_loc, seq_dir
+from .config import ref_loc, seq_dir_pth
 from .sample_types import FiltSample, SamFile
 from .fastqc import fastqc
 from .fastp import pyfastp
@@ -48,7 +48,7 @@ def compare_aligners(
 
 
 @workflow
-def alignment_wf(seq_dir: FlyteDirectory = seq_dir) -> FlyteFile:
+def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     """
     Run an alignment workflow on FastQ files contained in the configured seq_dir.
 
@@ -63,20 +63,20 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir) -> FlyteFile:
     Returns:
         FlyteFile: A FlyteFile object representing the output of the alignment workflow.
     """
-    fqc_dir = fastqc(seq_dir=seq_dir)
+    fqc_dir = fastqc(seq_dir=seq_dir_pth)
     check = check_fastqc_reports(rep_dir=fqc_dir)
-
-    qc = (
+    presample = prepare_samples(seq_dir=seq_dir_pth)
+    samples = (
         conditional("pass-qc")
         .if_(check == "PASS")
-        .then(print('Passed'))
+        .then(presample)
         .elif_(check == "WARN")
-        .then(approve(check, "check-warnings", timeout=timedelta(hours=2)))
-        .elif_(check == "FAIL")
+        .then(approve(presample, "approve-qc-warnings", timeout=timedelta(hours=2)))
+        .else_()
         .fail("One or more samples failed QC.")
     )
 
-    samples = prepare_samples(seq_dir=seq_dir)
+    # samples = prepare_samples(seq_dir=seq_dir)
     filtered_samples = map_task(pyfastp)(rs=samples)
     bowtie2_idx = bowtie2_index(ref=ref_loc)
     hisat2_idx = hisat2_index(ref=ref_loc)
