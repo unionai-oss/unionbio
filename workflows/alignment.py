@@ -66,6 +66,7 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     fqc_dir = fastqc(seq_dir=seq_dir_pth)
     check = check_fastqc_reports(rep_dir=fqc_dir)
     presample = prepare_samples(seq_dir=seq_dir_pth)
+    
     samples = (
         conditional("pass-qc")
         .if_(check == "PASS")

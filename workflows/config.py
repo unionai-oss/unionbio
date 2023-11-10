@@ -10,6 +10,6 @@ logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
 base_image = "localhost:30000/variant-discovery:latest"
-seq_dir_pth = "s3://my-s3-bucket/my-data/single"
+seq_dir_pth = "s3://my-s3-bucket/my-data/sequences"
 ref_loc = "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"
 ref_hash = str(hash(ref_loc))[:4]

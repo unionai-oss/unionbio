@@ -33,10 +33,10 @@ def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
             with zip_file.open(f"{Path(zip_file.filename).stem}/summary.txt") as summary:
                 contents = summary.read().decode("utf-8")
                 logger.debug(f"Contents of summary.txt: {contents}")
-                # if b"FAIL" in contents:
-                #     return "FAIL"
-                # elif b"WARN" in contents:
-                #     return "WARN"
+                if "FAIL" in contents:
+                    return "FAIL"
+                elif "WARN" in contents:
+                    return "WARN"
 
     return "PASS"
 
