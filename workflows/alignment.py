@@ -70,6 +70,9 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
 
     check >> presample >> approval
 
+    # If the FastQC summary is all PASS then we can proceed with the workflow.
+    # If there is at least one WARN, then explicit approval is required.
+    # If there is at least one FAIL, then the workflow fails.
     samples = (
         conditional("pass-qc")
         .if_(check == "PASS")
