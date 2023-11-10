@@ -66,16 +66,17 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir) -> FlyteFile:
     fqc_dir = fastqc(seq_dir=seq_dir)
     check = check_fastqc_reports(rep_dir=fqc_dir)
 
-    samples = (
+    qc = (
         conditional("pass-qc")
         .if_(check == "PASS")
-        .then(prepare_samples(seq_dir=seq_dir))
+        .then(print('Passed'))
         .elif_(check == "WARN")
         .then(approve(check, "check-warnings", timeout=timedelta(hours=2)))
         .elif_(check == "FAIL")
         .fail("One or more samples failed QC.")
     )
 
+    samples = prepare_samples(seq_dir=seq_dir)
     filtered_samples = map_task(pyfastp)(rs=samples)
     bowtie2_idx = bowtie2_index(ref=ref_loc)
     hisat2_idx = hisat2_index(ref=ref_loc)
