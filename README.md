@@ -1,8 +1,9 @@
-# Variant Discovery on Flyte
+# 🧬 Variant Discovery on Flyte
+---
 
 This bioinformatics workflow will take you through a variant discovery pipeline, from raw reads to actionable insights, all orchestrated with Flyte. The workflow is broken up into sensible steps, each highlighting some of the more advanced Flyte features.
 
-## QC and Alignment
+## 🔍📏 QC and Alignment
 
 The first section will collect QC metrics, preprocess our samples, and align them to a reference genome using a couple different aligners for comparison sake. 
 
