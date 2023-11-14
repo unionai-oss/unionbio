@@ -65,23 +65,25 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     """
     fqc_dir = fastqc(seq_dir=seq_dir_pth)
     check = check_fastqc_reports(rep_dir=fqc_dir)
-    presample = prepare_samples(seq_dir=seq_dir_pth)
-    approval = approve(presample, "approve-qc", timeout=timedelta(hours=2))
+    approval = approve(check, "approve-qc", timeout=timedelta(hours=2))
 
-    check >> presample >> approval
 
     # If the FastQC summary is all PASS then we can proceed with the workflow.
     # If there is at least one WARN, then explicit approval is required.
     # If there is at least one FAIL, then the workflow fails.
-    samples = (
+    qc = (
         conditional("pass-qc")
         .if_(check == "PASS")
-        .then(presample)
+        .then(check)
         .elif_(check == "WARN")
         .then(approval)
         .else_()
         .fail("One or more samples failed QC.")
     )
+    
+    samples = prepare_samples(seq_dir=seq_dir_pth)
+    
+    check >> qc >> samples
 
     filtered_samples = map_task(pyfastp)(rs=samples)
     bowtie2_idx = bowtie2_index(ref=ref_loc)
