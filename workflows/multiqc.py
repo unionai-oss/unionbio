@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .sample_types import FiltSample, SamFile
 from .utils import subproc_raise
+from .config import logger
 
 # Add MultiQC to the base image
 multiqc_image_spec = ImageSpec(
@@ -46,22 +47,27 @@ def render_multiqc(
         src = ldir.joinpath(fqc.path, f)
         dest = ldir.joinpath(ldir, f)
         shutil.move(src, dest)
+    logger.debug(f"FastQC reports downloaded to {ldir}")
 
     for filt_rep in filt_reps:
         filt_rep.report.download()
         shutil.move(filt_rep.report.path, ldir)
+    logger.debug(f"FastP reports downloaded to {ldir}")
 
     for pair in sams:
         pair[0].report.download()
         shutil.move(pair[0].report.path, ldir)
         pair[1].report.download()
         shutil.move(pair[1].report.path, ldir)
+    logger.debug(f"Alignment reports for {sams} downloaded to {ldir}")
 
     final_report = ldir.joinpath("multiqc_report.html")
     mqc_cmd = ["multiqc", str(ldir), "-n", str(final_report)]
+    logger.debug(f"Generating MultiQC report at {final_report} with command: {mqc_cmd}")
     subproc_raise(mqc_cmd)
 
     report_html = open(final_report, "r").read()
     current_context().default_deck.append(report_html)
+    logger.debug("MultiQC report HTML added to default deck")
 
     return FlyteFile(path=str(final_report))

@@ -4,7 +4,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from .config import ref_hash, base_image
+from .config import ref_hash, base_image, logger
 from .sample_types import FiltSample, SamFile
 from .utils import subproc_raise
 
@@ -52,9 +52,11 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         SamFile: A SamFile object representing the alignment result in SAM format.
     """
     idx.download()
+    logger.debug(f"Index downloaded to {idx.path}")
     ldir = Path(current_context().working_directory)
     sam = ldir.joinpath(f"{fs.sample}_bowtie2.sam")
     rep = ldir.joinpath(f"{fs.sample}_bowtie2_report.txt")
+    logger.debug(f"Writing SAM to {sam} and report to {rep}")
 
     cmd = [
         "bowtie2",
@@ -67,7 +69,8 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         "-S",
         sam,
     ]
-
+    logger.debug(f"Running command: {cmd}")
+     
     stdout, stderr = subproc_raise(cmd)
 
     with open(rep, "w") as f:

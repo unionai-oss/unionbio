@@ -63,6 +63,7 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     Returns:
         FlyteFile: A FlyteFile object representing the output of the alignment workflow.
     """
+    # Generate FastQC reports and check for failures
     fqc_dir = fastqc(seq_dir=seq_dir)
     check = check_fastqc_reports(rep_dir=fqc_dir)
 
@@ -76,18 +77,21 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
         .fail("One or more samples failed QC.")
     )
 
+    # Map out filtering across all samples and generate indices
     filtered_samples = map_task(pyfastp)(rs=samples)
     bowtie2_idx = bowtie2_index(ref=ref_loc)
     hisat2_idx = hisat2_index(ref=ref_loc)
 
-    # Require that sampels pass QC before index potentially expensive index generation
+    # Require that samples pass QC before potentially expensive index generation
     samples >> bowtie2_idx
     samples >> hisat2_idx
 
+    # Compare alignment results using two different aligners in a dynamic task
     sams = compare_aligners(
         bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples
     )
 
+    # Generate final multiqc report with stats from all steps for final approval
     final_report = render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=sams)
 
     return approve(final_report, "approve-final-report", timeout=timedelta(hours=2))

@@ -6,7 +6,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from .config import ref_hash, base_image
+from .config import ref_hash, base_image, logger
 from .sample_types import FiltSample, SamFile
 from .utils import subproc_raise
 
@@ -56,14 +56,16 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     ldir = Path(current_context().working_directory)
     sam = ldir.joinpath(f"{fs.sample}_hisat2.sam")
     rep = ldir.joinpath(f"{fs.sample}_hisat2_report.txt")
+    logger.debug(f"Writing SAM to {sam} and report to {rep}")
+
     unc_r1 = ldir.joinpath(f"{fs.sample}_1.fq")
     unc_r2 = ldir.joinpath(f"{fs.sample}_2.fq")
 
     with gzip.open(fs.filt_r1, "rb") as gz_file, open(unc_r1, "wb") as out_file:
         shutil.copyfileobj(gz_file, out_file)
-
     with gzip.open(fs.filt_r2, "rb") as gz_file, open(unc_r2, "wb") as out_file:
         shutil.copyfileobj(gz_file, out_file)
+    logger.debug(f"Uncompressed reads to {unc_r1} and {unc_r2}")
 
     cmd = [
         "hisat2",
@@ -78,7 +80,8 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         "--summary-file",
         rep,
     ]
-
+    logger.debug(f"Running command: {cmd}")
+    
     stdout, stderr = subproc_raise(cmd)
 
     return SamFile(
