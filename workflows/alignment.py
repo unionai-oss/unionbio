@@ -1,15 +1,15 @@
 from datetime import timedelta
-from flytekit import workflow, dynamic, approve
+from flytekit import workflow, dynamic, approve, conditional
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit.experimental import map_task
 from typing import List
 
-from .config import ref_loc, seq_dir
+from .config import ref_loc, seq_dir_pth
 from .sample_types import FiltSample, SamFile
 from .fastqc import fastqc
 from .fastp import pyfastp
-from .utils import prepare_samples
+from .utils import prepare_samples, check_fastqc_reports, noop_task
 from .bowtie2 import bowtie2_align_paired_reads, bowtie2_index
 from .hisat2 import hisat2_align_paired_reads, hisat2_index
 from .multiqc import render_multiqc
@@ -48,7 +48,7 @@ def compare_aligners(
 
 
 @workflow
-def alignment_wf(seq_dir: FlyteDirectory = seq_dir) -> FlyteFile:
+def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     """
     Run an alignment workflow on FastQ files contained in the configured seq_dir.
 
@@ -64,20 +64,30 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir) -> FlyteFile:
         FlyteFile: A FlyteFile object representing the output of the alignment workflow.
     """
     fqc_dir = fastqc(seq_dir=seq_dir)
-    samples = prepare_samples(seq_dir=seq_dir)
+    check = check_fastqc_reports(rep_dir=fqc_dir)
+
+    # If the FastQC summary is PASS or WARN then we can proceed with the workflow.
+    # If there is at least one FAIL, then the workflow fails.
+    samples = (
+        conditional("pass-qc")
+        .if_((check == "PASS") | (check == "WARN"))
+        .then(prepare_samples(seq_dir=seq_dir))
+        .else_()
+        .fail("One or more samples failed QC.")
+    )
+
     filtered_samples = map_task(pyfastp)(rs=samples)
-
-    qc_check = render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=[])
-    report = approve(qc_check, "qc-report-approval", timeout=timedelta(hours=2))
-
     bowtie2_idx = bowtie2_index(ref=ref_loc)
     hisat2_idx = hisat2_index(ref=ref_loc)
+
+    # Require that sampels pass QC before index potentially expensive index generation
+    samples >> bowtie2_idx
+    samples >> hisat2_idx
+
     sams = compare_aligners(
         bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples
     )
 
-    report >> bowtie2_idx
-    report >> hisat2_idx
-    report >> sams
+    final_report = render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=sams)
 
-    return render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=sams)
+    return approve(final_report, "approve-final-report", timeout=timedelta(hours=2))

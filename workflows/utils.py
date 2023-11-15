@@ -1,3 +1,4 @@
+import zipfile
 import subprocess
 from pathlib import Path
 from typing import List, Tuple
@@ -7,8 +8,40 @@ from flytekit.types.file import FlyteFile
 from flytekit.configuration import Config
 from flytekit.remote import FlyteRemote
 
-from .config import base_image
+from .config import base_image, logger
 from .sample_types import FiltSample, RawSample
+
+@task
+def noop_task() -> str:
+    return ""
+
+@task
+def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
+    """
+    Check FastQC reports for errors.
+
+    This function checks FastQC reports for errors and raises an exception if any are found.
+
+    Args:
+        rep_dir (FlyteDirectory): The input directory containing FastQC reports.
+    """
+    rep_dir.download()
+    all_zips = list(Path(rep_dir.path).rglob("*fastqc.zip*"))
+
+    for p in all_zips:
+        logger.debug(f"Checking {p}")
+        with zipfile.ZipFile(p, "r") as zip_file:
+            logger.debug(f"{zip_file.filename}")
+            logger.debug(f"Archive contains {zip_file.namelist()}")
+            with zip_file.open(f"{Path(zip_file.filename).stem}/summary.txt") as summary:
+                contents = summary.read().decode("utf-8")
+                logger.debug(f"Contents of summary.txt: {contents}")
+                if "FAIL" in contents:
+                    return "FAIL"
+                elif "WARN" in contents:
+                    return "WARN"
+
+    return "PASS"
 
 
 def get_remote(local=None, config_file=None):
