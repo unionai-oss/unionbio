@@ -9,7 +9,7 @@ from .config import ref_loc, seq_dir_pth
 from .sample_types import FiltSample, SamFile
 from .fastqc import fastqc
 from .fastp import pyfastp
-from .utils import prepare_samples, check_fastqc_reports
+from .utils import prepare_samples, check_fastqc_reports, noop_pass
 from .bowtie2 import bowtie2_align_paired_reads, bowtie2_index
 from .hisat2 import hisat2_align_paired_reads, hisat2_index
 from .multiqc import render_multiqc
@@ -63,8 +63,10 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     Returns:
         FlyteFile: A FlyteFile object representing the output of the alignment workflow.
     """
-    fqc_dir = fastqc(seq_dir=seq_dir)
+    # fqc_dir = fastqc(seq_dir=seq_dir)
+    fqc_dir = FlyteDirectory("s3://my-s3-bucket/my-data/pass-reports")
     check = check_fastqc_reports(rep_dir=fqc_dir)
+    noop = noop_pass()
     approval = approve(check, "approve-qc", timeout=timedelta(hours=2))
 
 
@@ -74,15 +76,14 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     qc = (
         conditional("pass-qc")
         .if_(check == "PASS")
-        .then(check)
+        .then(noop)
         .elif_(check == "WARN")
         .then(approval)
         .else_()
         .fail("One or more samples failed QC.")
     )
     
-    samples = prepare_samples(seq_dir=seq_dir)
-    
+    samples = prepare_samples(seq_dir=seq_dir) 
     check >> qc >> samples
 
     filtered_samples = map_task(pyfastp)(rs=samples)

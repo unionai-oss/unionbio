@@ -11,6 +11,9 @@ from flytekit.remote import FlyteRemote
 from .config import base_image, logger
 from .sample_types import FiltSample, RawSample
 
+@task
+def noop_pass():
+    return "PASS"
 
 @task
 def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:

@@ -13,7 +13,7 @@ from .utils import subproc_raise
 multiqc_image_spec = ImageSpec(
     name="multiqc",
     packages=["multiqc"],
-    registry="localhost:30000",
+    registry="ghcr.io/pryce-turner",
     base_image="ghcr.io/pryce-turner/variant-discovery:latest",
 )
 
