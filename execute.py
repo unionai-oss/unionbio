@@ -1,4 +1,4 @@
-from workflows import alignment, scratch
+from workflows import alignment
 from workflows.utils import get_remote
 
 remote = get_remote()

@@ -30,7 +30,7 @@ def pyfastp(rs: RawSample) -> FiltSample:
 
     cmd = ["fastp", "-i", rs.raw_r1, "-I", rs.raw_r2, "-o", o1p, "-O", o2p, "-j", rep]
     logger.debug(f"Running command: {cmd}")
-    
+
     subproc_raise(cmd)
 
     return FiltSample(

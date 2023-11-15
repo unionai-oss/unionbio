@@ -9,7 +9,7 @@ from .config import ref_loc, seq_dir_pth
 from .sample_types import FiltSample, SamFile
 from .fastqc import fastqc
 from .fastp import pyfastp
-from .utils import prepare_samples, check_fastqc_reports, noop_task
+from .utils import prepare_samples, check_fastqc_reports
 from .bowtie2 import bowtie2_align_paired_reads, bowtie2_index
 from .hisat2 import hisat2_align_paired_reads, hisat2_index
 from .multiqc import render_multiqc

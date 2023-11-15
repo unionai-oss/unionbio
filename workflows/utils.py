@@ -11,9 +11,11 @@ from flytekit.remote import FlyteRemote
 from .config import base_image, logger
 from .sample_types import FiltSample, RawSample
 
+
 @task
 def noop_task() -> str:
     return ""
+
 
 @task
 def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
@@ -33,7 +35,9 @@ def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
         with zipfile.ZipFile(p, "r") as zip_file:
             logger.debug(f"{zip_file.filename}")
             logger.debug(f"Archive contains {zip_file.namelist()}")
-            with zip_file.open(f"{Path(zip_file.filename).stem}/summary.txt") as summary:
+            with zip_file.open(
+                f"{Path(zip_file.filename).stem}/summary.txt"
+            ) as summary:
                 contents = summary.read().decode("utf-8")
                 logger.debug(f"Contents of summary.txt: {contents}")
                 if "FAIL" in contents:

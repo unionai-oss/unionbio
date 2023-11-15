@@ -81,7 +81,7 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         rep,
     ]
     logger.debug(f"Running command: {cmd}")
-    
+
     stdout, stderr = subproc_raise(cmd)
 
     return SamFile(
