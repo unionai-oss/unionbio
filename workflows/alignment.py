@@ -9,7 +9,7 @@ from .config import ref_loc, seq_dir_pth
 from .sample_types import FiltSample, SamFile
 from .fastqc import fastqc
 from .fastp import pyfastp
-from .utils import prepare_samples, check_fastqc_reports, noop_pass
+from .utils import prepare_samples, check_fastqc_reports, noop_task
 from .bowtie2 import bowtie2_align_paired_reads, bowtie2_index
 from .hisat2 import hisat2_align_paired_reads, hisat2_index
 from .multiqc import render_multiqc
@@ -63,33 +63,24 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     Returns:
         FlyteFile: A FlyteFile object representing the output of the alignment workflow.
     """
-    # fqc_dir = fastqc(seq_dir=seq_dir)
-    fqc_dir = FlyteDirectory("s3://my-s3-bucket/my-data/pass-reports")
+    fqc_dir = fastqc(seq_dir=seq_dir)
     check = check_fastqc_reports(rep_dir=fqc_dir)
-    noop = noop_pass()
-    approval = approve(check, "approve-qc", timeout=timedelta(hours=2))
 
-
-    # If the FastQC summary is all PASS then we can proceed with the workflow.
-    # If there is at least one WARN, then explicit approval is required.
+    # If the FastQC summary is PASS or WARN then we can proceed with the workflow.
     # If there is at least one FAIL, then the workflow fails.
-    qc = (
+    samples = (
         conditional("pass-qc")
-        .if_(check == "PASS")
-        .then(noop)
-        .elif_(check == "WARN")
-        .then(approval)
+        .if_((check == "PASS") | (check == "WARN"))
+        .then(prepare_samples(seq_dir=seq_dir))
         .else_()
         .fail("One or more samples failed QC.")
     )
-    
-    samples = prepare_samples(seq_dir=seq_dir) 
-    check >> qc >> samples
 
     filtered_samples = map_task(pyfastp)(rs=samples)
     bowtie2_idx = bowtie2_index(ref=ref_loc)
     hisat2_idx = hisat2_index(ref=ref_loc)
 
+    # Require that sampels pass QC before index potentially expensive index generation
     samples >> bowtie2_idx
     samples >> hisat2_idx
 
@@ -97,4 +88,6 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
         bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples
     )
 
-    return render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=sams)
+    final_report = render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=sams)
+
+    return approve(final_report, "approve-final-report", timeout=timedelta(hours=2))

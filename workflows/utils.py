@@ -12,8 +12,8 @@ from .config import base_image, logger
 from .sample_types import FiltSample, RawSample
 
 @task
-def noop_pass():
-    return "PASS"
+def noop_task() -> str:
+    return ""
 
 @task
 def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
