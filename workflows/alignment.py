@@ -63,7 +63,7 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     Returns:
         FlyteFile: A FlyteFile object representing the output of the alignment workflow.
     """
-    fqc_dir = fastqc(seq_dir=seq_dir_pth)
+    fqc_dir = fastqc(seq_dir=seq_dir)
     check = check_fastqc_reports(rep_dir=fqc_dir)
     approval = approve(check, "approve-qc", timeout=timedelta(hours=2))
 
@@ -81,7 +81,7 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
         .fail("One or more samples failed QC.")
     )
     
-    samples = prepare_samples(seq_dir=seq_dir_pth)
+    samples = prepare_samples(seq_dir=seq_dir)
     
     check >> qc >> samples
 
