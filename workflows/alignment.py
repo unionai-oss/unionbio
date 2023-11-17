@@ -93,7 +93,5 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
         bt2_idx=bowtie2_idx, hs2_idx=hisat2_idx, samples=filtered_samples
     )
 
-    # Generate final multiqc report with stats from all steps for final approval
-    final_report = render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=sams)
-
-    return approve(final_report, "approve-final-report", timeout=timedelta(hours=2))
+    # Generate final multiqc report with stats from all steps
+    return render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=sams)
