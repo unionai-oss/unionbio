@@ -79,12 +79,14 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
 
     # Map out filtering across all samples and generate indices
     filtered_samples = map_task(pyfastp)(rs=samples)
+    approve_filter = approve(render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples), "filter-approval", timeout=timedelta(hours=2))
+
     bowtie2_idx = bowtie2_index(ref=ref_loc)
     hisat2_idx = hisat2_index(ref=ref_loc)
 
     # Require that samples pass QC before potentially expensive index generation
-    samples >> bowtie2_idx
-    samples >> hisat2_idx
+    samples >> approve_filter >> bowtie2_idx
+    samples >> approve_filter >> hisat2_idx
 
     # Compare alignment results using two different aligners in a dynamic task
     sams = compare_aligners(

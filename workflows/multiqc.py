@@ -21,7 +21,7 @@ multiqc_image_spec = ImageSpec(
 
 @task(container_image=multiqc_image_spec, disable_deck=False)
 def render_multiqc(
-    fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[List[SamFile]]
+    fqc: FlyteDirectory, filt_reps: List[FiltSample]=None, sams: List[List[SamFile]]=None
 ) -> FlyteFile:
     """
     Generate MultiQC report by rendering quality and alignment data.

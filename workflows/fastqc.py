@@ -1,4 +1,4 @@
-from flytekit import kwtypes
+from flytekit import kwtypes, TaskMetadata
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
 
@@ -20,6 +20,7 @@ Returns:
 fastqc = ShellTask(
     name="fastqc",
     debug=True,
+    metadata=TaskMetadata(retries=3, cache=True, cache_version="1"),
     script="""
     mkdir {outputs.qc}
     fastqc {inputs.seq_dir}/*.fastq.gz --outdir={outputs.qc}

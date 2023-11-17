@@ -13,11 +13,6 @@ from .sample_types import FiltSample, RawSample
 
 
 @task
-def noop_task() -> str:
-    return ""
-
-
-@task
 def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
     """
     Check FastQC reports for errors.
