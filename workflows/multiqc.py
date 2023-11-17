@@ -66,7 +66,25 @@ def render_multiqc(
     logger.debug(f"Generating MultiQC report at {final_report} with command: {mqc_cmd}")
     subproc_raise(mqc_cmd)
 
-    report_html = open(final_report, "r").read()
+    # Hack to force render plots on page load
+    report_html_lst = []
+    hack = """
+  // Force render plots on page load
+  $(".hc-plot").each(function () {
+    var target = $(this).attr("id");
+    var max_num = mqc_config["num_datasets_plot_limit"] * 50;
+    plot_graph(target, undefined, max_num);
+  });
+  """
+    with open(final_report, "r") as f:
+        for line in f:
+            if "// Render plots on page load" in line:
+                report_html_lst.append(hack)
+                report_html_lst.append(line)
+            else:
+                report_html_lst.append(line)
+    report_html = "".join(report_html_lst)
+
     current_context().default_deck.append(report_html)
     logger.debug("MultiQC report HTML added to default deck")
 
