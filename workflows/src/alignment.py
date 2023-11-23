@@ -2,17 +2,17 @@ from datetime import timedelta
 from flytekit import workflow, dynamic, approve, conditional
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from flytekit.experimental import map_task
+from flytekit import map_task
 from typing import List
 
-from .config import ref_loc, seq_dir_pth
-from .sample_types import FiltSample, SamFile
-from .fastqc import fastqc
-from .fastp import pyfastp
-from .utils import prepare_samples, check_fastqc_reports
-from .bowtie2 import bowtie2_align_paired_reads, bowtie2_index
-from .hisat2 import hisat2_align_paired_reads, hisat2_index
-from .multiqc import render_multiqc
+from src.config import ref_loc, seq_dir_pth
+from src.sample_types import FiltSample, SamFile
+from src.fastqc import fastqc
+from src.fastp import pyfastp
+from src.utils import prepare_samples, check_fastqc_reports
+from src.bowtie2 import bowtie2_align_paired_reads, bowtie2_index
+from src.hisat2 import hisat2_align_paired_reads, hisat2_index
+from src.multiqc import render_multiqc
 
 
 @dynamic
@@ -79,14 +79,19 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
 
     # Map out filtering across all samples and generate indices
     filtered_samples = map_task(pyfastp)(rs=samples)
-    approve_filter = approve(render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=[]), "filter-approval", timeout=timedelta(hours=2))
+    approve_filter = approve(
+        render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=[]),
+        "filter-approval",
+        timeout=timedelta(hours=2),
+    )
 
     bowtie2_idx = bowtie2_index(ref=ref_loc)
     hisat2_idx = hisat2_index(ref=ref_loc)
 
     # Require that samples pass QC before potentially expensive index generation
-    samples >> approve_filter >> bowtie2_idx
-    samples >> approve_filter >> hisat2_idx
+    samples >> approve_filter
+    approve_filter >> bowtie2_idx
+    approve_filter >> hisat2_idx
 
     # Compare alignment results using two different aligners in a dynamic task
     sams = compare_aligners(
