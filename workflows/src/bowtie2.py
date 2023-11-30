@@ -22,7 +22,7 @@ Returns:
 bowtie2_index = ShellTask(
     name="bowtie2-index",
     debug=True,
-    requests=Resources(cpu="2", mem="2Gi"),
+    requests=Resources(cpu="4", mem="10Gi"),
     metadata=TaskMetadata(retries=3, cache=True, cache_version=ref_hash),
     container_image=base_image,
     script="""
@@ -38,7 +38,7 @@ bowtie2_index = ShellTask(
 
 @task(
     container_image=base_image,
-    requests=Resources(cpu="2", mem="2Gi"),
+    requests=Resources(cpu="4", mem="10Gi"),
 )
 def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     """
@@ -84,6 +84,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         sample=fs.sample, sam=FlyteFile(path=str(sam)), report=FlyteFile(path=str(rep))
     )
 
+
 @dynamic
 def bowtie2_align_samples(
     idx: FlyteDirectory, samples: List[FiltSample]
@@ -92,7 +93,7 @@ def bowtie2_align_samples(
     Process samples through bowtie2.
 
     This function takes a FlyteDirectory objects representing a bowtie index and a list of
-    FiltSample objects containing filtered sample data. It performs paired-end alignment 
+    FiltSample objects containing filtered sample data. It performs paired-end alignment
     using bowtie2. It then returns a list of SamFile objects representing the alignment results.
 
     Args:
