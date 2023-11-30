@@ -1,5 +1,6 @@
 from pathlib import Path
-from flytekit import kwtypes, task, Resources, current_context, TaskMetadata
+from typing import List
+from flytekit import kwtypes, task, Resources, current_context, TaskMetadata, dynamic
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
@@ -82,3 +83,29 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     return SamFile(
         sample=fs.sample, sam=FlyteFile(path=str(sam)), report=FlyteFile(path=str(rep))
     )
+
+@dynamic
+def bowtie2_align_samples(
+    idx: FlyteDirectory, samples: List[FiltSample]
+) -> List[SamFile]:
+    """
+    Process samples through bowtie2.
+
+    This function takes a FlyteDirectory objects representing a bowtie index and a list of
+    FiltSample objects containing filtered sample data. It performs paired-end alignment 
+    using bowtie2. It then returns a list of SamFile objects representing the alignment results.
+
+    Args:
+        bt2_idx (FlyteDirectory): The FlyteDirectory object representing the bowtie2 index.
+        samples (List[FiltSample]): A list of FiltSample objects containing sample data
+            to be processed.
+
+    Returns:
+        List[List[SamFile]]: A list of lists, where each inner list contains alignment
+            results (SamFile objects) for a sample, with results from both aligners.
+    """
+    sams = []
+    for sample in samples:
+        sam = bowtie2_align_paired_reads(idx=idx, fs=sample)
+        sams.append(sam)
+    return sams
