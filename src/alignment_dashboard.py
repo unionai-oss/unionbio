@@ -1,3 +1,6 @@
+#####################################################
+# PYTHONPATH=. streamlit run alignment_dashboard.py #
+#####################################################
 import time
 
 import streamlit as st

@@ -57,7 +57,7 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     approve_filter >> bowtie2_idx
 
     # Compare alignment results using two different aligners in a dynamic task
-    sams = bowtie2_align_samples(idx=bowtie2_idx, fs=filtered_samples)
+    sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
 
     # Generate final multiqc report with stats from all steps
     return render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=sams)

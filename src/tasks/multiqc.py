@@ -14,7 +14,7 @@ from tasks.utils import subproc_raise
 multiqc_image_spec = ImageSpec(
     name="multiqc",
     packages=["multiqc"],
-    registry="ghcr.io/pryce-turner",
+    registry="localhost:30000",
     base_image="ghcr.io/pryce-turner/variant-discovery:latest",
 )
 

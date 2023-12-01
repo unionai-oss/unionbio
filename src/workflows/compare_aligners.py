@@ -1,18 +1,18 @@
 from datetime import timedelta
-from flytekit import workflow, dynamic, approve, conditional
-from flytekit.types.directory import FlyteDirectory
-from flytekit.types.file import FlyteFile
-from flytekit.experimental import map_task
 from typing import List
 
+from flytekit import approve, conditional, dynamic, map_task, workflow
+from flytekit.types.directory import FlyteDirectory
+from flytekit.types.file import FlyteFile
+
 from config import ref_loc, seq_dir_pth
-from tasks.sample_types import FiltSample, SamFile
-from tasks.fastqc import fastqc
-from tasks.fastp import pyfastp
-from tasks.utils import prepare_samples, check_fastqc_reports
 from tasks.bowtie2 import bowtie2_align_paired_reads, bowtie2_index
+from tasks.fastp import pyfastp
+from tasks.fastqc import fastqc
 from tasks.hisat2 import hisat2_align_paired_reads, hisat2_index
 from tasks.multiqc import render_multiqc
+from tasks.sample_types import FiltSample, SamFile
+from tasks.utils import check_fastqc_reports, prepare_samples
 
 
 @dynamic
@@ -79,7 +79,11 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
 
     # Map out filtering across all samples and generate indices
     filtered_samples = map_task(pyfastp)(rs=samples)
-    approve_filter = approve(render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=[]), "filter-approval", timeout=timedelta(hours=2))
+    approve_filter = approve(
+        render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=[]),
+        "filter-approval",
+        timeout=timedelta(hours=2),
+    )
 
     bowtie2_idx = bowtie2_index(ref=ref_loc)
     hisat2_idx = hisat2_index(ref=ref_loc)
