@@ -14,14 +14,14 @@ from tasks.utils import subproc_raise
 multiqc_image_spec = ImageSpec(
     name="multiqc",
     packages=["multiqc"],
-    registry="localhost:30000",
+    registry="ghcr.io/pryce-turner",
     base_image="ghcr.io/pryce-turner/variant-discovery:latest",
 )
 
 
 @task(container_image=multiqc_image_spec, disable_deck=False)
 def render_multiqc(
-    fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[List[SamFile]]
+    fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[SamFile]
 ) -> FlyteFile:
     """
     Generate MultiQC report by rendering quality and alignment data.
@@ -54,11 +54,9 @@ def render_multiqc(
         shutil.move(filt_rep.report.path, ldir)
     logger.debug(f"FastP reports downloaded to {ldir}")
 
-    for pair in sams:
-        pair[0].report.download()
-        shutil.move(pair[0].report.path, ldir)
-        pair[1].report.download()
-        shutil.move(pair[1].report.path, ldir)
+    for sam in sams:
+        sam.report.download()
+        shutil.move(sam.report.path, ldir)
     logger.debug(f"Alignment reports for {sams} downloaded to {ldir}")
 
     final_report = ldir.joinpath("multiqc_report.html")
