@@ -88,7 +88,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 @dynamic
 def bowtie2_align_samples(
     idx: FlyteDirectory, samples: List[FiltSample]
-) -> List[List[SamFile]]:
+) -> List[SamFile]:
     """
     Process samples through bowtie2.
 

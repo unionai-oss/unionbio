@@ -18,7 +18,7 @@ from tasks.utils import check_fastqc_reports, prepare_samples
 @dynamic
 def compare_aligners(
     bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: List[FiltSample]
-) -> List[List[SamFile]]:
+) -> List[SamFile]:
     """
     Compare alignment results using two different aligners for multiple samples.
 
@@ -35,15 +35,15 @@ def compare_aligners(
             to be processed.
 
     Returns:
-        List[List[SamFile]]: A list of lists, where each inner list contains alignment
-            results (SamFile objects) for a sample, with results from both aligners.
+        List[SamFile]: A list of alignment results (SamFile objects) for a sample, 
+        with results from both aligners.
     """
     sams = []
     for sample in samples:
         bt2_sam = bowtie2_align_paired_reads(idx=bt2_idx, fs=sample)
         hs2_sam = hisat2_align_paired_reads(idx=hs2_idx, fs=sample)
-        pair = [bt2_sam, hs2_sam]
-        sams.append(pair)
+        sams.append(bt2_sam)
+        sams.append(hs2_sam)
     return sams
 
 
