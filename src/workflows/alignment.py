@@ -1,17 +1,15 @@
 from datetime import timedelta
-from flytekit import workflow, dynamic, approve, conditional
+from flytekit import workflow, approve, conditional
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from flytekit.experimental import map_task
-from typing import List
+from flytekit import map_task
 
-from .config import ref_loc, seq_dir_pth
-from .sample_types import FiltSample, SamFile
-from .fastqc import fastqc
-from .fastp import pyfastp
-from .utils import prepare_samples, check_fastqc_reports
-from .bowtie2 import bowtie2_align_samples, bowtie2_index
-from .multiqc import render_multiqc
+from config import ref_loc, seq_dir_pth
+from tasks.fastqc import fastqc
+from tasks.fastp import pyfastp
+from tasks.utils import prepare_samples, check_fastqc_reports
+from tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
+from tasks.multiqc import render_multiqc
 
 
 @workflow
@@ -46,15 +44,20 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
 
     # Map out filtering across all samples and generate indices
     filtered_samples = map_task(pyfastp)(rs=samples)
-    approve_filter = approve(render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=[]), "filter-approval", timeout=timedelta(hours=2))
+    approve_filter = approve(
+        render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=[]),
+        "filter-approval",
+        timeout=timedelta(hours=2),
+    )
 
     bowtie2_idx = bowtie2_index(ref=ref_loc)
 
     # Require that samples pass QC before potentially expensive index generation
-    samples >> approve_filter >> bowtie2_idx
+    samples >> approve_filter
+    approve_filter >> bowtie2_idx
 
     # Compare alignment results using two different aligners in a dynamic task
-    sams = bowtie2_align_samples(idx=bowtie2_idx, fs=filtered_samples)
+    sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
 
     # Generate final multiqc report with stats from all steps
     return render_multiqc(fqc=fqc_dir, filt_reps=filtered_samples, sams=sams)

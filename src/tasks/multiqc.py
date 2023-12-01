@@ -6,15 +6,15 @@ from flytekit.types.file import FlyteFile
 from typing import List
 from pathlib import Path
 
-from .sample_types import FiltSample, SamFile
-from .utils import subproc_raise
-from .config import logger
+from config import logger
+from tasks.sample_types import FiltSample, SamFile
+from tasks.utils import subproc_raise
 
 # Add MultiQC to the base image
 multiqc_image_spec = ImageSpec(
     name="multiqc",
     packages=["multiqc"],
-    registry="ghcr.io/pryce-turner",
+    registry="localhost:30000",
     base_image="ghcr.io/pryce-turner/variant-discovery:latest",
 )
 
