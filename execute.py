@@ -1,9 +1,9 @@
-from workflows import alignment
-from workflows.utils import get_remote
+from src.workflows.alignment import alignment_wf
+from src.tasks.utils import get_remote
 
 remote = get_remote()
 execution = remote.execute_local_workflow(
-    alignment.alignment_wf,
+    alignment_wf,
     # scratch.wf,
     inputs={},
 )

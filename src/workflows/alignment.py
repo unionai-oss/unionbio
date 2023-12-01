@@ -4,12 +4,12 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit import map_task
 
-from src.config import ref_loc, seq_dir_pth
-from src.fastqc import fastqc
-from src.fastp import pyfastp
-from src.utils import prepare_samples, check_fastqc_reports
-from src.bowtie2 import bowtie2_align_samples, bowtie2_index
-from src.multiqc import render_multiqc
+from config import ref_loc, seq_dir_pth
+from tasks.fastqc import fastqc
+from tasks.fastp import pyfastp
+from tasks.utils import prepare_samples, check_fastqc_reports
+from tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
+from tasks.multiqc import render_multiqc
 
 
 @workflow

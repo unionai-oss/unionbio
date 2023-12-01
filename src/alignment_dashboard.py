@@ -6,7 +6,7 @@ from flytekit.configuration import Config
 from flytekit.remote import FlyteRemote
 from streamlit import session_state as session
 
-from alignment import alignment_wf
+from workflows.compare_aligners import alignment_wf
 
 st.set_page_config(
     page_title="fastq alignment",

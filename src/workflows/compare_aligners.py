@@ -5,14 +5,14 @@ from flytekit.types.file import FlyteFile
 from flytekit.experimental import map_task
 from typing import List
 
-from .config import ref_loc, seq_dir_pth
-from .sample_types import FiltSample, SamFile
-from .fastqc import fastqc
-from .fastp import pyfastp
-from .utils import prepare_samples, check_fastqc_reports
-from .bowtie2 import bowtie2_align_paired_reads, bowtie2_index
-from .hisat2 import hisat2_align_paired_reads, hisat2_index
-from .multiqc import render_multiqc
+from config import ref_loc, seq_dir_pth
+from tasks.sample_types import FiltSample, SamFile
+from tasks.fastqc import fastqc
+from tasks.fastp import pyfastp
+from tasks.utils import prepare_samples, check_fastqc_reports
+from tasks.bowtie2 import bowtie2_align_paired_reads, bowtie2_index
+from tasks.hisat2 import hisat2_align_paired_reads, hisat2_index
+from tasks.multiqc import render_multiqc
 
 
 @dynamic

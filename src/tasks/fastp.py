@@ -2,9 +2,9 @@ from pathlib import Path
 from flytekit import task, Resources, current_context
 from flytekit.types.file import FlyteFile
 
-from .config import base_image, logger
-from .sample_types import FiltSample, RawSample
-from .utils import subproc_raise
+from config import base_image, logger
+from tasks.sample_types import FiltSample, RawSample
+from tasks.utils import subproc_raise
 
 
 @task(
