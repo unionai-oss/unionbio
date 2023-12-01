@@ -5,9 +5,9 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from .config import ref_hash, base_image, logger
-from .sample_types import FiltSample, SamFile
-from .utils import subproc_raise
+from config import ref_hash, base_image, logger
+from tasks.sample_types import FiltSample, SamFile
+from tasks.utils import subproc_raise
 
 
 """
@@ -36,7 +36,10 @@ bowtie2_index = ShellTask(
 )
 
 
-@task(container_image=base_image, requests=Resources(cpu="4", mem="10Gi"))
+@task(
+    container_image=base_image,
+    requests=Resources(cpu="4", mem="10Gi"),
+)
 def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     """
     Perform paired-end alignment using Bowtie 2 on a filtered sample.
@@ -81,15 +84,16 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         sample=fs.sample, sam=FlyteFile(path=str(sam)), report=FlyteFile(path=str(rep))
     )
 
+
 @dynamic
 def bowtie2_align_samples(
     idx: FlyteDirectory, samples: List[FiltSample]
-) -> List[SamFile]:
+) -> List[List[SamFile]]:
     """
     Process samples through bowtie2.
 
     This function takes a FlyteDirectory objects representing a bowtie index and a list of
-    FiltSample objects containing filtered sample data. It performs paired-end alignment 
+    FiltSample objects containing filtered sample data. It performs paired-end alignment
     using bowtie2. It then returns a list of SamFile objects representing the alignment results.
 
     Args:

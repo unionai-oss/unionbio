@@ -6,9 +6,9 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from .config import ref_hash, base_image, logger
-from .sample_types import FiltSample, SamFile
-from .utils import subproc_raise
+from config import ref_hash, base_image, logger
+from tasks.sample_types import FiltSample, SamFile
+from tasks.utils import subproc_raise
 
 """
 Generate Hisat2 index files from a reference genome.
@@ -36,7 +36,10 @@ hisat2_index = ShellTask(
 )
 
 
-@task(container_image=base_image, requests=Resources(cpu="4", mem="10Gi"))
+@task(
+    container_image=base_image,
+    requests=Resources(cpu="4", mem="10Gi"),
+)
 def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     """
     Perform paired-end alignment using Hisat 2 on a filtered sample.

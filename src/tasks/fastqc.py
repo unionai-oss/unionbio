@@ -2,7 +2,7 @@ from flytekit import kwtypes, TaskMetadata
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
 
-from .config import base_image
+from config import base_image
 
 """
 Perform quality control using FastQC.

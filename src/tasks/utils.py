@@ -8,8 +8,8 @@ from flytekit.types.file import FlyteFile
 from flytekit.configuration import Config
 from flytekit.remote import FlyteRemote
 
-from .config import base_image, logger
-from .sample_types import FiltSample, RawSample
+from config import base_image, logger
+from tasks.sample_types import FiltSample, RawSample
 
 
 @task

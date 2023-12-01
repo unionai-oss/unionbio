@@ -2,12 +2,15 @@ from pathlib import Path
 from flytekit import task, Resources, current_context
 from flytekit.types.file import FlyteFile
 
-from .config import base_image, logger
-from .sample_types import FiltSample, RawSample
-from .utils import subproc_raise
+from config import base_image, logger
+from tasks.sample_types import FiltSample, RawSample
+from tasks.utils import subproc_raise
 
 
-@task(requests=Resources(cpu="1", mem="2Gi"), container_image=base_image)
+@task(
+    requests=Resources(cpu="1", mem="2Gi"),
+    container_image=base_image,
+)
 def pyfastp(rs: RawSample) -> FiltSample:
     """
     Perform quality filtering and preprocessing using Fastp on a RawSample.

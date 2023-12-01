@@ -1,14 +1,15 @@
 from typing import List
-from flytekit import kwtypes, TaskMetadata, dynamic
+
+from flytekit import TaskMetadata, dynamic, kwtypes
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
-from .config import base_image
+
 from .sample_types import SamFile
 
 # """
 # Perform quality control using FastQC.
 
-# This function takes a FlyteDirectory object containing raw sequencing data, 
+# This function takes a FlyteDirectory object containing raw sequencing data,
 # gathers QC metrics using FastQC, and returns a FlyteDirectory object that
 # can be crawled with MultiQC to generate a report.
 
@@ -29,9 +30,14 @@ mark_dups = ShellTask(
             --remove-sequencing-duplicates
     """,
     inputs=kwtypes(sample=str, sam=FlyteFile),
-    output_locs=[OutputLocation(var="o", var_type=FlyteFile, location="/root/{inputs.sample}_dedup.sam")],
+    output_locs=[
+        OutputLocation(
+            var="o", var_type=FlyteFile, location="/root/{inputs.sample}_dedup.sam"
+        )
+    ],
     container_image="broadinstitute/gatk:4.4.0.0",
 )
+
 
 @dynamic
 def mark_dups_samples(sams: List[SamFile]) -> List[SamFile]:
