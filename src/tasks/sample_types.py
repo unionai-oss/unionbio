@@ -26,6 +26,12 @@ class RawSample(DataClassJSONMixin):
     raw_r1: FlyteFile = FlyteFile(path="/dev/null")
     raw_r2: FlyteFile = FlyteFile(path="/dev/null")
 
+    def parse(self):
+        ...
+
+    def traverse(self, dir):
+        ...
+
 
 
 @dataclass
@@ -45,7 +51,7 @@ class FiltSample(DataClassJSONMixin):
             the filtered sample.
     """
 
-    sample: str
+    sample: str = ""
     filt_r1: FlyteFile = FlyteFile(path="/dev/null") 
     filt_r2: FlyteFile = FlyteFile(path="/dev/null")
     report: FlyteFile = FlyteFile(path="/dev/null")
@@ -66,7 +72,7 @@ class SamFile(DataClassJSONMixin):
             for performance of the aligner.
     """
 
-    sample: str
+    sample: str = ""
     sam: FlyteFile = FlyteFile(path="/dev/null")
     report: FlyteFile = FlyteFile(path="/dev/null")
 
@@ -75,6 +81,14 @@ registry = [
     List[FiltSample],
     List[SamFile],
 ]
+
+class SampleFactory:
+    
+    def __init__(self, dir, sample_type, traverser) -> None:
+        self.dir = dir
+        self.sample_type = sample_type
+        self.traverser = traverser
+
 
 @task(container_image=base_image)
 def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[RawSample]: # eventually replace with Union[*registry]
