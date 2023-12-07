@@ -1,6 +1,11 @@
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
+from flytekit.types.directory import FlyteDirectory
+from flytekit import task
+from config import base_image
+from pathlib import Path
+from typing import List
 
 
 @dataclass
@@ -17,9 +22,10 @@ class RawSample(DataClassJSONMixin):
         raw_r2 (FlyteFile): A FlyteFile object representing the path to the raw R2 read file.
     """
 
-    sample: str
-    raw_r1: FlyteFile
-    raw_r2: FlyteFile
+    sample: str = ""
+    raw_r1: FlyteFile = FlyteFile(path="/dev/null")
+    raw_r2: FlyteFile = FlyteFile(path="/dev/null")
+
 
 
 @dataclass
@@ -40,9 +46,9 @@ class FiltSample(DataClassJSONMixin):
     """
 
     sample: str
-    filt_r1: FlyteFile
-    filt_r2: FlyteFile
-    report: FlyteFile
+    filt_r1: FlyteFile = FlyteFile(path="/dev/null") 
+    filt_r2: FlyteFile = FlyteFile(path="/dev/null")
+    report: FlyteFile = FlyteFile(path="/dev/null")
 
 
 @dataclass
@@ -61,5 +67,51 @@ class SamFile(DataClassJSONMixin):
     """
 
     sample: str
-    sam: FlyteFile
-    report: FlyteFile
+    sam: FlyteFile = FlyteFile(path="/dev/null")
+    report: FlyteFile = FlyteFile(path="/dev/null")
+
+registry = [
+    List[RawSample],
+    List[FiltSample],
+    List[SamFile],
+]
+
+@task(container_image=base_image)
+def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[RawSample]: # eventually replace with Union[*registry]
+    """
+    Prepare and process raw sequencing data to create a list of RawSample objects.
+
+    This function processes raw sequencing data located in the specified input directory
+    and prepares it to create a list of RawSample objects.
+
+    Args:
+        seq_dir (FlyteDirectory): The input directory containing raw sequencing data.
+
+    Returns:
+        List[RawSample]: A list of RawSample objects representing the processed sequencing data.
+    """
+    samples = {}
+
+    # Fetch FlyteDirectory from object storage and make
+    # list of relevant paths
+    seq_dir.download()
+    all_paths = list(Path(seq_dir.path).rglob("*fastq.gz*"))
+
+    for fp in all_paths:
+        # Parse paths following 'sample_read.fastq.gz' format
+        fn = fp.name
+        fullname = fn.split(".")[0]
+        sample, mate = fullname.split("_")[0:2]
+
+        if not samples.get(sample):
+            samples[sample] = RawSample(
+                sample=sample,
+            )
+
+        print(f"Working on {fn} with mate {mate} for sample {sample}")
+        if mate == "1":
+            setattr(samples[sample], "raw_r1", FlyteFile(path=str(fp)))
+        elif mate == "2":
+            setattr(samples[sample], "raw_r2", FlyteFile(path=str(fp)))
+
+    return list(samples.values())

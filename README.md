@@ -15,7 +15,7 @@ You can build out the default Dockerfile that ships with `pyflyte init` to add c
 ### 2. Logically group samples
 ✨**Leverage dataclasses to keep things organized**
 
-Using [dataclasses](workflows/sample_types.py) to define your samples provides a clean and extensible data structure to keep your workflows tidy. Instead of writing to directories and keeping track of things manually on the commandline, these dataclasses will keep relevant metadata about your samples and let you know where to find them in object storage.
+Using [dataclasses](src/tasks/sample_types.py) to define your samples provides a clean and extensible data structure to keep your workflows tidy. Instead of writing to directories and keeping track of things manually on the commandline, these dataclasses will keep relevant metadata about your samples and let you know where to find them in object storage.
 
 ### 3. FastQC
 ✨**Run arbitrary shell commands**
