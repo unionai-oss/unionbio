@@ -74,50 +74,6 @@ def get_remote(local=None, config_file=None):
         default_domain="development",
     )
 
-
-@task(container_image=base_image)
-def prepare_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
-    """
-    Prepare and process raw sequencing data to create a list of RawSample objects.
-
-    This function processes raw sequencing data located in the specified input directory
-    and prepares it to create a list of RawSample objects.
-
-    Args:
-        seq_dir (FlyteDirectory): The input directory containing raw sequencing data.
-
-    Returns:
-        List[RawSample]: A list of RawSample objects representing the processed sequencing data.
-    """
-    samples = {}
-
-    # Fetch FlyteDirectory from object storage and make
-    # list of relevant paths
-    seq_dir.download()
-    all_paths = list(Path(seq_dir.path).rglob("*fastq.gz*"))
-
-    for fp in all_paths:
-        # Parse paths following 'sample_read.fastq.gz' format
-        fn = fp.name
-        fullname = fn.split(".")[0]
-        sample, mate = fullname.split("_")[0:2]
-
-        if not samples.get(sample):
-            samples[sample] = RawSample(
-                sample=sample,
-                raw_r1=FlyteFile(path="/dev/null"),
-                raw_r2=FlyteFile(path="/dev/null"),
-            )
-
-        print(f"Working on {fn} with mate {mate} for sample {sample}")
-        if mate == "1":
-            setattr(samples[sample], "raw_r1", FlyteFile(path=str(fp)))
-        elif mate == "2":
-            setattr(samples[sample], "raw_r2", FlyteFile(path=str(fp)))
-
-    return list(samples.values())
-
-
 @task(container_image=base_image)
 def make_filt_sample(indir: FlyteDirectory) -> FiltSample:
     """
