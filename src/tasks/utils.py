@@ -11,6 +11,23 @@ from flytekit.remote import FlyteRemote
 from config import base_image, logger
 from tasks.sample_types import FiltSample, RawSample
 
+@task(container_image=base_image)
+def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
+    """
+    Prepare and process raw sequencing data to create a list of RawSample objects.
+
+    This function processes raw sequencing data located in the specified input directory
+    and prepares it to create a list of RawSample objects.
+
+    Args:
+        seq_dir (FlyteDirectory): The input directory containing raw sequencing data.
+
+    Returns:
+        List[RawSample]: A list of RawSample objects representing the processed sequencing data.
+    """
+    seq_dir.download()
+    factory = RawSample()
+    return factory.make(Path(seq_dir))
 
 @task
 def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
@@ -72,28 +89,6 @@ def get_remote(local=None, config_file=None):
         ),
         default_project="flytesnacks",
         default_domain="development",
-    )
-
-@task(container_image=base_image)
-def make_filt_sample(indir: FlyteDirectory) -> FiltSample:
-    """
-    Create a FiltSample object from input directory.
-
-    This function is used to create a FiltSample object by specifying the input directory
-    containing filtered sample data.
-
-    Args:
-        indir (FlyteDirectory, optional): The input directory containing filtered sample data.
-            Defaults to "s3://my-s3-bucket/my-data/filt-sample".
-    """
-    indir.download()
-    print(type(indir.path))
-    print(indir.path)
-    return FiltSample(
-        sample="ERR250683",
-        filt_r1=FlyteFile(path=f"{indir.path}/ERR250683_1_filt.fq.gz"),
-        filt_r2=FlyteFile(path=f"{indir.path}/ERR250683_2_filt.fq.gz"),
-        report=FlyteFile(path=f"{indir.path}/ERR250683_report.json"),
     )
 
 
