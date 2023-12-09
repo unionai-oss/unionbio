@@ -22,21 +22,18 @@ class RawSample(DataClassJSONMixin):
         raw_r2 (FlyteFile): A FlyteFile object representing the path to the raw R2 read file.
     """
 
-    sample: str = ""
+    sample: str
     raw_r1: FlyteFile = FlyteFile(path="/dev/null")
     raw_r2: FlyteFile = FlyteFile(path="/dev/null")
 
-    def parse(self, fp: Path):
-        # Parse paths following 'sample_read.fastq.gz' format
-        fn = fp.name
-        fullname = fn.split(".")[0]
-        sample, mate = fullname.split("_")[0:2]
-        return sample, mate
 
-    def make(self, dir: Path):
+    @classmethod
+    def make_all(cls, dir: Path):
         samples = {}
-        for fp in list(dir.rglob("*fastq.gz*")):
-            sample, mate = self.parse(fp)
+        for fp in list(dir.rglob("*.fastq.gz")):
+            fn = fp.name
+            fullname = fn.split(".")[0]
+            sample, mate = fullname.split("_")[0:2]
             if sample not in samples:
                 samples[sample] = RawSample(sample=sample)
             if mate == "1":
@@ -64,10 +61,41 @@ class FiltSample(DataClassJSONMixin):
             the filtered sample.
     """
 
-    sample: str = ""
+    sample: str
     filt_r1: FlyteFile = FlyteFile(path="/dev/null") 
     filt_r2: FlyteFile = FlyteFile(path="/dev/null")
     report: FlyteFile = FlyteFile(path="/dev/null")
+
+    def make_filenames(self):
+        # Make filenames for filtered reads and report
+        return (
+            f"{self.sample}_1_filt.fastq.gz",
+            f"{self.sample}_2_filt.fastq.gz",
+            f"{self.sample}_report.json"
+        )
+
+    @classmethod
+    def make_all(cls, dir: Path):
+        samples = {}
+        for fp in list(dir.rglob("*filt*")):
+            
+            if 'fastq.gz' in fp.name:
+                fn = fp.name
+                fullname = fn.split(".")[0]
+                sample, mate = fullname.split("_")[0:2]
+            elif 'report' in fp.name:
+                sample = fp.name.split("_")[0]
+                mate = 0
+
+            if sample not in samples:
+                samples[sample] = FiltSample(sample=sample)
+            
+            if mate == "1":
+                setattr(samples[sample], "filt_r1", FlyteFile(path=str(fp)))
+            elif mate == "2":
+                setattr(samples[sample], "filt_r2", FlyteFile(path=str(fp)))
+
+        return list(samples.values())
 
 
 @dataclass
