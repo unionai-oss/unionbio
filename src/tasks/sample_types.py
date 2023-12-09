@@ -31,9 +31,7 @@ class RawSample(DataClassJSONMixin):
     def make_all(cls, dir: Path):
         samples = {}
         for fp in list(dir.rglob("*.fastq.gz")):
-            fn = fp.name
-            fullname = fn.split(".")[0]
-            sample, mate = fullname.split("_")[0:2]
+            sample, mate = fp.stem.split("_")[0:2]
             if sample not in samples:
                 samples[sample] = RawSample(sample=sample)
             if mate == "1":
@@ -80,11 +78,9 @@ class FiltSample(DataClassJSONMixin):
         for fp in list(dir.rglob("*filt*")):
             
             if 'fastq.gz' in fp.name:
-                fn = fp.name
-                fullname = fn.split(".")[0]
-                sample, mate = fullname.split("_")[0:2]
+                sample, mate = fp.stem.split("_")[0:2]
             elif 'report' in fp.name:
-                sample = fp.name.split("_")[0]
+                sample = fp.stem.split("_")[0]
                 mate = 0
 
             if sample not in samples:
@@ -113,7 +109,24 @@ class SamFile(DataClassJSONMixin):
             for performance of the aligner.
     """
 
-    sample: str = ""
+    sample: str
+    aligner: str
     sam: FlyteFile = FlyteFile(path="/dev/null")
     report: FlyteFile = FlyteFile(path="/dev/null")
 
+    @classmethod
+    def make_all(cls, dir: Path):
+        samples = {}
+        for fp in list(dir.rglob("*aligned*")):
+            
+            sample, aligner = fp.stem.split("_")[0:2]
+    
+            if sample not in samples:
+                samples[sample] = SamFile(sample=sample, aligner=aligner)
+            
+            if 'sam' in fp.name:
+                setattr(samples[sample], "sam", FlyteFile(path=str(fp)))
+            elif 'report' in fp.name:
+                setattr(samples[sample], "report", FlyteFile(path=str(fp)))
+
+        return list(samples.values())
