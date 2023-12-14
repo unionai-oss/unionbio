@@ -19,7 +19,7 @@ multiqc_image_spec = ImageSpec(
 )
 
 
-@task(container_image=multiqc_image_spec, disable_deck=False)
+@task(container_image=multiqc_image_spec, enable_deck=True)
 def render_multiqc(
     fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[SamFile]
 ) -> FlyteFile:
