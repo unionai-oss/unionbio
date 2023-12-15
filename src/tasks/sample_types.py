@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit import task
-from config import base_image
+from config import base_image, logger
 from pathlib import Path
 from typing import List, Union, Any
 
@@ -31,13 +31,16 @@ class RawSample(DataClassJSONMixin):
     def make_all(cls, dir: Path):
         samples = {}
         for fp in list(dir.rglob("*.fastq.gz")):
-            sample, mate = fp.stem.split("_")[0:2]
+            logger.debug(f'Processing {fp}')
+            sample, mate = fp.stem.strip(".fastq.gz").split("_")[0:2]
+            logger.debug(f'Found sample {sample} and mate {mate}')
             if sample not in samples:
                 samples[sample] = RawSample(sample=sample)
             if mate == "1":
                 setattr(samples[sample], "raw_r1", FlyteFile(path=str(fp)))
             elif mate == "2":
                 setattr(samples[sample], "raw_r2", FlyteFile(path=str(fp)))
+        logger.info(f'Created {samples} from {dir}')
         return list(samples.values())
 
 
@@ -78,7 +81,7 @@ class FiltSample(DataClassJSONMixin):
         for fp in list(dir.rglob("*filt*")):
             
             if 'fastq.gz' in fp.name:
-                sample, mate = fp.stem.split("_")[0:2]
+                sample, mate = fp.stem.strip("fastq.gz").split("_")[0:2]
             elif 'report' in fp.name:
                 sample = fp.stem.split("_")[0]
                 mate = 0
