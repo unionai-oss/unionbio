@@ -48,6 +48,14 @@ RUN wget http://opengene.org/fastp/fastp.${FASTP_VER} && \
  mv fastp.${FASTP_VER} /usr/local/bin/fastp && \
  chmod a+x /usr/local/bin/fastp
 
+# Install bwa
+RUN git clone https://github.com/lh3/bwa.git && \
+    cd bwa && \
+    make && \
+    mv bwa /usr/local/bin/bwa && \
+    cd .. && \
+    rm -rf bwa
+
 # Install samtools
 RUN wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VER}/samtools-${SAMTOOLS_VER}.tar.bz2 && \
  tar -xjf samtools-${SAMTOOLS_VER}.tar.bz2 && \
