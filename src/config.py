@@ -16,6 +16,7 @@ ref_hash = str(hash(ref_loc))[:4]
 
 test_assets = {
     'local_seq_dir': '/mnt/sequences',
+    'local_tiny_seq_dir': '/mnt/tiny_sequences',
     'local_filt_dir': '/mnt/filtered_sequences',
     'local_sam_dir': '/mnt/alignments',
 }

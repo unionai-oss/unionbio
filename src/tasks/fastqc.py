@@ -27,7 +27,7 @@ fastqc = ShellTask(
     """,
     inputs=kwtypes(seq_dir=FlyteDirectory),
     output_locs=[
-        OutputLocation(var="qc", var_type=FlyteDirectory, location="/root/qc")
+        OutputLocation(var="qc", var_type=FlyteDirectory, location="/tmp/qc")
     ],
     container_image=base_image,
 )
