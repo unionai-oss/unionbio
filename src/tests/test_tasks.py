@@ -17,3 +17,5 @@ def test_fastp():
     filt_samp = pyfastp(rs=raw_samp)
     assert isinstance(filt_samp, FiltSample)
 
+def test_multiqc():
+    ...

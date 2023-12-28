@@ -19,4 +19,5 @@ test_assets = {
     'local_tiny_seq_dir': '/mnt/tiny_sequences',
     'local_filt_dir': '/mnt/filtered_sequences',
     'local_sam_dir': '/mnt/alignments',
+    'local_tiny_ref': '/mnt/references/GRCh38_short.fasta',
 }
