@@ -35,7 +35,7 @@ def compare_aligners(
             to be processed.
 
     Returns:
-        List[SamFile]: A list of alignment results (SamFile objects) for a sample, 
+        List[SamFile]: A list of alignment results (SamFile objects) for a sample,
         with results from both aligners.
     """
     sams = []

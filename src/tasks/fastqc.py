@@ -26,8 +26,6 @@ fastqc = ShellTask(
     fastqc {inputs.seq_dir}/*.fastq.gz --outdir={outputs.qc}
     """,
     inputs=kwtypes(seq_dir=FlyteDirectory),
-    output_locs=[
-        OutputLocation(var="qc", var_type=FlyteDirectory, location="/tmp/qc")
-    ],
+    output_locs=[OutputLocation(var="qc", var_type=FlyteDirectory, location="/tmp/qc")],
     container_image=base_image,
 )

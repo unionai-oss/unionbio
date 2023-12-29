@@ -26,23 +26,21 @@ class RawSample(DataClassJSONMixin):
     raw_r1: FlyteFile = FlyteFile(path="/dev/null")
     raw_r2: FlyteFile = FlyteFile(path="/dev/null")
 
-
     @classmethod
     def make_all(cls, dir: Path):
         samples = {}
         for fp in list(dir.rglob("*.fastq.gz")):
-            logger.debug(f'Processing {fp}')
+            logger.debug(f"Processing {fp}")
             sample, mate = fp.stem.strip(".fastq.gz").split("_")[0:2]
-            logger.debug(f'Found sample {sample} and mate {mate}')
+            logger.debug(f"Found sample {sample} and mate {mate}")
             if sample not in samples:
                 samples[sample] = RawSample(sample=sample)
             if mate == "1":
                 setattr(samples[sample], "raw_r1", FlyteFile(path=str(fp)))
             elif mate == "2":
                 setattr(samples[sample], "raw_r2", FlyteFile(path=str(fp)))
-        logger.info(f'Created {samples} from {dir}')
+        logger.info(f"Created {samples} from {dir}")
         return list(samples.values())
-
 
 
 @dataclass
@@ -63,7 +61,7 @@ class FiltSample(DataClassJSONMixin):
     """
 
     sample: str
-    filt_r1: FlyteFile = FlyteFile(path="/dev/null") 
+    filt_r1: FlyteFile = FlyteFile(path="/dev/null")
     filt_r2: FlyteFile = FlyteFile(path="/dev/null")
     report: FlyteFile = FlyteFile(path="/dev/null")
 
@@ -72,23 +70,22 @@ class FiltSample(DataClassJSONMixin):
         return (
             f"{self.sample}_1_filt.fastq.gz",
             f"{self.sample}_2_filt.fastq.gz",
-            f"{self.sample}_report.json"
+            f"{self.sample}_report.json",
         )
 
     @classmethod
     def make_all(cls, dir: Path):
         samples = {}
         for fp in list(dir.rglob("*filt*")):
-            
-            if 'fastq.gz' in fp.name:
+            if "fastq.gz" in fp.name:
                 sample, mate = fp.stem.strip("fastq.gz").split("_")[0:2]
-            elif 'report' in fp.name:
+            elif "report" in fp.name:
                 sample = fp.stem.split("_")[0]
                 mate = 0
 
             if sample not in samples:
                 samples[sample] = FiltSample(sample=sample)
-            
+
             if mate == "1":
                 setattr(samples[sample], "filt_r1", FlyteFile(path=str(fp)))
             elif mate == "2":
@@ -121,15 +118,14 @@ class SamFile(DataClassJSONMixin):
     def make_all(cls, dir: Path):
         samples = {}
         for fp in list(dir.rglob("*aligned*")):
-            
             sample, aligner = fp.stem.split("_")[0:2]
-    
+
             if sample not in samples:
                 samples[sample] = SamFile(sample=sample, aligner=aligner)
-            
-            if 'sam' in fp.name:
+
+            if "sam" in fp.name:
                 setattr(samples[sample], "sam", FlyteFile(path=str(fp)))
-            elif 'report' in fp.name:
+            elif "report" in fp.name:
                 setattr(samples[sample], "report", FlyteFile(path=str(fp)))
 
         return list(samples.values())

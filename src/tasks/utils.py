@@ -11,6 +11,7 @@ from flytekit.remote import FlyteRemote
 from config import base_image, logger
 from tasks.sample_types import FiltSample, RawSample
 
+
 @task(container_image=base_image)
 def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
     """
@@ -28,6 +29,7 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
     seq_dir.download()
     factory = RawSample(sample="")
     return factory.make_all(Path(seq_dir))
+
 
 @task
 def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
@@ -90,6 +92,7 @@ def get_remote(local=None, config_file=None):
         default_project="flytesnacks",
         default_domain="development",
     )
+
 
 @task(container_image=base_image)
 def make_filt_sample(indir: FlyteDirectory) -> FiltSample:

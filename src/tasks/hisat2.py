@@ -89,7 +89,7 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 
     return SamFile(
         sample=fs.sample,
-        aligner='hisat2',
+        aligner="hisat2",
         sam=FlyteFile(path=str(sam)),
-        report=FlyteFile(path=str(rep))
+        report=FlyteFile(path=str(rep)),
     )
