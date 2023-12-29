@@ -8,28 +8,27 @@ from tasks.sample_types import RawSample, FiltSample, SamFile
 
 
 def test_raw_sample_make_all():
-    samps = RawSample.make_all(Path(test_assets["local_seq_dir"]))
-    assert len(samps) == 2
-    for i in samps:
-        assert isinstance(i, RawSample)
-        assert Path(i.raw_r1.path).exists()
-        assert Path(i.raw_r2.path).exists()
+    samps = RawSample.make_all(Path(test_assets["seq_dir"]))
+    print(samps)
+    assert len(samps) == 1
+    assert isinstance(samps[0], RawSample)
+    assert 'ERR250683-tiny_1.fastq.gz' in samps[0].raw_r1.path
+    assert 'ERR250683-tiny_2.fastq.gz' in samps[0].raw_r2.path
 
 
 def test_filt_sample_fname():
     o1, o2, rep = FiltSample("test").make_filenames()
-    assert o1 == "test_1_filt.fastq.gz"
+    assert o1 == "test_1.filt.fastq.gz"
 
 
 def test_filt_sample_make_all():
-    filt_samps = FiltSample.make_all(Path(test_assets["local_filt_dir"]))
-    assert len(filt_samps) == 2
-    for i in filt_samps:
-        assert isinstance(i, FiltSample)
+    filt_samps = FiltSample.make_all(Path(test_assets["filt_dir"]))
+    assert len(filt_samps) == 1
+    assert isinstance(filt_samps[0], FiltSample)
 
 
 def test_sam_file_make_all():
-    sams = SamFile.make_all(Path(test_assets["local_sam_dir"]))
+    sams = SamFile.make_all(Path(test_assets["sam_dir"]))
     assert len(sams) == 2
     for i in sams:
         assert isinstance(i, SamFile)
