@@ -15,9 +15,9 @@ ref_loc = "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"
 ref_hash = str(hash(ref_loc))[:4]
 
 test_assets = {
-    'local_seq_dir': '/mnt/sequences',
-    'local_tiny_seq_dir': '/mnt/tiny_sequences',
-    'local_filt_dir': '/mnt/filtered_sequences',
-    'local_sam_dir': '/mnt/alignments',
-    'local_tiny_ref': '/mnt/references/GRCh38_short.fasta',
+    "seq_dir": "/mnt/sequences",
+    "filt_dir": "/mnt/filtered_sequences",
+    "sam_dir": "/mnt/alignments",
+    "ref_dir": "/mnt/references/GRCh38_short.fasta",
+    "idx_dir": "/mnt/indices",
 }

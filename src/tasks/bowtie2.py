@@ -84,7 +84,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         sample=fs.sample,
         aligner="bowtie2",
         sam=FlyteFile(path=str(sam)),
-        report=FlyteFile(path=str(rep))
+        report=FlyteFile(path=str(rep)),
     )
 
 
