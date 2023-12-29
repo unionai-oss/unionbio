@@ -68,9 +68,9 @@ class FiltSample(DataClassJSONMixin):
     def make_filenames(self):
         # Make filenames for filtered reads and report
         return (
-            f"{self.sample}_1_filt.fastq.gz",
-            f"{self.sample}_2_filt.fastq.gz",
-            f"{self.sample}_report.json",
+            f"{self.sample}_1.filt.fastq.gz",
+            f"{self.sample}_2.filt.fastq.gz",
+            f"{self.sample}_filt-report.json",
         )
 
     @classmethod
@@ -90,6 +90,8 @@ class FiltSample(DataClassJSONMixin):
                 setattr(samples[sample], "filt_r1", FlyteFile(path=str(fp)))
             elif mate == "2":
                 setattr(samples[sample], "filt_r2", FlyteFile(path=str(fp)))
+            elif mate == 0:
+                setattr(samples[sample], "report", FlyteFile(path=str(fp)))
 
         return list(samples.values())
 
