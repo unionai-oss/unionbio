@@ -12,8 +12,8 @@ def test_raw_sample_make_all():
     print(samps)
     assert len(samps) == 1
     assert isinstance(samps[0], RawSample)
-    assert 'ERR250683-tiny_1.fastq.gz' in samps[0].raw_r1.path
-    assert 'ERR250683-tiny_2.fastq.gz' in samps[0].raw_r2.path
+    assert "ERR250683-tiny_1.fastq.gz" in samps[0].raw_r1.path
+    assert "ERR250683-tiny_2.fastq.gz" in samps[0].raw_r2.path
 
 
 def test_filt_sample_fname():

@@ -20,4 +20,5 @@ test_assets = {
     "sam_dir": "/root/src/tests/assets/alignments",
     "ref_dir": "/root/src/tests/assets/references/GRCh38_short.fasta",
     "idx_dir": "/root/src/tests/assets/indices",
+    "fastqc_dir": "/root/src/tests/assets/fastqc",
 }
