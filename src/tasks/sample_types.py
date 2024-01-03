@@ -1,11 +1,8 @@
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
-from flytekit.types.directory import FlyteDirectory
-from flytekit import task
-from config import base_image, logger
+from config import logger
 from pathlib import Path
-from typing import List, Union, Any
 
 
 @dataclass
@@ -25,6 +22,13 @@ class RawSample(DataClassJSONMixin):
     sample: str
     raw_r1: FlyteFile = FlyteFile(path="/dev/null")
     raw_r2: FlyteFile = FlyteFile(path="/dev/null")
+
+    def make_filenames(self):
+        # Make filenames for filtered reads and report
+        return (
+            f"{self.sample}_1.fastq.gz",
+            f"{self.sample}_2.fastq.gz",
+        )
 
     @classmethod
     def make_all(cls, dir: Path):
@@ -117,6 +121,13 @@ class SamFile(DataClassJSONMixin):
     aligner: str
     sam: FlyteFile = FlyteFile(path="/dev/null")
     report: FlyteFile = FlyteFile(path="/dev/null")
+
+    def make_filenames(self, aligner="unspecified"):
+        # Make filenames for filtered reads and report
+        return (
+            f"{self.sample}_{aligner}_aligned.sam",
+            f"{self.sample}_{aligner}_aligned_report.txt",
+        )
 
     @classmethod
     def make_all(cls, dir: Path):
