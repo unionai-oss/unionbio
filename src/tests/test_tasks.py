@@ -1,14 +1,11 @@
 import os
 import filecmp
 from pathlib import Path
-from flytekit import workflow
 from flytekit.types.directory import FlyteDirectory
-from tasks.utils import prepare_raw_samples
-from tasks.sample_types import RawSample, FiltSample, SamFile
+from tasks.sample_types import RawSample, FiltSample
 from tasks.fastp import pyfastp
 from tasks.fastqc import fastqc
-from config import test_assets, logger
-from tests.utils import dir_contents_match
+from config import test_assets
 
 
 def test_fastqc():
