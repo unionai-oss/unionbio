@@ -78,10 +78,12 @@ class FiltSample(DataClassJSONMixin):
         samples = {}
         for fp in list(dir.rglob("*filt*")):
             if "fastq.gz" in fp.name:
-                sample, mate = fp.stem.strip("fastq.gz").split("_")[0:2]
+                sample, mate = fp.stem.strip(".filt.fastq.gz").split("_")[0:2]
+                logger.debug(f"Found sample {sample} and mate {mate} for {fp}")
             elif "report" in fp.name:
                 sample = fp.stem.split("_")[0]
                 mate = 0
+                logger.debug(f"Found sample {sample} for report at {fp}")
 
             if sample not in samples:
                 samples[sample] = FiltSample(sample=sample)

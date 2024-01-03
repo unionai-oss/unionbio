@@ -25,6 +25,10 @@ def test_filt_sample_make_all():
     filt_samps = FiltSample.make_all(Path(test_assets["filt_dir"]))
     assert len(filt_samps) == 1
     assert isinstance(filt_samps[0], FiltSample)
+    assert filt_samps[0].sample == "ERR250683-tiny"
+    assert "ERR250683-tiny_1.filt.fastq.gz" in filt_samps[0].filt_r1.path
+    assert "ERR250683-tiny_2.filt.fastq.gz" in filt_samps[0].filt_r2.path
+    assert "ERR250683-tiny_filt-report.json" in filt_samps[0].report.path
 
 
 def test_sam_file_make_all():
