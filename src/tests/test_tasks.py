@@ -29,6 +29,3 @@ def test_fastp():
         Path(filt_samp.filt_r1.path),
         Path(test_assets["filt_dir"]).joinpath("ERR250683-tiny_1.filt.fastq.gz"),
     )
-
-def test_multiqc():
-    ...
