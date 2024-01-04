@@ -122,11 +122,11 @@ class SamFile(DataClassJSONMixin):
     sam: FlyteFile = FlyteFile(path="/dev/null")
     report: FlyteFile = FlyteFile(path="/dev/null")
 
-    def make_filenames(self, aligner="unspecified"):
+    def make_filenames(self):
         # Make filenames for filtered reads and report
         return (
-            f"{self.sample}_{aligner}_aligned.sam",
-            f"{self.sample}_{aligner}_aligned_report.txt",
+            f"{self.sample}_{self.aligner}_aligned.sam",
+            f"{self.sample}_{self.aligner}_aligned_report.txt",
         )
 
     @classmethod

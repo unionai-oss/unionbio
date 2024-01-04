@@ -17,8 +17,10 @@ ref_hash = str(hash(ref_loc))[:4]
 test_assets = {
     "seq_dir": "/root/src/tests/assets/sequences",
     "filt_dir": "/root/src/tests/assets/filtered_sequences",
-    "sam_dir": "/root/src/tests/assets/alignments",
-    "ref_dir": "/root/src/tests/assets/references/GRCh38_short.fasta",
+    "bt2_sam_dir": "/root/src/tests/assets/alignments/bt2",
+    "hs2_sam_dir": "/root/src/tests/assets/alignments/hs2",
+    "ref_path": "/root/src/tests/assets/references/GRCh38_short.fasta",
     "idx_dir": "/root/src/tests/assets/indices",
+    "hs2_idx_dir": "/root/src/tests/assets/indices/hs2",
     "fastqc_dir": "/root/src/tests/assets/fastqc",
 }
