@@ -33,12 +33,12 @@ def test_filt_sample_make_all():
 
 
 def test_sam_file_fname():
-    o1, o2, rep = SamFile("test").make_filenames()
-    assert o1 == "test_bowtie2_aligned.sam"
+    sam, rep = SamFile("test", "bowtie2").make_filenames()
+    assert sam == "test_bowtie2_aligned.sam"
 
 
 def test_sam_file_make_all():
-    sams = SamFile.make_all(Path(test_assets["sam_dir"]))
+    sams = SamFile.make_all(Path(test_assets["bt2_sam_dir"]))
     assert len(sams) == 1
     assert isinstance(sams[0], SamFile)
     assert sams[0].sample == "ERR250683-tiny"
