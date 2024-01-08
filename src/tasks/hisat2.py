@@ -57,8 +57,9 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     """
     idx.download()
     ldir = Path(current_context().working_directory)
-    sam = ldir.joinpath(f"{fs.sample}_hisat2.sam")
-    rep = ldir.joinpath(f"{fs.sample}_hisat2_report.txt")
+    sam_name, rep_name = SamFile(fs.sample, "hisat2").make_filenames()
+    sam = ldir.joinpath(sam_name)
+    rep = ldir.joinpath(rep_name)
     logger.debug(f"Writing SAM to {sam} and report to {rep}")
 
     unc_r1 = ldir.joinpath(f"{fs.sample}_1.fq")
