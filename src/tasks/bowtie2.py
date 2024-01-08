@@ -58,8 +58,9 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     idx.download()
     logger.debug(f"Index downloaded to {idx.path}")
     ldir = Path(current_context().working_directory)
-    sam = ldir.joinpath(f"{fs.sample}_bowtie2.sam")
-    rep = ldir.joinpath(f"{fs.sample}_bowtie2_report.txt")
+    sam_name, rep_name = SamFile(fs.sample, "bowtie2").make_filenames()
+    sam = ldir.joinpath(sam_name)
+    rep = ldir.joinpath(rep_name)
     logger.debug(f"Writing SAM to {sam} and report to {rep}")
 
     cmd = [

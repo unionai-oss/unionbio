@@ -21,6 +21,7 @@ test_assets = {
     "hs2_sam_dir": "/root/src/tests/assets/alignments/hs2",
     "ref_path": "/root/src/tests/assets/references/GRCh38_short.fasta",
     "idx_dir": "/root/src/tests/assets/indices",
+    "bt2_idx_dir": "/root/src/tests/assets/indices/bt2",
     "hs2_idx_dir": "/root/src/tests/assets/indices/hs2",
     "fastqc_dir": "/root/src/tests/assets/fastqc",
 }
