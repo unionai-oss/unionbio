@@ -75,12 +75,10 @@ RUN wget https://github.com/broadinstitute/gatk/releases/download/${GATK_VER}/ga
     chmod a+x /usr/local/bin/gatk && \
     rm -rf gatk-${GATK_VER}*
 
-# Install Python dependencies
-COPY requirements.txt /root
+# Copy code and install deps
+COPY . /root
 RUN pip install -r /root/requirements.txt
 
-# Copy the actual code
-COPY . /root
 
 # This tag is supplied by the build script and will be used to determine the version
 # when registering tasks, workflows, and launch plans
