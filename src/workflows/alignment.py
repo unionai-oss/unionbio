@@ -7,7 +7,7 @@ from flytekit import map_task
 from config import ref_loc, seq_dir_pth
 from tasks.fastqc import fastqc
 from tasks.fastp import pyfastp
-from tasks.utils import prepare_samples, check_fastqc_reports
+from tasks.utils import prepare_raw_samples, check_fastqc_reports
 from tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
 from tasks.multiqc import render_multiqc
 
@@ -37,7 +37,7 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     samples = (
         conditional("pass-qc")
         .if_((check == "PASS") | (check == "WARN"))
-        .then(prepare_samples(seq_dir=seq_dir))
+        .then(prepare_raw_samples(seq_dir=seq_dir))
         .else_()
         .fail("One or more samples failed QC.")
     )

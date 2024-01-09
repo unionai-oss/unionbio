@@ -12,7 +12,7 @@ from tasks.fastqc import fastqc
 from tasks.hisat2 import hisat2_align_paired_reads, hisat2_index
 from tasks.multiqc import render_multiqc
 from tasks.sample_types import FiltSample, SamFile
-from tasks.utils import check_fastqc_reports, prepare_samples
+from tasks.utils import check_fastqc_reports, prepare_raw_samples
 
 
 @dynamic
@@ -72,7 +72,7 @@ def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     samples = (
         conditional("pass-qc")
         .if_((check == "PASS") | (check == "WARN"))
-        .then(prepare_samples(seq_dir=seq_dir))
+        .then(prepare_raw_samples(seq_dir=seq_dir))
         .else_()
         .fail("One or more samples failed QC.")
     )

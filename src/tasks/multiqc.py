@@ -6,7 +6,7 @@ from flytekit.types.file import FlyteFile
 from typing import List
 from pathlib import Path
 
-from config import logger
+from config import logger, base_image
 from tasks.sample_types import FiltSample, SamFile
 from tasks.utils import subproc_raise
 
@@ -15,7 +15,7 @@ multiqc_image_spec = ImageSpec(
     name="multiqc",
     packages=["multiqc"],
     registry="ghcr.io/pryce-turner",
-    base_image="ghcr.io/pryce-turner/variant-discovery:latest",
+    base_image=base_image,
 )
 
 
