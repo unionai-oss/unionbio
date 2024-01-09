@@ -44,4 +44,4 @@ def test_sam_file_make_all():
     assert sams[0].sample == "ERR250683-tiny"
     assert sams[0].aligner in ["hisat2", "bowtie2"]
     assert "ERR250683-tiny_bowtie2_aligned.sam" in sams[0].sam.path
-    assert "ERR250683-tiny_bowtie2_report_aligned.txt" in sams[0].report.path
+    assert "ERR250683-tiny_bowtie2_aligned_report.txt" in sams[0].report.path

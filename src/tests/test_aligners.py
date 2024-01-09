@@ -32,6 +32,7 @@ def test_hisat2_align():
 def test_bowtie2_index():
     idx_dir = bowtie2_index(ref=Path(test_assets["ref_path"]))
     assert isinstance(idx_dir, FlyteDirectory)
+    print(os.listdir(idx_dir.path))
     assert all(
         x in os.listdir(test_assets["bt2_idx_dir"]) for x in os.listdir(idx_dir.path)
     )

@@ -31,7 +31,7 @@ bowtie2_index = ShellTask(
     """,
     inputs=kwtypes(ref=FlyteFile),
     output_locs=[
-        OutputLocation(var="idx", var_type=FlyteDirectory, location="/root/idx")
+        OutputLocation(var="idx", var_type=FlyteDirectory, location="/root/bt2_idx")
     ],
 )
 
