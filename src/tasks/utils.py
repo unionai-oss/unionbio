@@ -27,8 +27,7 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[RawSample]:
         List[RawSample]: A list of RawSample objects representing the processed sequencing data.
     """
     seq_dir.download()
-    factory = RawSample(sample="")
-    return factory.make_all(Path(seq_dir))
+    return RawSample.make_all(Path(seq_dir))
 
 
 @task

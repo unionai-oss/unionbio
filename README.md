@@ -3,6 +3,17 @@
 
 This bioinformatics workflow will take you through a variant discovery pipeline, from raw reads to actionable insights, all orchestrated with Flyte. The workflow is broken up into sensible steps, each highlighting some of the more advanced Flyte features.
 
+## 🚀🏃 Quickstart
+
+- Clone the repo
+- Create a venv and `pip install -r requirements.txt`
+- Spin up the demo cluster locally by following the instructions here: https://docs.flyte.org/en/latest/introduction.html#running-flyte-workflows-in-python
+- Navigate to the minio instance that was started alongside the demo cluster
+    - log in with `minio` and `miniostorage` as username and password
+    - create the folders `my-data/sequences` and `my-data/refs`
+    - upload the sequences and refs from `src/tests/assets` to those locations
+- 
+
 ## 🔍📏 QC and Alignment
 
 The first section will collect QC metrics, preprocess our samples, and align them to a reference genome using a couple different aligners for comparison sake. 
