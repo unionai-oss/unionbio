@@ -1,0 +1,58 @@
+FROM nvcr.io/nvidia/clara/clara-parabricks:4.2.1-1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install python 3.10
+RUN apt-get update && \
+    apt-get install -y software-properties-common build-essential && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt install -y python3.10
+RUN apt-get install -y python3-distutils curl git libpython3.10-dev
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+RUN cp /usr/bin/python3.10 /usr/bin/python
+RUN pip install --upgrade setuptools
+
+# Copy the dgx-agent directory contents into the container at /root
+WORKDIR /root
+COPY dgx-agent /root/dgx-agent
+RUN chmod 777 -R /root
+
+# Install ngcsdk, grpcio, grpcio-status, and flytekit packages
+RUN cd dgx-agent && pip install -e .
+RUN cd dgx-agent/libs && pip install ngcsdk-3.33.0-py3-none-any.whl
+RUN pip install --no-cache-dir grpcio==1.53.0 grpcio-status==1.53.0 \
+    "git+https://github.com/flyteorg/flytekit.git@master#subdirectory=plugins/flytekit-flyin"
+RUN pip install "git+https://github.com/flyteorg/flytekit.git@master"  # dgx-agent branch
+RUN pip install "git+https://github.com/flyteorg/flyte.git@77d75301b7d552e391f240512d48a618806b2a48#subdirectory=flyteidl"
+RUN pip install boto3==1.33.2  # ngcsdk dependency
+
+ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+
+# Install GATK4
+ARG JRE_VER=17
+ARG GATK_VER=4.4.0.0
+RUN apt-get install -y openjdk-${JRE_VER}-jre zlib1g-dev wget unzip
+RUN wget https://github.com/broadinstitute/gatk/releases/download/${GATK_VER}/gatk-${GATK_VER}.zip && \
+    unzip gatk-${GATK_VER}.zip && \
+    mv gatk-${GATK_VER}/gatk-package-${GATK_VER}-local.jar /usr/local/bin/gatk && \
+    chmod a+x /usr/local/bin/gatk && \
+    rm -rf gatk-${GATK_VER}*
+
+# Install bwa
+RUN git clone https://github.com/lh3/bwa.git && \
+    cd bwa && \
+    make && \
+    mv bwa /usr/local/bin/bwa && \
+    cd .. && \
+    rm -rf bwa
+
+RUN rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+# COPY bio_assets /root/bio_assets
+
+RUN git clone https://github.com/statgen/bamUtil.git && \
+    cd bamUtil && \
+    make cloneLib && \
+    make && \
+    make install INSTALLDIR=/usr/local/bin
+ 
