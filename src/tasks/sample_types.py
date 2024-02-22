@@ -1,5 +1,6 @@
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
+from typing import Optional
 from flytekit.types.file import FlyteFile
 from config import logger
 from pathlib import Path
@@ -119,14 +120,21 @@ class SamFile(DataClassJSONMixin):
 
     sample: str
     aligner: str
+    sorted: Optional[bool] = None
+    deduped: Optional[bool] = None
     sam: FlyteFile = FlyteFile(path="/dev/null")
     report: FlyteFile = FlyteFile(path="/dev/null")
 
     def make_filenames(self):
-        # Make filenames for filtered reads and report
+        # Make filenames for samfile and report
+        state = f"{self.sample}_{self.aligner}"
+        if self.sorted:
+            state += "_sorted"
+        if self.deduped:
+            state += "_deduped"
         return (
-            f"{self.sample}_{self.aligner}_aligned.sam",
-            f"{self.sample}_{self.aligner}_aligned_report.txt",
+            f"{state}_aligned.sam",
+            f"{state}_aligned_report.txt",
         )
 
     @classmethod
@@ -137,6 +145,16 @@ class SamFile(DataClassJSONMixin):
 
             if sample not in samples:
                 samples[sample] = SamFile(sample=sample, aligner=aligner)
+
+            if "sorted" in fp.name:
+                setattr(samples[sample], "sorted", True)
+            else:
+                setattr(samples[sample], "sorted", False)
+
+            if "deduped" in fp.name:
+                setattr(samples[sample], "deduped", True)
+            else:
+                setattr(samples[sample], "deduped", False)
 
             if "sam" in fp.name:
                 setattr(samples[sample], "sam", FlyteFile(path=str(fp)))

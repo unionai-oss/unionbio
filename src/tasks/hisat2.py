@@ -31,7 +31,7 @@ hisat2_index = ShellTask(
     """,
     inputs=kwtypes(ref=FlyteFile),
     output_locs=[
-        OutputLocation(var="idx", var_type=FlyteDirectory, location="/root/idx")
+        OutputLocation(var="idx", var_type=FlyteDirectory, location="/tmp/hs2_idx")
     ],
 )
 
@@ -93,4 +93,5 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         aligner="hisat2",
         sam=FlyteFile(path=str(sam)),
         report=FlyteFile(path=str(rep)),
+        sorted=False,
     )

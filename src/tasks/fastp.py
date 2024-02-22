@@ -2,13 +2,13 @@ from pathlib import Path
 from flytekit import task, Resources, current_context
 from flytekit.types.file import FlyteFile
 
-from config import base_image, logger
+from config import base_image, logger, fastp_cpu
 from tasks.sample_types import FiltSample, RawSample
 from tasks.utils import subproc_raise
 
 
 @task(
-    requests=Resources(cpu="1", mem="2Gi"),
+    requests=Resources(cpu=fastp_cpu, mem="2Gi"),
     container_image=base_image,
 )
 def pyfastp(rs: RawSample) -> FiltSample:
@@ -32,7 +32,7 @@ def pyfastp(rs: RawSample) -> FiltSample:
     repp = ldir.joinpath(rep)
     logger.debug(f"Writing filtered reads to {o1p} and {o2p} and report to {repp}")
 
-    cmd = ["fastp", "-i", rs.raw_r1, "-I", rs.raw_r2, "-o", o1p, "-O", o2p, "-j", rep]
+    cmd = ["fastp", "-i", rs.raw_r1, "-I", rs.raw_r2, "--thread", str(int(fastp_cpu) * 2), "-o", o1p, "-O", o2p, "-j", rep]
     logger.debug(f"Running command: {cmd}")
 
     subproc_raise(cmd)

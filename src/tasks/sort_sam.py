@@ -8,7 +8,7 @@ from tasks.sample_types import SamFile
 from config import base_image
 
 # """
-# Perform quality control using FastQC.
+# Sort SAM file based on coordinate.
 
 # This function takes a FlyteDirectory object containing raw sequencing data,
 # gathers QC metrics using FastQC, and returns a FlyteDirectory object that
@@ -20,26 +20,24 @@ from config import base_image
 # Returns:
 #     qc (FlyteDirectory): A directory containing fastqc report output.
 # """
-mark_dups = ShellTask(
-    name="mark_dups",
+sort_sam = ShellTask(
+    name="sort_sam",
     debug=True,
     metadata=TaskMetadata(retries=3, cache=True, cache_version="1"),
     script="""
+    mkdir /tmp/sort_sam
     "java" \
     "-jar" \
     "/usr/local/bin/gatk" \
-    "MarkDuplicates" \
+    "SortSam" \
     -I {inputs.sam} \
     -O {outputs.o} \
-    -M {outputs.m} \
+    --SORT_ORDER coordinate \
     """,
-    inputs=kwtypes(sample=str, sam=FlyteFile),
+    inputs=kwtypes(out_fname=str, sam=FlyteFile),
     output_locs=[
         OutputLocation(
-            var="o", var_type=FlyteFile, location="/tmp/mark_dups/{inputs.sample}_dedup.sam"
-        ),
-        OutputLocation(
-            var="m", var_type=FlyteFile, location="/tmp/mark_dups/{inputs.sample}_dedup_metrics.sam"
+            var="o", var_type=FlyteFile, location="/tmp/sort_sam/{inputs.out_fname}"
         )
     ],
     container_image=base_image,
@@ -47,7 +45,7 @@ mark_dups = ShellTask(
 
 
 @dynamic
-def mark_dups_samples(sams: List[SamFile]) -> List[SamFile]:
-    deduped = []
+def sort_samples(sams: List[SamFile]) -> List[SamFile]:
+    sorted = []
     for i in sams:
-        deduped.append(mark_dups(sample=i.sample, sam=i.sam))
+        sorted.append(sort_sam(sample=i.sample, sam=i.sam))

@@ -31,7 +31,7 @@ bowtie2_index = ShellTask(
     """,
     inputs=kwtypes(ref=FlyteFile),
     output_locs=[
-        OutputLocation(var="idx", var_type=FlyteDirectory, location="/root/idx")
+        OutputLocation(var="idx", var_type=FlyteDirectory, location="/tmp/bt2_idx")
     ],
 )
 
@@ -86,6 +86,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         aligner="bowtie2",
         sam=FlyteFile(path=str(sam)),
         report=FlyteFile(path=str(rep)),
+        sorted=False,
     )
 
 
