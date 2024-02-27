@@ -9,16 +9,20 @@ console_handler.setFormatter(
 # logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-base_image = "ghcr.io/pryce-turner/variant-discovery:20240102"
+base_image = "localhost:30000/variant-discovery:20240220"
 seq_dir_pth = "s3://my-s3-bucket/my-data/sequences"
 ref_loc = "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"
 ref_hash = str(hash(ref_loc))[:4]
+
+# Tool config
+fastp_cpu = "3"
 
 test_assets = {
     "seq_dir": "/root/src/tests/assets/sequences",
     "filt_dir": "/root/src/tests/assets/filtered_sequences",
     "bt2_sam_dir": "/root/src/tests/assets/alignments/bt2",
     "hs2_sam_dir": "/root/src/tests/assets/alignments/hs2",
+    "sort_dir": "/root/src/tests/assets/alignments/sorted",
     "ref_path": "/root/src/tests/assets/references/GRCh38_short.fasta",
     "idx_dir": "/root/src/tests/assets/indices",
     "bt2_idx_dir": "/root/src/tests/assets/indices/bt2",

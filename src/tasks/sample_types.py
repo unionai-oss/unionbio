@@ -1,5 +1,6 @@
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
+from typing import Optional
 from flytekit.types.file import FlyteFile
 from config import logger
 from pathlib import Path
@@ -119,15 +120,27 @@ class SamFile(DataClassJSONMixin):
 
     sample: str
     aligner: str
-    sam: FlyteFile = FlyteFile(path="/dev/null")
-    report: FlyteFile = FlyteFile(path="/dev/null")
+    sorted: Optional[bool] = None
+    deduped: Optional[bool] = None
+    sam: Optional[FlyteFile] = None
+    report: Optional[FlyteFile] = None
 
-    def make_filenames(self):
-        # Make filenames for filtered reads and report
-        return (
-            f"{self.sample}_{self.aligner}_aligned.sam",
-            f"{self.sample}_{self.aligner}_aligned_report.txt",
-        )
+    def _get_state_str(self):
+        state = f"{self.sample}_{self.aligner}"
+        if self.sorted:
+            state += "_sorted"
+        if self.deduped:
+            state += "_deduped"
+        return state
+
+    def get_alignment_fname(self):
+        return f"{self._get_state_str()}_aligned.sam"
+    
+    def get_report_fname(self):
+        return f"{self._get_state_str()}_aligned_report.txt"
+    
+    def get_metrics_fname(self):
+        return f"{self._get_state_str()}_metrics.txt"
 
     @classmethod
     def make_all(cls, dir: Path):
@@ -137,6 +150,16 @@ class SamFile(DataClassJSONMixin):
 
             if sample not in samples:
                 samples[sample] = SamFile(sample=sample, aligner=aligner)
+
+            if "sorted" in fp.name:
+                setattr(samples[sample], "sorted", True)
+            else:
+                setattr(samples[sample], "sorted", False)
+
+            if "deduped" in fp.name:
+                setattr(samples[sample], "deduped", True)
+            else:
+                setattr(samples[sample], "deduped", False)
 
             if "sam" in fp.name:
                 setattr(samples[sample], "sam", FlyteFile(path=str(fp)))
