@@ -48,4 +48,6 @@ sort_sam = ShellTask(
 def sort_samples(sams: List[SamFile]) -> List[SamFile]:
     sorted = []
     for i in sams:
-        sorted.append(sort_sam(sample=i.sample, sam=i.sam))
+        i.sorted = True
+        fname, rep = i.make_filenames()
+        sorted.append(sort_sam(out_fname=fname, sam=i.sam))

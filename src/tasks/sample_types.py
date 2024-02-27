@@ -122,20 +122,25 @@ class SamFile(DataClassJSONMixin):
     aligner: str
     sorted: Optional[bool] = None
     deduped: Optional[bool] = None
-    sam: FlyteFile = FlyteFile(path="/dev/null")
-    report: FlyteFile = FlyteFile(path="/dev/null")
+    sam: Optional[FlyteFile] = None
+    report: Optional[FlyteFile] = None
 
-    def make_filenames(self):
-        # Make filenames for samfile and report
+    def _get_state_str(self):
         state = f"{self.sample}_{self.aligner}"
         if self.sorted:
             state += "_sorted"
         if self.deduped:
             state += "_deduped"
-        return (
-            f"{state}_aligned.sam",
-            f"{state}_aligned_report.txt",
-        )
+        return state
+
+    def get_alignment_fname(self):
+        return f"{self._get_state_str()}_aligned.sam"
+    
+    def get_report_fname(self):
+        return f"{self._get_state_str()}_aligned_report.txt"
+    
+    def get_metrics_fname(self):
+        return f"{self._get_state_str()}_metrics.txt"
 
     @classmethod
     def make_all(cls, dir: Path):

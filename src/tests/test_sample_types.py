@@ -10,7 +10,6 @@ def test_raw_sample_fname():
 
 def test_raw_sample_make_all():
     samps = RawSample.make_all(Path(test_assets["seq_dir"]))
-    print(samps)
     assert len(samps) == 1
     assert isinstance(samps[0], RawSample)
     assert "ERR250683-tiny_1.fastq.gz" in samps[0].raw_r1.path
@@ -33,7 +32,7 @@ def test_filt_sample_make_all():
 
 
 def test_sam_file_fname():
-    sam, rep = SamFile("test", "bowtie2").make_filenames()
+    sam = SamFile("test", "bowtie2").get_alignment_fname()
     assert sam == "test_bowtie2_aligned.sam"
 
 

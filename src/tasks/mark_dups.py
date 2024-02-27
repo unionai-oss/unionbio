@@ -7,19 +7,21 @@ from flytekit.types.file import FlyteFile
 from tasks.sample_types import SamFile
 from config import base_image
 
-# """
-# Perform quality control using FastQC.
+"""
+Identify and remove duplicates from a SAM file using GATK's MarkDuplicates tool.
 
-# This function takes a FlyteDirectory object containing raw sequencing data,
-# gathers QC metrics using FastQC, and returns a FlyteDirectory object that
-# can be crawled with MultiQC to generate a report.
+This function takes in an alignment file, removes the duplicates and writes out
+a deduped alignment file.
 
-# Args:
-#     seq_dir (FlyteDirectory): An S3 prefix containing raw sequencing data to be processed.
+Args:
+    oafn (str): The name of the output deduped alignment file.
+    omfn (str): The name of the output deduping metrics file.
+    al (FlyteDirectory): An alignment file containing duplicate reads.
 
-# Returns:
-#     qc (FlyteDirectory): A directory containing fastqc report output.
-# """
+Returns:
+    dal (FlyteFile): A deduped alignment file.
+    m (FlyteFile): A deduping metrics file.
+"""
 mark_dups = ShellTask(
     name="mark_dups",
     debug=True,
@@ -29,17 +31,17 @@ mark_dups = ShellTask(
     "-jar" \
     "/usr/local/bin/gatk" \
     "MarkDuplicates" \
-    -I {inputs.sam} \
-    -O {outputs.o} \
+    -I {inputs.al} \
+    -O {outputs.dal} \
     -M {outputs.m} \
     """,
-    inputs=kwtypes(sample=str, sam=FlyteFile),
+    inputs=kwtypes(oafn=str, omfn=str, al=FlyteFile),
     output_locs=[
         OutputLocation(
-            var="o", var_type=FlyteFile, location="/tmp/mark_dups/{inputs.sample}_dedup.sam"
+            var="dal", var_type=FlyteFile, location="/tmp/{inputs.oafn}"
         ),
         OutputLocation(
-            var="m", var_type=FlyteFile, location="/tmp/mark_dups/{inputs.sample}_dedup_metrics.sam"
+            var="m", var_type=FlyteFile, location="/tmp/{inputs.omfn}"
         )
     ],
     container_image=base_image,
@@ -50,4 +52,9 @@ mark_dups = ShellTask(
 def mark_dups_samples(sams: List[SamFile]) -> List[SamFile]:
     deduped = []
     for i in sams:
-        deduped.append(mark_dups(sample=i.sample, sam=i.sam))
+        i.deduped = True
+        deduped.append(mark_dups(
+            oafn=i.get_alignment_fname(),
+            omfn=i.get_metrics_fname(),
+            al=i.sam
+            ))

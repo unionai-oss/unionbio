@@ -57,9 +57,9 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     """
     idx.download()
     ldir = Path(current_context().working_directory)
-    sam_name, rep_name = SamFile(fs.sample, "hisat2").make_filenames()
-    sam = ldir.joinpath(sam_name)
-    rep = ldir.joinpath(rep_name)
+    alignment = SamFile(fs.sample, "hisat2")
+    sam = ldir.joinpath(alignment.get_alignment_fname())
+    rep = ldir.joinpath(alignment.get_report_fname())
     logger.debug(f"Writing SAM to {sam} and report to {rep}")
 
     unc_r1 = ldir.joinpath(f"{fs.sample}_1.fq")
@@ -88,10 +88,9 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
 
     stdout, stderr = subproc_raise(cmd)
 
-    return SamFile(
-        sample=fs.sample,
-        aligner="hisat2",
-        sam=FlyteFile(path=str(sam)),
-        report=FlyteFile(path=str(rep)),
-        sorted=False,
-    )
+    setattr(alignment, "sam", FlyteFile(path=str(sam)))
+    setattr(alignment, "report", FlyteFile(path=str(rep)))
+    setattr(alignment, "sorted", False)
+    setattr(alignment, "deduped", False)
+
+    return alignment

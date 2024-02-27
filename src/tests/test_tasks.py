@@ -29,7 +29,7 @@ def test_fastp():
 def test_sort_sam():
     alignment = SamFile.make_all(Path(test_assets["bt2_sam_dir"]))[0]
     alignment.sorted = True
-    fname, report = alignment.make_filenames()
+    fname = alignment.get_alignment_fname()
     sorted_alignment = sort_sam(out_fname=fname, sam=alignment.sam)
     assert isinstance(sorted_alignment, FlyteFile)
     assert filecmp.cmp(
@@ -37,9 +37,16 @@ def test_sort_sam():
         Path(test_assets["sort_dir"]).joinpath("ERR250683-tiny_bowtie2_sorted_aligned.sam"),
     )
 
-# def test_mark_dups():
-#     alignment = SamFile.make_all(Path(test_assets["bt2_sam_dir"]))[0]
-#     deduped = mark_dups(sam=alignment.sam, sample=alignment.sample)
+def test_mark_dups():
+    alignment = SamFile.make_all(Path(test_assets["sort_dir"]))[0]
+    alignment.deduped = True
+    print(alignment)
+    deduped, metrics = mark_dups(
+            oafn=alignment.get_alignment_fname(),
+            omfn=alignment.get_metrics_fname(),
+            al=alignment.sam
+            )
+    assert isinstance(deduped, FlyteFile)
     
 # def test_base_recalibrator():
 #     ...

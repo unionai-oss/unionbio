@@ -58,9 +58,10 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     idx.download()
     logger.debug(f"Index downloaded to {idx.path}")
     ldir = Path(current_context().working_directory)
-    sam_name, rep_name = SamFile(fs.sample, "bowtie2").make_filenames()
-    sam = ldir.joinpath(sam_name)
-    rep = ldir.joinpath(rep_name)
+
+    alignment = SamFile(fs.sample, "bowtie2")
+    sam = ldir.joinpath(alignment.get_alignment_fname())
+    rep = ldir.joinpath(alignment.get_report_fname())
     logger.debug(f"Writing SAM to {sam} and report to {rep}")
 
     cmd = [
@@ -81,13 +82,12 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     with open(rep, "w") as f:
         f.write(stderr)
 
-    return SamFile(
-        sample=fs.sample,
-        aligner="bowtie2",
-        sam=FlyteFile(path=str(sam)),
-        report=FlyteFile(path=str(rep)),
-        sorted=False,
-    )
+    setattr(alignment, "sam", FlyteFile(path=str(sam)))
+    setattr(alignment, "report", FlyteFile(path=str(rep)))
+    setattr(alignment, "sorted", False)
+    setattr(alignment, "deduped", False)
+
+    return alignment
 
 
 @dynamic
