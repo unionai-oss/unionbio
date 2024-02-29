@@ -120,10 +120,11 @@ class SamFile(DataClassJSONMixin):
 
     sample: str
     aligner: str
+    sam: Optional[FlyteFile] = None
     sorted: Optional[bool] = None
     deduped: Optional[bool] = None
-    sam: Optional[FlyteFile] = None
-    report: Optional[FlyteFile] = None
+    alignment_report: Optional[FlyteFile] = None
+    bqsr_report: Optional[FlyteFile] = None
 
     def _get_state_str(self):
         state = f"{self.sample}_{self.aligner}"
@@ -135,10 +136,13 @@ class SamFile(DataClassJSONMixin):
 
     def get_alignment_fname(self):
         return f"{self._get_state_str()}_aligned.sam"
-    
+
     def get_report_fname(self):
         return f"{self._get_state_str()}_aligned_report.txt"
-    
+
+    def get_bqsr_fname(self):
+        return f"{self._get_state_str()}_bqsr.table"
+
     def get_metrics_fname(self):
         return f"{self._get_state_str()}_metrics.txt"
 

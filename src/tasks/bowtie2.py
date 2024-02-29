@@ -83,7 +83,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         f.write(stderr)
 
     setattr(alignment, "sam", FlyteFile(path=str(sam)))
-    setattr(alignment, "report", FlyteFile(path=str(rep)))
+    setattr(alignment, "alignment_report", FlyteFile(path=str(rep)))
     setattr(alignment, "sorted", False)
     setattr(alignment, "deduped", False)
 

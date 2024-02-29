@@ -32,7 +32,21 @@ def pyfastp(rs: RawSample) -> FiltSample:
     repp = ldir.joinpath(rep)
     logger.debug(f"Writing filtered reads to {o1p} and {o2p} and report to {repp}")
 
-    cmd = ["fastp", "-i", rs.raw_r1, "-I", rs.raw_r2, "--thread", str(int(fastp_cpu) * 2), "-o", o1p, "-O", o2p, "-j", rep]
+    cmd = [
+        "fastp",
+        "-i",
+        rs.raw_r1,
+        "-I",
+        rs.raw_r2,
+        "--thread",
+        str(int(fastp_cpu) * 2),
+        "-o",
+        o1p,
+        "-O",
+        o2p,
+        "-j",
+        rep,
+    ]
     logger.debug(f"Running command: {cmd}")
 
     subproc_raise(cmd)

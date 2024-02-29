@@ -43,7 +43,7 @@ mark_dups = ShellTask(
         ),
         OutputLocation(
             var="m", var_type=FlyteFile, location="/tmp/dedup/{inputs.omfn}"
-        )
+        ),
     ],
     container_image=base_image,
 )
@@ -54,8 +54,8 @@ def mark_dups_samples(sams: List[SamFile]) -> List[SamFile]:
     deduped = []
     for i in sams:
         i.deduped = True
-        deduped.append(mark_dups(
-            oafn=i.get_alignment_fname(),
-            omfn=i.get_metrics_fname(),
-            al=i.sam
-            ))
+        deduped.append(
+            mark_dups(
+                oafn=i.get_alignment_fname(), omfn=i.get_metrics_fname(), al=i.sam
+            )
+        )
