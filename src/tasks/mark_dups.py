@@ -4,7 +4,7 @@ from flytekit import TaskMetadata, dynamic, kwtypes
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 
-from tasks.sample_types import SamFile
+from tasks.sample_types import Alignment
 from config import base_image
 
 """
@@ -50,7 +50,7 @@ mark_dups = ShellTask(
 
 
 @dynamic
-def mark_dups_samples(sams: List[SamFile]) -> List[SamFile]:
+def mark_dups_samples(sams: List[Alignment]) -> List[Alignment]:
     deduped = []
     for i in sams:
         i.deduped = True

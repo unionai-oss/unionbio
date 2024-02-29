@@ -7,7 +7,7 @@ from typing import List
 from pathlib import Path
 
 from config import logger, base_image
-from tasks.sample_types import FiltSample, SamFile
+from tasks.sample_types import FiltSample, Alignment
 from tasks.utils import subproc_raise
 
 # Add MultiQC to the base image
@@ -21,7 +21,7 @@ multiqc_image_spec = ImageSpec(
 
 @task(container_image=multiqc_image_spec, enable_deck=True)
 def render_multiqc(
-    fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[SamFile]
+    fqc: FlyteDirectory, filt_reps: List[FiltSample], sams: List[Alignment]
 ) -> FlyteFile:
     """
     Generate MultiQC report by rendering quality and alignment data.

@@ -7,7 +7,7 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
 from config import ref_hash, base_image, logger
-from tasks.sample_types import FiltSample, SamFile
+from tasks.sample_types import FiltSample, Alignment
 from tasks.utils import subproc_raise
 
 """
@@ -40,7 +40,7 @@ hisat2_index = ShellTask(
     container_image=base_image,
     requests=Resources(cpu="4", mem="10Gi"),
 )
-def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
+def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> Alignment:
     """
     Perform paired-end alignment using Hisat 2 on a filtered sample.
 
@@ -57,7 +57,7 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     """
     idx.download()
     ldir = Path(current_context().working_directory)
-    alignment = SamFile(fs.sample, "hisat2")
+    alignment = Alignment(fs.sample, "hisat2")
     sam = ldir.joinpath(alignment.get_alignment_fname())
     rep = ldir.joinpath(alignment.get_report_fname())
     logger.debug(f"Writing SAM to {sam} and report to {rep}")

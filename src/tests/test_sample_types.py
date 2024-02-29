@@ -1,6 +1,6 @@
 from pathlib import Path
 from config import test_assets
-from tasks.sample_types import RawSample, FiltSample, SamFile
+from tasks.sample_types import RawSample, FiltSample, Alignment
 
 
 def test_raw_sample_fname():
@@ -32,14 +32,14 @@ def test_filt_sample_make_all():
 
 
 def test_sam_file_fname():
-    sam = SamFile("test", "bowtie2").get_alignment_fname()
+    sam = Alignment("test", "bowtie2").get_alignment_fname()
     assert sam == "test_bowtie2_aligned.sam"
 
 
 def test_sam_file_make_all():
-    sams = SamFile.make_all(Path(test_assets["bt2_sam_dir"]))
+    sams = Alignment.make_all(Path(test_assets["bt2_sam_dir"]))
     assert len(sams) == 1
-    assert isinstance(sams[0], SamFile)
+    assert isinstance(sams[0], Alignment)
     assert sams[0].sample == "ERR250683-tiny"
     assert sams[0].aligner in ["hisat2", "bowtie2"]
     assert "ERR250683-tiny_bowtie2_aligned.sam" in sams[0].sam.path

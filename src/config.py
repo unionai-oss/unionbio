@@ -24,6 +24,7 @@ test_assets = {
     "hs2_sam_dir": "/root/src/tests/assets/alignments/hs2",
     "sort_dir": "/root/src/tests/assets/alignments/sorted",
     "dedup_dir": "/root/src/tests/assets/alignments/deduped",
+    "ref_path": "/root/src/tests/assets/references/GRCh38_short.fasta",
     "ref_dir": "/root/src/tests/assets/references/",
     "ref_fn": "GRCh38_short.fasta",
     "indel_path": "/root/src/tests/assets/indels/hg38_known_indels.vcf",

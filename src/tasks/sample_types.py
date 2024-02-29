@@ -104,7 +104,7 @@ class FiltSample(DataClassJSONMixin):
 
 
 @dataclass
-class SamFile(DataClassJSONMixin):
+class Alignment(DataClassJSONMixin):
     """
     Represents a SAM (Sequence Alignment/Map) file and its associated sample and report.
 
@@ -153,7 +153,7 @@ class SamFile(DataClassJSONMixin):
             sample, aligner = fp.stem.split("_")[0:2]
 
             if sample not in samples:
-                samples[sample] = SamFile(sample=sample, aligner=aligner)
+                samples[sample] = Alignment(sample=sample, aligner=aligner)
 
             if "sorted" in fp.name:
                 setattr(samples[sample], "sorted", True)

@@ -4,7 +4,7 @@ from flytekit import TaskMetadata, dynamic, kwtypes
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 
-from tasks.sample_types import SamFile
+from tasks.sample_types import Alignment
 from config import base_image
 
 # """
@@ -45,7 +45,7 @@ sort_sam = ShellTask(
 
 
 @dynamic
-def sort_samples(sams: List[SamFile]) -> List[SamFile]:
+def sort_samples(sams: List[Alignment]) -> List[Alignment]:
     sorted = []
     for i in sams:
         i.sorted = True

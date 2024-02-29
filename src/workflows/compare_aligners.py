@@ -11,14 +11,14 @@ from tasks.fastp import pyfastp
 from tasks.fastqc import fastqc
 from tasks.hisat2 import hisat2_align_paired_reads, hisat2_index
 from tasks.multiqc import render_multiqc
-from tasks.sample_types import FiltSample, SamFile
+from tasks.sample_types import FiltSample, Alignment
 from tasks.utils import check_fastqc_reports, prepare_raw_samples
 
 
 @dynamic
 def compare_aligners(
     bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: List[FiltSample]
-) -> List[SamFile]:
+) -> List[Alignment]:
     """
     Compare alignment results using two different aligners for multiple samples.
 
