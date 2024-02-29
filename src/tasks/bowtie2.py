@@ -46,14 +46,14 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> Alignment
 
     This function takes a FlyteDirectory object representing the Bowtie 2 index and a
     FiltSample object containing filtered sample data. It performs paired-end alignment
-    using Bowtie 2 and returns a SamFile object representing the resulting alignment.
+    using Bowtie 2 and returns a Alignment object representing the resulting alignment.
 
     Args:
         idx (FlyteDirectory): A FlyteDirectory object representing the Bowtie 2 index.
         fs (FiltSample): A FiltSample object containing filtered sample data to be aligned.
 
     Returns:
-        SamFile: A SamFile object representing the alignment result in SAM format.
+        Alignment: A Alignment object representing the alignment result in SAM format.
     """
     idx.download()
     logger.debug(f"Index downloaded to {idx.path}")
@@ -99,7 +99,7 @@ def bowtie2_align_samples(
 
     This function takes a FlyteDirectory objects representing a bowtie index and a list of
     FiltSample objects containing filtered sample data. It performs paired-end alignment
-    using bowtie2. It then returns a list of SamFile objects representing the alignment results.
+    using bowtie2. It then returns a list of Alignment objects representing the alignment results.
 
     Args:
         bt2_idx (FlyteDirectory): The FlyteDirectory object representing the bowtie2 index.
@@ -107,8 +107,8 @@ def bowtie2_align_samples(
             to be processed.
 
     Returns:
-        List[List[SamFile]]: A list of lists, where each inner list contains alignment
-            results (SamFile objects) for a sample, with results from both aligners.
+        List[List[Alignment]]: A list of lists, where each inner list contains alignment
+            results (Alignment objects) for a sample, with results from both aligners.
     """
     sams = []
     for sample in samples:

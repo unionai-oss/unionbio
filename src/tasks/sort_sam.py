@@ -7,19 +7,16 @@ from flytekit.types.file import FlyteFile
 from tasks.sample_types import Alignment
 from config import base_image
 
-# """
-# Sort SAM file based on coordinate.
+"""
+Sort SAM file based on coordinate.
 
-# This function takes a FlyteDirectory object containing raw sequencing data,
-# gathers QC metrics using FastQC, and returns a FlyteDirectory object that
-# can be crawled with MultiQC to generate a report.
+Args:
+    out_fname (str): The name of the output sorted SAM file.
+    sam (FlyteFile): An alignment file in SAM format.
 
-# Args:
-#     seq_dir (FlyteDirectory): An S3 prefix containing raw sequencing data to be processed.
-
-# Returns:
-#     qc (FlyteDirectory): A directory containing fastqc report output.
-# """
+Returns:
+    o (FlyteFile): A sorted alignment file in SAM format.
+"""
 sort_sam = ShellTask(
     name="sort_sam",
     debug=True,

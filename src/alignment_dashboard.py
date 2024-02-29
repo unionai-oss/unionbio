@@ -27,7 +27,7 @@ def gate_node_approval(execution):
                     native_url=synced_execution.node_executions["n9"].closure.deck_uri
                 )
                 break
-            except:
+            except Exception:
                 pass
             time.sleep(10)
 
@@ -46,7 +46,7 @@ def samples():
                 native_url=synced_execution.node_executions["n4"].closure.deck_uri
             )
             break
-        except:
+        except Exception:
             pass
         time.sleep(10)
 

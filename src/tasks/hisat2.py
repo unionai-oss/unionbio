@@ -46,14 +46,14 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> Alignment:
 
     This function takes a FlyteDirectory object representing the Hisat 2 index and a
     FiltSample object containing filtered sample data. It performs paired-end alignment
-    using Hisat 2 and returns a SamFile object representing the resulting alignment.
+    using Hisat 2 and returns a Alignment object representing the resulting alignment.
 
     Args:
         idx (FlyteDirectory): A FlyteDirectory object representing the Hisat 2 index.
         fs (FiltSample): A FiltSample object containing filtered sample data to be aligned.
 
     Returns:
-        SamFile: A SamFile object representing the alignment result in SAM format.
+        Alignment: An Alignment object representing the alignment result in SAM format.
     """
     idx.download()
     ldir = Path(current_context().working_directory)

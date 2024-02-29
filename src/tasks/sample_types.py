@@ -113,17 +113,22 @@ class Alignment(DataClassJSONMixin):
 
     Attributes:
         sample (str): The name or identifier of the sample to which the SAM file belongs.
+        aligner (str): The name of the aligner used to generate the SAM file.
         sam (FlyteFile): A FlyteFile object representing the path to the SAM file.
-        report (FlyteFile): A FlyteFile object representing an associated report
+        alignment_report (FlyteFile): A FlyteFile object representing an associated report
             for performance of the aligner.
+        sorted (bool): A boolean value indicating whether the SAM file has been sorted.
+        deduped (bool): A boolean value indicating whether the SAM file has been deduplicated.
+        bqsr_report (FlyteFile): A FlyteFile object representing a report from the Base Quality
+            Score Recalibration (BQSR) process.
     """
 
     sample: str
     aligner: str
     sam: Optional[FlyteFile] = None
+    alignment_report: Optional[FlyteFile] = None
     sorted: Optional[bool] = None
     deduped: Optional[bool] = None
-    alignment_report: Optional[FlyteFile] = None
     bqsr_report: Optional[FlyteFile] = None
 
     def _get_state_str(self):

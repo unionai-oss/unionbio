@@ -8,7 +8,7 @@ from tasks.sample_types import Alignment
 from config import base_image
 
 """
-Identify and remove duplicates from a SAM file using GATK's MarkDuplicates tool.
+Identify and remove duplicates from an alignment file using GATK's MarkDuplicates tool.
 
 This function takes in an alignment file, removes the duplicates and writes out
 a deduped alignment file.
@@ -16,7 +16,7 @@ a deduped alignment file.
 Args:
     oafn (str): The name of the output deduped alignment file.
     omfn (str): The name of the output deduping metrics file.
-    al (FlyteDirectory): An alignment file containing duplicate reads.
+    al (FlyteFile): An alignment file containing duplicate reads.
 
 Returns:
     dal (FlyteFile): A deduped alignment file.
