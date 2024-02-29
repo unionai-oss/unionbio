@@ -27,6 +27,7 @@ mark_dups = ShellTask(
     debug=True,
     metadata=TaskMetadata(retries=3, cache=True, cache_version="1"),
     script="""
+    mkdir /tmp/dedup
     "java" \
     "-jar" \
     "/usr/local/bin/gatk" \
@@ -38,10 +39,10 @@ mark_dups = ShellTask(
     inputs=kwtypes(oafn=str, omfn=str, al=FlyteFile),
     output_locs=[
         OutputLocation(
-            var="dal", var_type=FlyteFile, location="/tmp/{inputs.oafn}"
+            var="dal", var_type=FlyteFile, location="/tmp/dedup/{inputs.oafn}"
         ),
         OutputLocation(
-            var="m", var_type=FlyteFile, location="/tmp/{inputs.omfn}"
+            var="m", var_type=FlyteFile, location="/tmp/dedup/{inputs.omfn}"
         )
     ],
     container_image=base_image,

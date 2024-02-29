@@ -1,5 +1,5 @@
 import os
-import filecmp
+from filecmp import cmp, cmpfiles
 from pathlib import Path
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
@@ -21,7 +21,7 @@ def test_fastp():
     raw_samp = RawSample.make_all(Path(test_assets["seq_dir"]))[0]
     filt_samp = pyfastp(rs=raw_samp)
     assert isinstance(filt_samp, FiltSample)
-    assert filecmp.cmp(
+    assert cmp(
         Path(filt_samp.filt_r1.path),
         Path(test_assets["filt_dir"]).joinpath("ERR250683-tiny_1.filt.fastq.gz"),
     )
@@ -32,7 +32,7 @@ def test_sort_sam():
     fname = alignment.get_alignment_fname()
     sorted_alignment = sort_sam(out_fname=fname, sam=alignment.sam)
     assert isinstance(sorted_alignment, FlyteFile)
-    assert filecmp.cmp(
+    assert cmp(
         Path(sorted_alignment.path),
         Path(test_assets["sort_dir"]).joinpath("ERR250683-tiny_bowtie2_sorted_aligned.sam"),
     )
@@ -47,6 +47,13 @@ def test_mark_dups():
             al=alignment.sam
             )
     assert isinstance(deduped, FlyteFile)
+    assert all(
+        cmp(*i)
+        for i in [
+            (Path(test_assets["dedup_dir"]).joinpath(x), Path('/tmp/dedup').joinpath(x))
+            for x in [deduped.path, metrics.path]
+        ]
+    )
     
 # def test_base_recalibrator():
 #     ...

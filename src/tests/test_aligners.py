@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from filecmp import cmp
+from filecmp import cmp, cmpfiles
 from flytekit.types.directory import FlyteDirectory
 from tasks.hisat2 import hisat2_index, hisat2_align_paired_reads
 from tasks.bowtie2 import bowtie2_index, bowtie2_align_paired_reads
