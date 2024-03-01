@@ -21,8 +21,8 @@ class RawSample(DataClassJSONMixin):
     """
 
     sample: str
-    raw_r1: FlyteFile = FlyteFile(path="/dev/null")
-    raw_r2: FlyteFile = FlyteFile(path="/dev/null")
+    raw_r1: FlyteFile | None = None
+    raw_r2: FlyteFile | None = None
 
     def make_filenames(self):
         # Make filenames for filtered reads and report
@@ -66,9 +66,9 @@ class FiltSample(DataClassJSONMixin):
     """
 
     sample: str
-    filt_r1: FlyteFile = FlyteFile(path="/dev/null")
-    filt_r2: FlyteFile = FlyteFile(path="/dev/null")
-    report: FlyteFile = FlyteFile(path="/dev/null")
+    filt_r1: FlyteFile | None = None
+    filt_r2: FlyteFile | None = None
+    report: FlyteFile | None = None
 
     def make_filenames(self):
         # Make filenames for filtered reads and report
@@ -125,11 +125,11 @@ class Alignment(DataClassJSONMixin):
 
     sample: str
     aligner: str
-    sam: Optional[FlyteFile] = None
-    alignment_report: Optional[FlyteFile] = None
-    sorted: Optional[bool] = None
-    deduped: Optional[bool] = None
-    bqsr_report: Optional[FlyteFile] = None
+    sam: FlyteFile | None = None
+    alignment_report: FlyteFile | None = None
+    sorted: bool | None = None
+    deduped: bool | None = None
+    bqsr_report: FlyteFile | None = None
 
     def _get_state_str(self):
         state = f"{self.sample}_{self.aligner}"
