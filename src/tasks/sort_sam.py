@@ -4,7 +4,8 @@ from flytekit import TaskMetadata, dynamic, kwtypes
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 
-from tasks.sample_types import Alignment
+from datatypes.alignment import Alignment
+from datatypes.reads import Reads
 from config import base_image
 
 """

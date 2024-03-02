@@ -18,8 +18,8 @@ ref_hash = str(hash(ref_loc))[:4]
 fastp_cpu = "3"
 
 test_assets = {
-    "seq_dir": "/root/src/tests/assets/sequences",
-    "filt_dir": "/root/src/tests/assets/filtered_sequences",
+    "seq_dir": "/root/src/tests/assets/sequences/raw",
+    "filt_dir": "/root/src/tests/assets/sequences/filtered",
     "bt2_sam_dir": "/root/src/tests/assets/alignments/bt2",
     "hs2_sam_dir": "/root/src/tests/assets/alignments/hs2",
     "sort_dir": "/root/src/tests/assets/alignments/sorted",

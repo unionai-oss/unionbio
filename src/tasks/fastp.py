@@ -3,7 +3,7 @@ from flytekit import task, Resources, current_context
 from flytekit.types.file import FlyteFile
 
 from config import base_image, logger, fastp_cpu
-from tasks.sample_types import FiltSample, RawSample
+from datatypes.reads import Reads
 from tasks.utils import subproc_raise
 
 
@@ -11,7 +11,7 @@ from tasks.utils import subproc_raise
     requests=Resources(cpu=fastp_cpu, mem="2Gi"),
     container_image=base_image,
 )
-def pyfastp(rs: RawSample) -> FiltSample:
+def pyfastp(rs: Reads) -> Reads:
     """
     Perform quality filtering and preprocessing using Fastp on a RawSample.
 
