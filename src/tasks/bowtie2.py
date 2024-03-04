@@ -70,9 +70,9 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
         "-x",
         f"{idx.path}/bt2_idx",
         "-1",
-        fs.filt_r1,
+        fs.read1,
         "-2",
-        fs.filt_r2,
+        fs.read2,
         "-S",
         sam,
     ]

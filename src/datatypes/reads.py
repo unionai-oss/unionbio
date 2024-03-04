@@ -8,15 +8,17 @@ from pathlib import Path
 @dataclass
 class Reads(DataClassJSONMixin):
     """
-    Represents a raw sequencing sample via its associated files.
+    Represents a sequencing reads sample via its associated fastq files.
 
-    This class defines the structure for representing a raw sequencing sample. It includes
-    attributes for the sample name and paths to the raw read files (R1 and R2).
+    This class defines the structure for representing a sequencing sample. It includes
+    attributes for the sample name and paths to the read files (R1 and R2).
 
     Attributes:
         sample (str): The name or identifier of the raw sequencing sample.
-        raw_r1 (FlyteFile): A FlyteFile object representing the path to the raw R1 read file.
-        raw_r2 (FlyteFile): A FlyteFile object representing the path to the raw R2 read file.
+        filtered (bool): A boolean value indicating whether the reads have been filtered.
+        filt_report (FlyteFile): A FlyteFile object representing the path to the filter report.
+        read1 (FlyteFile): A FlyteFile object representing the path to the raw R1 read file.
+        read2 (FlyteFile): A FlyteFile object representing the path to the raw R2 read file.
     """
 
     sample: str

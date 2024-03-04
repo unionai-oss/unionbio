@@ -7,7 +7,8 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
 from config import ref_hash, base_image, logger
-from tasks.sample_types import FiltSample, Alignment
+from datatypes.alignment import Alignment
+from datatypes.reads import Reads
 from tasks.utils import subproc_raise
 
 """
@@ -40,17 +41,17 @@ hisat2_index = ShellTask(
     container_image=base_image,
     requests=Resources(cpu="4", mem="10Gi"),
 )
-def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> Alignment:
+def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     """
     Perform paired-end alignment using Hisat 2 on a filtered sample.
 
     This function takes a FlyteDirectory object representing the Hisat 2 index and a
-    FiltSample object containing filtered sample data. It performs paired-end alignment
+    Reads object containing filtered sample data. It performs paired-end alignment
     using Hisat 2 and returns a Alignment object representing the resulting alignment.
 
     Args:
         idx (FlyteDirectory): A FlyteDirectory object representing the Hisat 2 index.
-        fs (FiltSample): A FiltSample object containing filtered sample data to be aligned.
+        fs (Reads): A Reads object containing filtered sample data to be aligned.
 
     Returns:
         Alignment: An Alignment object representing the alignment result in SAM format.
@@ -65,9 +66,9 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> Alignment:
     unc_r1 = ldir.joinpath(f"{fs.sample}_1.fq")
     unc_r2 = ldir.joinpath(f"{fs.sample}_2.fq")
 
-    with gzip.open(fs.filt_r1, "rb") as gz_file, open(unc_r1, "wb") as out_file:
+    with gzip.open(fs.read1, "rb") as gz_file, open(unc_r1, "wb") as out_file:
         shutil.copyfileobj(gz_file, out_file)
-    with gzip.open(fs.filt_r2, "rb") as gz_file, open(unc_r2, "wb") as out_file:
+    with gzip.open(fs.read2, "rb") as gz_file, open(unc_r2, "wb") as out_file:
         shutil.copyfileobj(gz_file, out_file)
     logger.debug(f"Uncompressed reads to {unc_r1} and {unc_r2}")
 

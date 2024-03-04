@@ -3,7 +3,8 @@ from filecmp import cmp
 from pathlib import Path
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from tasks.sample_types import RawSample, FiltSample, Alignment
+from datatypes.alignment import Alignment
+from datatypes.reads import Reads
 from tasks.fastp import pyfastp
 from tasks.fastqc import fastqc
 from tasks.mark_dups import mark_dups
@@ -20,11 +21,11 @@ def test_fastqc():
 
 
 def test_fastp():
-    raw_samp = RawSample.make_all(Path(test_assets["seq_dir"]))[0]
+    raw_samp = Reads.make_all(Path(test_assets["seq_dir"]))[0]
     filt_samp = pyfastp(rs=raw_samp)
-    assert isinstance(filt_samp, FiltSample)
+    assert isinstance(filt_samp, Reads)
     assert cmp(
-        Path(filt_samp.filt_r1.path),
+        Path(filt_samp.read1.path),
         Path(test_assets["filt_dir"]).joinpath("ERR250683-tiny_1.filt.fastq.gz"),
     )
 

@@ -26,7 +26,10 @@ def pyfastp(rs: Reads) -> Reads:
         FiltSample: A FiltSample object representing the filtered and preprocessed data.
     """
     ldir = Path(current_context().working_directory)
-    o1, o2, rep = FiltSample(rs.sample).make_filenames()
+    samp = Reads(rs.sample)
+    samp.filtered = True
+    o1, o2 = samp.get_read_fnames()
+    rep = samp.get_report_fname()
     o1p = ldir.joinpath(o1)
     o2p = ldir.joinpath(o2)
     repp = ldir.joinpath(rep)
@@ -35,9 +38,9 @@ def pyfastp(rs: Reads) -> Reads:
     cmd = [
         "fastp",
         "-i",
-        rs.raw_r1,
+        rs.read1,
         "-I",
-        rs.raw_r2,
+        rs.read2,
         "--thread",
         str(int(fastp_cpu) * 2),
         "-o",
@@ -51,9 +54,8 @@ def pyfastp(rs: Reads) -> Reads:
 
     subproc_raise(cmd)
 
-    return FiltSample(
-        sample=rs.sample,
-        filt_r1=FlyteFile(path=str(o1p)),
-        filt_r2=FlyteFile(path=str(o2p)),
-        report=FlyteFile(path=str(rep)),
-    )
+    setattr(samp, "read1", FlyteFile(path=str(o1p)))
+    setattr(samp, "read2", FlyteFile(path=str(o2p)))
+    setattr(samp, "filt_report", FlyteFile(path=str(repp)))
+
+    return samp
