@@ -2,6 +2,7 @@ import os
 import zipfile
 import requests
 import tarfile
+import gzip
 from pathlib import Path
 from typing import List
 from flytekit import task, current_context
@@ -14,6 +15,30 @@ from flytekit.extras.tasks.shell import subproc_execute
 from config import base_image, logger, pb_image
 from datatypes.reads import Reads
 
+def fetch_file(url: str, local_dir: Path) -> Path:
+    """
+    Downloads a file from the specified URL.
+
+    Args:
+        url (str): The URL of the tar.gz file to download.
+        local_dir (Path): The directory where you would like this file saved.
+
+    Returns:
+        Path: The local path to the decompressed file.
+
+    Raises:
+        requests.HTTPError: If an HTTP error occurs while downloading the file.
+    """
+    try:
+        response = requests.get(url)
+        fname = url.split("/")[-1]
+        local_path = local_dir.joinpath(fname)
+        with open(local_path, "wb") as file:
+            file.write(response.content)
+    except requests.HTTPError as e:
+        print(f"HTTP error: {e}")
+        raise e
+    return local_path
 
 @task(container_image=base_image)
 def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
@@ -32,7 +57,28 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     seq_dir.download()
     return Reads.make_all(Path(seq_dir))
 
+@task(cache=True, cache_version=1)
+def fetch_decomp_file(url: str) -> FlyteFile:
+    """
+    Downloads a file from the specified URL, decompresses it, and returns a FlyteFile object.
 
+    Args:
+        url (str): The URL of the tar.gz file to download.
+
+    Returns:
+        Path: The local path to the decompressed file.
+
+    Raises:
+        requests.HTTPError: If an HTTP error occurs while downloading the file.
+    """
+    lpath = fetch_file(url, current_context().working_directory)
+    dlpath = lpath.with_suffix('')
+    with gzip.open(lpath, 'rb') as f_in:
+        with open(dlpath, 'wb') as f_out:
+            f_out.write(f_in.read())
+    return FlyteFile(path=dlpath)
+    
+    
 @task
 def get_data(url: str) -> FlyteDirectory:
     """
@@ -52,11 +98,11 @@ def get_data(url: str) -> FlyteDirectory:
         tar_name = url.split("/")[-1]
         with open(tar_name, "wb") as file:
             file.write(response.content)
-        working_dir = current_context().working_directory
     except requests.HTTPError as e:
         print(f"HTTP error: {e}")
         raise e
 
+    working_dir = current_context().working_directory
     out_dir = Path(os.path.join(working_dir, tar_name))
     with tarfile.open(tar_name, "r:gz") as tarf:
         tarf.extractall(out_dir)
