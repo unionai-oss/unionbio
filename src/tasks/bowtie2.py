@@ -6,7 +6,8 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
 from config import ref_hash, base_image, logger
-from tasks.sample_types import FiltSample, SamFile
+from datatypes.alignment import Alignment
+from datatypes.reads import Reads
 from tasks.utils import subproc_raise
 
 
@@ -31,7 +32,7 @@ bowtie2_index = ShellTask(
     """,
     inputs=kwtypes(ref=FlyteFile),
     output_locs=[
-        OutputLocation(var="idx", var_type=FlyteDirectory, location="/root/bt2_idx")
+        OutputLocation(var="idx", var_type=FlyteDirectory, location="/tmp/bt2_idx")
     ],
 )
 
@@ -40,27 +41,28 @@ bowtie2_index = ShellTask(
     container_image=base_image,
     requests=Resources(cpu="4", mem="10Gi"),
 )
-def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
+def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     """
     Perform paired-end alignment using Bowtie 2 on a filtered sample.
 
     This function takes a FlyteDirectory object representing the Bowtie 2 index and a
     FiltSample object containing filtered sample data. It performs paired-end alignment
-    using Bowtie 2 and returns a SamFile object representing the resulting alignment.
+    using Bowtie 2 and returns a Alignment object representing the resulting alignment.
 
     Args:
         idx (FlyteDirectory): A FlyteDirectory object representing the Bowtie 2 index.
-        fs (FiltSample): A FiltSample object containing filtered sample data to be aligned.
+        fs (Reads): A filtered sample Reads object containing filtered sample data to be aligned.
 
     Returns:
-        SamFile: A SamFile object representing the alignment result in SAM format.
+        Alignment: A Alignment object representing the alignment result in SAM format.
     """
     idx.download()
     logger.debug(f"Index downloaded to {idx.path}")
     ldir = Path(current_context().working_directory)
-    sam_name, rep_name = SamFile(fs.sample, "bowtie2").make_filenames()
-    sam = ldir.joinpath(sam_name)
-    rep = ldir.joinpath(rep_name)
+
+    alignment = Alignment(fs.sample, "bowtie2")
+    sam = ldir.joinpath(alignment.get_alignment_fname())
+    rep = ldir.joinpath(alignment.get_report_fname())
     logger.debug(f"Writing SAM to {sam} and report to {rep}")
 
     cmd = [
@@ -68,9 +70,9 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
         "-x",
         f"{idx.path}/bt2_idx",
         "-1",
-        fs.filt_r1,
+        fs.read1,
         "-2",
-        fs.filt_r2,
+        fs.read2,
         "-S",
         sam,
     ]
@@ -81,33 +83,33 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: FiltSample) -> SamFile:
     with open(rep, "w") as f:
         f.write(stderr)
 
-    return SamFile(
-        sample=fs.sample,
-        aligner="bowtie2",
-        sam=FlyteFile(path=str(sam)),
-        report=FlyteFile(path=str(rep)),
-    )
+    setattr(alignment, "sam", FlyteFile(path=str(sam)))
+    setattr(alignment, "alignment_report", FlyteFile(path=str(rep)))
+    setattr(alignment, "sorted", False)
+    setattr(alignment, "deduped", False)
+
+    return alignment
 
 
 @dynamic
 def bowtie2_align_samples(
-    idx: FlyteDirectory, samples: List[FiltSample]
-) -> List[SamFile]:
+    idx: FlyteDirectory, samples: List[Reads]
+) -> List[Alignment]:
     """
     Process samples through bowtie2.
 
     This function takes a FlyteDirectory objects representing a bowtie index and a list of
-    FiltSample objects containing filtered sample data. It performs paired-end alignment
-    using bowtie2. It then returns a list of SamFile objects representing the alignment results.
+    Reads objects containing filtered sample data. It performs paired-end alignment
+    using bowtie2. It then returns a list of Alignment objects representing the alignment results.
 
     Args:
         bt2_idx (FlyteDirectory): The FlyteDirectory object representing the bowtie2 index.
-        samples (List[FiltSample]): A list of FiltSample objects containing sample data
+        samples (List[Reads]): A list of Reads objects containing sample data
             to be processed.
 
     Returns:
-        List[List[SamFile]]: A list of lists, where each inner list contains alignment
-            results (SamFile objects) for a sample, with results from both aligners.
+        List[List[Alignment]]: A list of lists, where each inner list contains alignment
+            results (Alignment objects) for a sample, with results from both aligners.
     """
     sams = []
     for sample in samples:
