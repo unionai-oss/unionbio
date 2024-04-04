@@ -1,8 +1,8 @@
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
-from config import logger
 from pathlib import Path
+
 
 @dataclass
 class Alignment(DataClassJSONMixin):

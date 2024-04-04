@@ -44,7 +44,7 @@ class Reads(DataClassJSONMixin):
             logger.debug(f"Processing {fp}")
             sample = fp.name.split("_")[0]
             logger.debug(f"Found sample {sample}")
-            
+
             if sample not in samples:
                 samples[sample] = Reads(sample=sample)
 

@@ -92,9 +92,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
 
 
 @dynamic
-def bowtie2_align_samples(
-    idx: FlyteDirectory, samples: List[Reads]
-) -> List[Alignment]:
+def bowtie2_align_samples(idx: FlyteDirectory, samples: List[Reads]) -> List[Alignment]:
     """
     Process samples through bowtie2.
 

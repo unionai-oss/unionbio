@@ -1,15 +1,17 @@
+import os
 import zipfile
-import subprocess
+import requests
+import tarfile
 from pathlib import Path
-from typing import List, Tuple
-from flytekit import task
+from typing import List
+from flytekit import task, current_context
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit.configuration import Config
 from flytekit.remote import FlyteRemote
+from flytekit.extras.tasks.shell import subproc_execute
 
-from config import base_image, logger
-from datatypes.alignment import Alignment
+from config import base_image, logger, pb_image
 from datatypes.reads import Reads
 
 
@@ -29,6 +31,37 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     """
     seq_dir.download()
     return Reads.make_all(Path(seq_dir))
+
+
+@task
+def get_data(url: str) -> FlyteDirectory:
+    """
+    Downloads a tar.gz file from the specified URL, extracts its contents, and returns a FlyteDirectory object.
+
+    Args:
+        url (str): The URL of the tar.gz file to download.
+
+    Returns:
+        FlyteDirectory: A FlyteDirectory object representing the directory where the contents of the tar.gz file were extracted.
+
+    Raises:
+        requests.HTTPError: If an HTTP error occurs while downloading the file.
+    """
+    try:
+        response = requests.get(url)
+        tar_name = url.split("/")[-1]
+        with open(tar_name, "wb") as file:
+            file.write(response.content)
+        working_dir = current_context().working_directory
+    except requests.HTTPError as e:
+        print(f"HTTP error: {e}")
+        raise e
+
+    out_dir = Path(os.path.join(working_dir, tar_name))
+    with tarfile.open(tar_name, "r:gz") as tarf:
+        tarf.extractall(out_dir)
+
+    return FlyteDirectory(path=out_dir)
 
 
 @task
@@ -93,41 +126,38 @@ def get_remote(local=None, config_file=None):
         default_domain="development",
     )
 
-def subproc_raise(command: List[str]) -> Tuple[str, str]:
+
+@task(container_image=pb_image)
+def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
     """
-    Execute a command and capture its stdout and stderr.
+    Compares two BAM files and returns True if they are identical, False otherwise.
+
     Args:
-        command (List[str]): The command to be executed as a list of strings.
+        in1 (FlyteFile): The first input BAM file.
+        in2 (FlyteFile): The second input BAM file.
+
     Returns:
-        Tuple[str, str]: A tuple containing the stdout and stderr output of the command.
-    Raises:
-        Exception: If the command execution fails, this exception is raised with
-            details about the command, return code, and stderr output.
-        Exception: If the executable is not found, this exception is raised with
-            guidance on specifying a container image in the task definition when
-            using custom dependencies.
+        bool: True if the BAM files are identical, False otherwise.
     """
-    try:
-        # Execute the command and capture stdout and stderr
-        result = subprocess.run(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            check=True,
-        )
+    in1.download()
+    in2.download()
 
-        # Access the stdout and stderr output
-        return result.stdout, result.stderr
+    cmp1 = [
+        "bam",
+        "diff",
+        "--in1",
+        in1.path,
+        "--in2",
+        in2.path,
+        "--noCigar",
+        "--isize",
+        "--flag",
+        "--mate",
+        "--mapQual",
+    ]
 
-    except subprocess.CalledProcessError as e:
-        raise Exception(
-            f"Command: {e.cmd}\nFailed with return code {e.returncode}:\n{e.stderr}"
-        )
+    out, err = subproc_execute(cmp1)
 
-    except FileNotFoundError as e:
-        raise Exception(
-            f"""Process failed because the executable could not be found. 
-            Did you specify a container image in the task definition if using 
-            custom dependencies?\n{e}"""
-        )
+    no_out = out == "" and err == ""
+
+    return no_out
