@@ -41,13 +41,15 @@ def call_vars(
         'wget https://storage.googleapis.com/brain-genomics-public/research/sequencing/fastq/hiseqx/wgs_pcr_free/30x/HG002.hiseqx.pcr-free.30x.R2.fastq.gz'
         ],
     ref: str = "ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz",
-    sites: str = "known_sites.vcf.gz",
-    sites_idx: str = "known_sites.vcf.gz.tbi",
+    sites: List[str] = [
+        'wget https://storage.googleapis.com/genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz',
+        'wget https://storage.googleapis.com/genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi'
+        ],
 ) -> FlyteFile:
     read_files = fetch_files(urls=reads, decompress=False)
     ref_ff = fetch_files(urls=[ref], decompres=True)
+    sites_files = fetch_files(urls=sites, decompress=False)
     idx_dir = bwa_index(ref=ref_ff)
-    sites_dir = get_known_sites(sites=sites, idx=sites_idx)
     bam_dir, recal = pb_fq2bam(reads=read_dir, ref_dir=ref_dir, sites=sites_dir)
     deepvar_dir = pb_deepvar(bam_dir=bam_dir, ref_dir=ref_dir)
     haplocall_dir = pb_haplocall(bam_dir=bam_dir, recal=recal, ref_dir=ref_dir)
