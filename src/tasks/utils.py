@@ -58,12 +58,12 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     return Reads.make_all(Path(seq_dir))
 
 @task(cache=True, cache_version=1)
-def fetch_decomp_file(url: str) -> FlyteFile:
+def fetch_files(urls: List[str], decompress: bool) -> List[FlyteFile]:
     """
     Downloads a file from the specified URL, decompresses it, and returns a FlyteFile object.
 
     Args:
-        url (str): The URL of the tar.gz file to download.
+        urls (List[str]): A list of URLs to the files to download.
 
     Returns:
         Path: The local path to the decompressed file.
@@ -71,16 +71,20 @@ def fetch_decomp_file(url: str) -> FlyteFile:
     Raises:
         requests.HTTPError: If an HTTP error occurs while downloading the file.
     """
-    lpath = fetch_file(url, current_context().working_directory)
-    dlpath = lpath.with_suffix('')
-    with gzip.open(lpath, 'rb') as f_in:
-        with open(dlpath, 'wb') as f_out:
-            f_out.write(f_in.read())
-    return FlyteFile(path=dlpath)
-    
+    outfiles = []
+    for url in urls:
+        lpath = fetch_file(url, current_context().working_directory)
+        if decompress and 'gz' in lpath:
+            dlpath = lpath.with_suffix('')
+            with gzip.open(lpath, 'rb') as f_in:
+                with open(dlpath, 'wb') as f_out:
+                    f_out.write(f_in.read())
+            outfiles.append(FlyteFile(path=dlpath))
+        else:
+            outfiles.append(FlyteFile(path=lpath))
     
 @task
-def get_data(url: str) -> FlyteDirectory:
+def fetch_tarfile(url: str) -> FlyteDirectory:
     """
     Downloads a tar.gz file from the specified URL, extracts its contents, and returns a FlyteDirectory object.
 
