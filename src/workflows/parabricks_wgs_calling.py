@@ -3,7 +3,7 @@ from flytekit import task, workflow
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 
-from tasks.utils import fetch_files
+from tasks.utils import fetch_remote_reads
 from tasks.bwa import bwa_index
 from tasks.parabricks import fq2bam
 
@@ -47,7 +47,7 @@ def call_vars(
         'wget https://storage.googleapis.com/genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi'
         ],
 ) -> FlyteFile:
-    read_files = fetch_files(urls=reads, decompress=False)
+    read_objs = fetch_remote_reads(urls=reads)
     ref_ff = fetch_files(urls=[ref], decompres=True)
     sites_files = fetch_files(urls=sites, decompress=False)
     ref_dir = bwa_index(ref=ref_ff)

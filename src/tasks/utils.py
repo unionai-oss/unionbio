@@ -58,7 +58,10 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     return Reads.make_all(Path(seq_dir))
 
 @task(cache=True, cache_version=1)
-def fetch_files(urls: List[str], decompress: bool) -> List[FlyteFile]:
+def index_remote_reference(url: str) ->
+
+@task(cache=True, cache_version=1)
+def fetch_remote_reads(urls: List[str]) -> List[Reads]:
     """
     Downloads a file from the specified URL, decompresses it, and returns a FlyteFile object.
 
@@ -71,18 +74,19 @@ def fetch_files(urls: List[str], decompress: bool) -> List[FlyteFile]:
     Raises:
         requests.HTTPError: If an HTTP error occurs while downloading the file.
     """
-    outfiles = []
+    workdir = current_context().working_directory
     for url in urls:
-        lpath = fetch_file(url, current_context().working_directory)
-        if decompress and 'gz' in lpath:
-            dlpath = lpath.with_suffix('')
-            with gzip.open(lpath, 'rb') as f_in:
-                with open(dlpath, 'wb') as f_out:
-                    f_out.write(f_in.read())
-            outfiles.append(FlyteFile(path=dlpath))
-        else:
-            outfiles.append(FlyteFile(path=lpath))
-    
+        fetch_file(url, workdir)
+    return Reads.make_all(workdir)
+
+
+        # if decompress and 'gz' in lpath:
+        #     dlpath = lpath.with_suffix('')
+        #     with gzip.open(lpath, 'rb') as f_in:
+        #         with open(dlpath, 'wb') as f_out:
+        #             f_out.write(f_in.read())
+        #     outfiles.append(FlyteFile(path=dlpath))
+
 @task
 def fetch_tarfile(url: str) -> FlyteDirectory:
     """

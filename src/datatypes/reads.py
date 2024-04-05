@@ -51,9 +51,9 @@ class Reads(DataClassJSONMixin):
             if ".fastq.gz" in fp.name:
                 mate = fp.name.strip(".fastq.gz").strip(".filt").split("_")[-1]
                 logger.debug(f"Found mate {mate} for {sample}")
-                if mate == "1":
+                if "1" in mate:
                     setattr(samples[sample], "read1", FlyteFile(path=str(fp)))
-                elif mate == "2":
+                elif "2" in mate:
                     setattr(samples[sample], "read2", FlyteFile(path=str(fp)))
             elif "filter-report" in fp.name:
                 logger.debug(f"Found filter report for {sample}")

@@ -7,6 +7,7 @@ from flytekit.types.file import FlyteFile
 from flytekitplugins.dgx import DGXConfig
 
 from config import pb_image
+from datatypes.alignment import Alignment
 
 
 # Supported DGX instances:
@@ -31,7 +32,7 @@ def fq2bam(reads: List[FlyteFile], sites: List[FlyteFile], ref_name: str, ref_di
     sites[1].download()
     ref_dir.download()
 
-    outpath = "out.bam"
+    bam_out = "out.bam"
     recal_out = "recal_data.table"
 
     out, err = subproc_execute(
@@ -47,13 +48,15 @@ def fq2bam(reads: List[FlyteFile], sites: List[FlyteFile], ref_name: str, ref_di
             "--knownSites",
             str(sites),
             "--out-bam",
-            outpath,
+            bam_out,
             "--out-recal-file",
             recal_out,
         ]
     )
 
-    return FlyteFile(path=outpath)
+    
+
+    return FlyteFile(path=bam_out), FlyteFile(path=recal_out)
 
 
 @task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
