@@ -1,7 +1,6 @@
-import time
-import typing
+from typing import List, Tuple
 from pathlib import Path
-from flytekit import task, Resources
+from flytekit import task, Resources, current_context
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
@@ -13,40 +12,38 @@ from config import pb_image
 # Supported DGX instances:
 # dgxa100.80g.1.norm, dgxa100.80g.2.norm, dgxa100.80g.4.norm, dgxa100.80g.8.norm
 @task(task_config=DGXConfig(instance="dgxa100.80g.1.norm"), container_image=pb_image)
-def dgx_pb_align(indir: FlyteDirectory) -> typing.Tuple[FlyteFile, str]:
+def fq2bam(reads: List[FlyteFile], sites: List[FlyteFile], ref_name: str, ref_dir: FlyteDirectory) -> Tuple[FlyteFile, FlyteFile]:
     """
     Takes an input directory containing sequence data and an indexed reference genome and
     performs alignment using Parabricks' fq2bam tool.
 
     Args:
-        indir (FlyteDirectory): The input directory containing sequences in the Data sub-directory
-        and an indexed reference genome in the Ref sub-directory.
+        
 
     Returns:
-        typing.Tuple[FlyteFile, str]: A tuple containing:
-            - The aligned BAM file in FlyteFile format.
-            - A string representing run statistics about the alignment process.
+        
     """
 
+    RGTAG = "@RG\tID:HG002\tLB:lib\tPL:Illumina\tSM:HG002\tPU:HG002"
+    reads[0].download()
+    reads[1].download()
+    sites[0].download()
+    sites[1].download()
+    ref_dir.download()
+
     outpath = "out.bam"
-    indir.download()
-    loc_dir = Path(indir.path)
-    r1 = loc_dir.joinpath("Data/sample_1.fq.gz")
-    r2 = loc_dir.joinpath("Data/sample_2.fq.gz")
-    ref = loc_dir.joinpath("Ref/Homo_sapiens_assembly38.fasta")
-    sites = loc_dir.joinpath("Ref/Homo_sapiens_assembly38.known_indels.vcf.gz")
     recal_out = "recal_data.table"
 
-    t1 = time.time()
     out, err = subproc_execute(
         [
             "pbrun",
             "fq2bam",
             "--ref",
-            str(ref),
+            str(ref_name),
             "--in-fq",
-            str(r1),
-            str(r2),
+            str(reads[0].path),
+            str(reads[1].path),
+            RGTAG,
             "--knownSites",
             str(sites),
             "--out-bam",
@@ -55,14 +52,13 @@ def dgx_pb_align(indir: FlyteDirectory) -> typing.Tuple[FlyteFile, str]:
             recal_out,
         ]
     )
-    elapsed = f"pbrun fq2bam in DGX took {time.time() - t1} seconds"
 
-    return FlyteFile(path=outpath), elapsed
+    return FlyteFile(path=outpath)
 
 
 @task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
 # @task(task_config=DGXConfig(instance="dgxa100.80g.1.norm"), container_image=pb_image)
-def basic_align(indir: FlyteDirectory) -> typing.Tuple[FlyteFile, str]:
+def basic_align(indir: FlyteDirectory) -> Tuple[FlyteFile, str]:
     """
     Aligns paired-end sequencing reads using BWA-MEM and GATK tools, and returns the path to the processed BAM file
     and the elapsed time for the alignment process.

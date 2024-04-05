@@ -5,6 +5,7 @@ from flytekit.types.file import FlyteFile
 
 from tasks.utils import fetch_files
 from tasks.bwa import bwa_index
+from tasks.parabricks import fq2bam
 
 
 @task
@@ -49,18 +50,18 @@ def call_vars(
     read_files = fetch_files(urls=reads, decompress=False)
     ref_ff = fetch_files(urls=[ref], decompres=True)
     sites_files = fetch_files(urls=sites, decompress=False)
-    idx_dir = bwa_index(ref=ref_ff)
-    bam_dir, recal = pb_fq2bam(reads=read_dir, ref_dir=ref_dir, sites=sites_dir)
+    ref_dir = bwa_index(ref=ref_ff)
+    bam_dir, recal = fq2bam(reads=read_files, sites=sites_files, ref_dir=ref_dir, ref_name="GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
     deepvar_dir = pb_deepvar(bam_dir=bam_dir, ref_dir=ref_dir)
     haplocall_dir = pb_haplocall(bam_dir=bam_dir, recal=recal, ref_dir=ref_dir)
     return intersect_vars(vcf1=deepvar_dir, vcf2=haplocall_dir)
 
 
-@workflow
-def comparison_wf() -> typing.Tuple[bool, bool, str, str, str]:
-    data = get_data(
-        url="https://s3.amazonaws.com/parabricks.sample/parabricks_sample.tar.gz"
-    )
+# @workflow
+# def comparison_wf() -> typing.Tuple[bool, bool, str, str, str]:
+#     data = get_data(
+#         url="https://s3.amazonaws.com/parabricks.sample/parabricks_sample.tar.gz"
+#     )
     # ff1, s1 = dgx_pb_align(indir=data)
     # ff2, s2 = dgx_basic_align(indir=data)
     # ff3, s3 = demo_basic_align(indir=data)
