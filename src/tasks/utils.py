@@ -69,7 +69,7 @@ def fetch_remote_reference(url: str) -> Reference:
     )
 
 @task(cache=True, cache_version=1)
-def fetch_remote_reads(urls: List[str]) -> List[Reads]:
+def fetch_remote_reads(urls: List[str]) -> Reads:
     """
     Fetches remote reads from a list of URLs and returns a list of Reads objects.
 
@@ -81,7 +81,7 @@ def fetch_remote_reads(urls: List[str]) -> List[Reads]:
     workdir = current_context().working_directory
     for url in urls:
         fetch_file(url, workdir)
-    return Reads.make_all(workdir)
+    return Reads.make_all(workdir)[0]
 
 @task(cache=True, cache_version=1)
 def fetch_remote_sites(sites: str, idx: str) -> Sites:
