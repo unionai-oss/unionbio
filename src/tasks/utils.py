@@ -14,6 +14,7 @@ from flytekit.extras.tasks.shell import subproc_execute
 
 from config import base_image, logger, pb_image
 from datatypes.reads import Reads
+from datatypes.reference import Reference
 
 def fetch_file(url: str, local_dir: Path) -> Path:
     """
@@ -24,7 +25,7 @@ def fetch_file(url: str, local_dir: Path) -> Path:
         local_dir (Path): The directory where you would like this file saved.
 
     Returns:
-        Path: The local path to the decompressed file.
+        Path: The local path to the file.
 
     Raises:
         requests.HTTPError: If an HTTP error occurs while downloading the file.
@@ -58,7 +59,13 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     return Reads.make_all(Path(seq_dir))
 
 @task(cache=True, cache_version=1)
-def index_remote_reference(url: str) ->
+def fetch_remote_reference(url: str) -> Reference:
+    workdir = current_context().working_directory
+    ref_path = fetch_file(url, workdir)
+    return Reference(
+        ref_name=ref_path.name,
+        ref_dir=workdir
+    )
 
 @task(cache=True, cache_version=1)
 def fetch_remote_reads(urls: List[str]) -> List[Reads]:
@@ -80,12 +87,15 @@ def fetch_remote_reads(urls: List[str]) -> List[Reads]:
     return Reads.make_all(workdir)
 
 
-        # if decompress and 'gz' in lpath:
-        #     dlpath = lpath.with_suffix('')
-        #     with gzip.open(lpath, 'rb') as f_in:
-        #         with open(dlpath, 'wb') as f_out:
-        #             f_out.write(f_in.read())
-        #     outfiles.append(FlyteFile(path=dlpath))
+@task(cache=True, cache_version=1)
+def fetch_files(urls: List[str]) -> List[FlyteFile]:
+    outfiles = []
+    workdir = current_context().working_directory
+    for url in urls:
+        lpath = fetch_file(url, workdir)
+        outfiles.append(FlyteFile(path=lpath))
+    return outfiles
+
 
 @task
 def fetch_tarfile(url: str) -> FlyteDirectory:

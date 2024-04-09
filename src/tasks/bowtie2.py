@@ -1,14 +1,13 @@
 from pathlib import Path
 from typing import List
 from flytekit import kwtypes, task, Resources, current_context, TaskMetadata, dynamic
-from flytekit.extras.tasks.shell import OutputLocation, ShellTask
+from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
 from config import ref_hash, base_image, logger
 from datatypes.alignment import Alignment
 from datatypes.reads import Reads
-from tasks.utils import subproc_raise
 
 
 """
@@ -78,7 +77,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     ]
     logger.debug(f"Running command: {cmd}")
 
-    stdout, stderr = subproc_raise(cmd)
+    stdout, stderr = subproc_execute(cmd)
 
     with open(rep, "w") as f:
         f.write(stderr)
