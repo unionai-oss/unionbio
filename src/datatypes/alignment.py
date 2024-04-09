@@ -15,7 +15,7 @@ class Alignment(DataClassJSONMixin):
     Attributes:
         sample (str): The name or identifier of the sample to which the SAM file belongs.
         aligner (str): The name of the aligner used to generate the SAM file.
-        sam (FlyteFile): A FlyteFile object representing the path to the SAM file.
+        alignment (FlyteFile): A FlyteFile object representing the path to the alignment file.
         alignment_report (FlyteFile): A FlyteFile object representing an associated report
             for performance of the aligner.
         sorted (bool): A boolean value indicating whether the SAM file has been sorted.
@@ -26,7 +26,7 @@ class Alignment(DataClassJSONMixin):
 
     sample: str
     aligner: str
-    sam: FlyteFile | None = None
+    alignment: FlyteFile | None = None
     alignment_report: FlyteFile | None = None
     sorted: bool | None = None
     deduped: bool | None = None
@@ -41,7 +41,7 @@ class Alignment(DataClassJSONMixin):
         return state
 
     def get_alignment_fname(self):
-        return f"{self._get_state_str()}_aligned.sam"
+        return f"{self._get_state_str()}_aligned.bam"
 
     def get_report_fname(self):
         return f"{self._get_state_str()}_aligned_report.txt"
@@ -71,8 +71,8 @@ class Alignment(DataClassJSONMixin):
             else:
                 setattr(samples[sample], "deduped", False)
 
-            if "sam" in fp.name:
-                setattr(samples[sample], "sam", FlyteFile(path=str(fp)))
+            if "bam" in fp.name:
+                setattr(samples[sample], "alignment", FlyteFile(path=str(fp)))
             elif "report" in fp.name:
                 setattr(samples[sample], "report", FlyteFile(path=str(fp)))
 

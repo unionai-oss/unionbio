@@ -15,6 +15,7 @@ from flytekit.extras.tasks.shell import subproc_execute
 from config import base_image, logger, pb_image
 from datatypes.reads import Reads
 from datatypes.reference import Reference
+from datatypes.known_sites import Sites
 
 def fetch_file(url: str, local_dir: Path) -> Path:
     """
@@ -53,7 +54,7 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
         seq_dir (FlyteDirectory): The input directory containing raw sequencing data.
 
     Returns:
-        List[RawSample]: A list of RawSample objects representing the processed sequencing data.
+        List[Reads]: A list of Reads objects representing the processed sequencing data.
     """
     seq_dir.download()
     return Reads.make_all(Path(seq_dir))
@@ -70,21 +71,35 @@ def fetch_remote_reference(url: str) -> Reference:
 @task(cache=True, cache_version=1)
 def fetch_remote_reads(urls: List[str]) -> List[Reads]:
     """
-    Downloads a file from the specified URL, decompresses it, and returns a FlyteFile object.
+    Fetches remote reads from a list of URLs and returns a list of Reads objects.
 
     Args:
-        urls (List[str]): A list of URLs to the files to download.
 
     Returns:
-        Path: The local path to the decompressed file.
-
-    Raises:
-        requests.HTTPError: If an HTTP error occurs while downloading the file.
+        
     """
     workdir = current_context().working_directory
     for url in urls:
         fetch_file(url, workdir)
     return Reads.make_all(workdir)
+
+@task(cache=True, cache_version=1)
+def fetch_remote_sites(sites: str, idx: str) -> Sites:
+    """
+    Fetches remote known sites from a URL and returns a Sites object.
+
+    Args:
+
+    Returns:
+        
+    """
+    workdir = current_context().working_directory
+    sites_path = fetch_file(sites, workdir)
+    idx_path = fetch_file(idx, workdir)
+    return Sites(
+        sites = FlyteFile(path=sites_path),
+        idx = FlyteFile(path=idx_path)
+    )
 
 
 @task(cache=True, cache_version=1)

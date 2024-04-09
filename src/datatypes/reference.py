@@ -25,3 +25,6 @@ class Reference(DataClassJSONMixin):
     ref_dir: FlyteDirectory
     index_name: str | None = None
     indexed_with: str | None = None
+
+    def get_ref_path(self):
+        return Path(self.ref_dir.path).joinpath(self.ref_name)

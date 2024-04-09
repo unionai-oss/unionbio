@@ -8,12 +8,15 @@ from flytekitplugins.dgx import DGXConfig
 
 from config import pb_image
 from datatypes.alignment import Alignment
+from datatypes.reference import Reference
+from datatypes.reads import Reads
+from datatypes.known_sites import Sites
 
 
 # Supported DGX instances:
 # dgxa100.80g.1.norm, dgxa100.80g.2.norm, dgxa100.80g.4.norm, dgxa100.80g.8.norm
 @task(task_config=DGXConfig(instance="dgxa100.80g.1.norm"), container_image=pb_image)
-def fq2bam(reads: List[FlyteFile], sites: List[FlyteFile], ref_name: str, ref_dir: FlyteDirectory) -> Tuple[FlyteFile, FlyteFile]:
+def fq2bam(read_obj: Reads, sites: Sites, ref: Reference) -> Alignment:
     """
     Takes an input directory containing sequence data and an indexed reference genome and
     performs alignment using Parabricks' fq2bam tool.
@@ -26,27 +29,29 @@ def fq2bam(reads: List[FlyteFile], sites: List[FlyteFile], ref_name: str, ref_di
     """
 
     RGTAG = "@RG\tID:HG002\tLB:lib\tPL:Illumina\tSM:HG002\tPU:HG002"
-    reads[0].download()
-    reads[1].download()
-    sites[0].download()
-    sites[1].download()
-    ref_dir.download()
+    read_obj.read1.download()
+    read_obj.read2.download()
+    sites.sites.download()
+    sites.idx.download()
+    ref.ref_dir.download()
 
-    bam_out = "out.bam"
-    recal_out = "recal_data.table"
+    al_out = Alignment(sample=read_obj.sample, aligner="pbrun_fq2bam")
+
+    bam_out = al_out.get_alignment_fname()
+    recal_out = al_out.get_bqsr_fname()
 
     out, err = subproc_execute(
         [
             "pbrun",
             "fq2bam",
             "--ref",
-            str(ref_name),
+            str(ref.get_ref_path()),
             "--in-fq",
-            str(reads[0].path),
-            str(reads[1].path),
+            str(read_obj.read1.path),
+            str(read_obj.read2.path),
             RGTAG,
             "--knownSites",
-            str(sites),
+            str(sites[0].path),
             "--out-bam",
             bam_out,
             "--out-recal-file",
@@ -54,7 +59,8 @@ def fq2bam(reads: List[FlyteFile], sites: List[FlyteFile], ref_name: str, ref_di
         ]
     )
 
-    
+    setattr(al_out, "bam_file", FlyteFile(path=bam_out))
+    setattr(al_out, "recal_file", FlyteFile(path=recal_out))
 
     return FlyteFile(path=bam_out), FlyteFile(path=recal_out)
 
