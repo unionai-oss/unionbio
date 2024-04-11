@@ -4,18 +4,20 @@ from flytekit import task, Resources, current_context
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from flytekitplugins.dgx import DGXConfig
+# from flytekitplugins.dgx import DGXConfig
 
 from config import pb_image
 from datatypes.alignment import Alignment
 from datatypes.reference import Reference
 from datatypes.reads import Reads
 from datatypes.known_sites import Sites
+from datatypes.variants import VCF
 
 
 # Supported DGX instances:
 # dgxa100.80g.1.norm, dgxa100.80g.2.norm, dgxa100.80g.4.norm, dgxa100.80g.8.norm
-@task(task_config=DGXConfig(instance="dgxa100.80g.1.norm"), container_image=pb_image)
+# @task(task_config=DGXConfig(instance="dgxa100.80g.1.norm"), container_image=pb_image)
+@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
 def fq2bam(read_obj: Reads, sites: Sites, ref: Reference) -> Alignment:
     """
     Takes an input directory containing sequence data and an indexed reference genome and
@@ -38,6 +40,7 @@ def fq2bam(read_obj: Reads, sites: Sites, ref: Reference) -> Alignment:
     al_out = Alignment(sample=read_obj.sample, aligner="pbrun_fq2bam")
 
     bam_out = al_out.get_alignment_fname()
+    bam_idx_out = al_out.get_alignment_idx_fname()
     recal_out = al_out.get_bqsr_fname()
 
     out, err = subproc_execute(
@@ -59,7 +62,8 @@ def fq2bam(read_obj: Reads, sites: Sites, ref: Reference) -> Alignment:
         ]
     )
 
-    setattr(al_out, "bam_file", FlyteFile(path=bam_out))
+    setattr(al_out, "alignment", FlyteFile(path=bam_out))
+    setattr(al_out, "alignment_index", FlyteFile(path=bam_idx_out))
     setattr(al_out, "recal_file", FlyteFile(path=recal_out))
 
     return FlyteFile(path=bam_out), FlyteFile(path=recal_out)
@@ -152,3 +156,85 @@ def basic_align(indir: FlyteDirectory) -> Tuple[FlyteFile, str]:
     )
 
     return FlyteFile(path=dup_bam)
+
+@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
+def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
+    """
+    Takes an input directory containing BAM files and an indexed reference genome and
+    performs variant calling using Parabricks' deepvariant tool.
+
+    Args:
+        bam_dir (FlyteDirectory): The input directory containing BAM files.
+        ref_dir (FlyteDirectory): The input directory containing the indexed reference genome.
+
+    Returns:
+        FlyteDirectory: The output directory containing the variant calls.
+    """
+    ref.ref_dir.download()
+    al.alignment.download()
+    al.alignment_idx.download()
+
+    vcf_out = VCF(sample=al.sample, caller="pbrun_deepvariant")
+    vcf_fname = vcf_out.get_vcf_fname()
+    vcf_idx_fname = vcf_out.get_vcf_idx_fname()
+
+    out, err = subproc_execute(
+        [
+            "pbrun",
+            "deepvariant",
+            "--ref",
+            str(ref.get_ref_path()),
+            "--in-bam",
+            str(al.alignment.path),
+            "--out-variants",
+            vcf_out
+        ]
+    )
+
+    setattr(vcf_out, "vcf", FlyteFile(path=vcf_fname))
+    setattr(vcf_out, "vcf_idx", FlyteFile(path=vcf_idx_fname))
+
+    deepvar_dir = FlyteDirectory(path="/tmp")
+    return deepvar_dir
+
+@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
+def pb_haplotypcaller(al: Alignment, ref: Reference) -> VCF:
+    """
+    Takes an input directory containing BAM files and an indexed reference genome and
+    performs variant calling using Parabricks' deepvariant tool.
+
+    Args:
+        bam_dir (FlyteDirectory): The input directory containing BAM files.
+        ref_dir (FlyteDirectory): The input directory containing the indexed reference genome.
+
+    Returns:
+        FlyteDirectory: The output directory containing the variant calls.
+    """
+    ref.ref_dir.download()
+    al.alignment.download()
+    al.alignment_idx.download()
+
+    vcf_out = VCF(sample=al.sample, caller="pbrun_deepvariant")
+    vcf_fname = vcf_out.get_vcf_fname()
+    vcf_idx_fname = vcf_out.get_vcf_idx_fname()
+
+    out, err = subproc_execute(
+        [
+            "pbrun",
+            "deepvariant",
+            "--ref",
+            str(ref.get_ref_path()),
+            "--in-bam",
+            str(al.alignment.path),
+            "--out-variants",
+            vcf_out
+        ]
+    )
+
+    setattr(vcf_out, "vcf", FlyteFile(path=vcf_fname))
+    setattr(vcf_out, "vcf_idx", FlyteFile(path=vcf_idx_fname))
+
+    deepvar_dir = FlyteDirectory(path="/tmp")
+    return deepvar_dir
+
+

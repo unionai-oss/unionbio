@@ -27,6 +27,7 @@ class Alignment(DataClassJSONMixin):
     sample: str
     aligner: str
     alignment: FlyteFile | None = None
+    alignment_idx: FlyteFile | None = None
     alignment_report: FlyteFile | None = None
     sorted: bool | None = None
     deduped: bool | None = None
@@ -42,6 +43,9 @@ class Alignment(DataClassJSONMixin):
 
     def get_alignment_fname(self):
         return f"{self._get_state_str()}_aligned.bam"
+    
+    def get_alignment_idx_fname(self):
+        return f"{self._get_state_str()}_aligned.bam.BAI"
 
     def get_report_fname(self):
         return f"{self._get_state_str()}_aligned_report.txt"
