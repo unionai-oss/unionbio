@@ -5,7 +5,7 @@ from flytekit.types.file import FlyteFile
 
 from tasks.utils import fetch_remote_reads, fetch_remote_reference, fetch_remote_sites
 from tasks.bwa import bwa_index
-from tasks.parabricks import fq2bam
+from tasks.parabricks import fq2bam, pb_deepvar, pb_haplocall, intersect_vars
 
 
 @task
@@ -50,11 +50,11 @@ def call_vars(
     read_obj = fetch_remote_reads(urls=reads)
     ref_obj = fetch_remote_reference(url=ref)
     sites_obj = fetch_remote_sites(sites=sites[0], idx=sites[1])
-    ref_idx = bwa_index(ref=ref_obj)
+    ref = bwa_index(ref=ref_obj)
     alignment = fq2bam(reads=read_obj, sites=sites_obj, ref=ref_obj)
-    deepvar_dir = pb_deepvar(bam_dir=bam_dir, ref_dir=ref_dir)
-    haplocall_dir = pb_haplocall(bam_dir=bam_dir, recal=recal, ref_dir=ref_dir)
-    return intersect_vars(vcf1=deepvar_dir, vcf2=haplocall_dir)
+    deepvar_vcf = pb_deepvar(bam=alignment, ref=ref)
+    haplocall_vcf = pb_haplocall(bam=alignment, ref=ref)
+    return intersect_vars(vcf1=deepvar_vcf, vcf2=haplocall_vcf)
 
 
 # @workflow

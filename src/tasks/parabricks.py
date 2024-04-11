@@ -164,11 +164,10 @@ def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
     performs variant calling using Parabricks' deepvariant tool.
 
     Args:
-        bam_dir (FlyteDirectory): The input directory containing BAM files.
-        ref_dir (FlyteDirectory): The input directory containing the indexed reference genome.
+
 
     Returns:
-        FlyteDirectory: The output directory containing the variant calls.
+
     """
     ref.ref_dir.download()
     al.alignment.download()
@@ -198,21 +197,20 @@ def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
     return deepvar_dir
 
 @task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
-def pb_haplotypcaller(al: Alignment, ref: Reference) -> VCF:
+def pb_haplocall(al: Alignment, ref: Reference) -> VCF:
     """
     Takes an input directory containing BAM files and an indexed reference genome and
-    performs variant calling using Parabricks' deepvariant tool.
+    performs variant calling using Parabricks' accelerated version of GATK's HaplotypeCaller.
 
     Args:
-        bam_dir (FlyteDirectory): The input directory containing BAM files.
-        ref_dir (FlyteDirectory): The input directory containing the indexed reference genome.
 
     Returns:
-        FlyteDirectory: The output directory containing the variant calls.
+
     """
     ref.ref_dir.download()
     al.alignment.download()
     al.alignment_idx.download()
+    al.bqsr_report.download()
 
     vcf_out = VCF(sample=al.sample, caller="pbrun_deepvariant")
     vcf_fname = vcf_out.get_vcf_fname()
@@ -226,6 +224,8 @@ def pb_haplotypcaller(al: Alignment, ref: Reference) -> VCF:
             str(ref.get_ref_path()),
             "--in-bam",
             str(al.alignment.path),
+            "--in-recal-file",
+            str(al.bqsr_report.path),
             "--out-variants",
             vcf_out
         ]
