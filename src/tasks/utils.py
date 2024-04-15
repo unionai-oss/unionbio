@@ -16,6 +16,7 @@ from config import base_image, logger, pb_image
 from datatypes.reads import Reads
 from datatypes.reference import Reference
 from datatypes.known_sites import Sites
+from datatypes.variants import VCF
 
 def fetch_file(url: str, local_dir: Path) -> Path:
     """
@@ -240,3 +241,38 @@ def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
     no_out = out == "" and err == ""
 
     return no_out
+
+@task(container_image=pb_image)
+def intersect_vcfs(in1: VCF, in2: VCF) -> VCF:
+    """
+    Takes the intersection of 2 VCF files and returns a new VCF file to increase
+    calling sensitivity.
+
+    Args:
+        in1 (VCF): The first input VCF object.
+        in2 (VCF): The second input VCF object.
+
+    Returns:
+        VCF: Intersected and zipped VCF object.
+    """
+    in1.dl_all()
+    in2.dl_all()
+    isec_out = VCF(sample=in1.sample, caller=f"{in1.caller}_{in2.caller}_isec")
+
+    cmd = " ".join([
+        "bcftools",
+        "isec",
+        "-n",
+        "+2",
+        in1.vcf.path,
+        in2.vcf.path,
+        "|",
+        "gzip",
+        "-c",
+        ">",
+        f"{isec_out.get_vcf_fname()}.gz",
+    ])
+
+    out, err = subproc_execute(cmd, shell=True)
+
+    return isec_out

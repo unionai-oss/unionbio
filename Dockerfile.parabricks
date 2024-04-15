@@ -1,9 +1,9 @@
-FROM nvcr.io/nvidia/clara/clara-parabricks:4.2.1-1
+FROM nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install python 3.10
 RUN apt-get update && \
-    apt-get install -y software-properties-common build-essential && \
+    apt-get install -y software-properties-common build-essential liblzma-dev libbz2-dev libcurl4-openssl-dev && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
     apt install -y python3.10
@@ -14,17 +14,17 @@ RUN pip install --upgrade setuptools
 
 # Copy the dgx-agent directory contents into the container at /root
 WORKDIR /root
-COPY dgx-agent /root/dgx-agent
-RUN chmod 777 -R /root
+# COPY dgx-agent /root/dgx-agent
+# RUN chmod 777 -R /root
 
 # Install ngcsdk, grpcio, grpcio-status, and flytekit packages
-RUN cd dgx-agent && pip install -e .
-RUN cd dgx-agent/libs && pip install ngcsdk-3.33.0-py3-none-any.whl
-RUN pip install --no-cache-dir grpcio==1.53.0 grpcio-status==1.53.0 \
-    "git+https://github.com/flyteorg/flytekit.git@master#subdirectory=plugins/flytekit-flyin"
+# RUN cd dgx-agent && pip install -e .
+# RUN cd dgx-agent/libs && pip install ngcsdk-3.33.0-py3-none-any.whl
+# RUN pip install --no-cache-dir grpcio==1.53.0 grpcio-status==1.53.0 \
+#     "git+https://github.com/flyteorg/flytekit.git@master#subdirectory=plugins/flytekit-flyin"
 RUN pip install "git+https://github.com/flyteorg/flytekit.git@master"  # dgx-agent branch
-RUN pip install "git+https://github.com/flyteorg/flyte.git@77d75301b7d552e391f240512d48a618806b2a48#subdirectory=flyteidl"
-RUN pip install boto3==1.33.2  # ngcsdk dependency
+# RUN pip install "git+https://github.com/flyteorg/flyte.git@77d75301b7d552e391f240512d48a618806b2a48#subdirectory=flyteidl"
+# RUN pip install boto3==1.33.2  # ngcsdk dependency
 
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
@@ -55,4 +55,8 @@ RUN git clone https://github.com/statgen/bamUtil.git && \
     make cloneLib && \
     make && \
     make install INSTALLDIR=/usr/local/bin
- 
+
+RUN git clone --recurse-submodules https://github.com/samtools/htslib.git && \
+    git clone https://github.com/samtools/bcftools.git && \
+    cd bcftools && \
+    make
