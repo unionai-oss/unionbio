@@ -3,36 +3,9 @@ from flytekit import task, workflow
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 
-from tasks.utils import fetch_remote_reads, fetch_remote_reference, fetch_remote_sites
+from tasks.utils import fetch_remote_reads, fetch_remote_reference, fetch_remote_sites, intersect_vcfs
 from tasks.bwa import bwa_index
-from tasks.parabricks import fq2bam, pb_deepvar, pb_haplocall, intersect_vars
-
-
-@task
-def index_reference(ref: str) -> FlyteDirectory:
-    return FlyteDirectory(path="/tmp")
-
-
-@task
-def get_known_sites(sites: str, idx: str) -> FlyteDirectory:
-    return FlyteDirectory(path="/tmp")
-
-
-@task
-def pb_deepvar(bam_dir: FlyteDirectory, ref_dir: FlyteDirectory) -> FlyteDirectory:
-    return FlyteDirectory(path="/tmp")
-
-
-@task
-def pb_haplocall(
-    bam_dir: FlyteDirectory, recal: FlyteFile, ref_dir: FlyteDirectory
-) -> FlyteDirectory:
-    return FlyteDirectory(path="/tmp")
-
-
-@task
-def intersect_vars(vcf1: FlyteDirectory, vcf2: FlyteDirectory) -> FlyteFile:
-    return FlyteFile(path="/tmp")
+from tasks.parabricks import fq2bam, pb_deepvar, pb_haplocall
 
 
 @workflow
@@ -50,21 +23,9 @@ def call_vars(
     read_obj = fetch_remote_reads(urls=reads)
     ref_obj = fetch_remote_reference(url=ref)
     sites_obj = fetch_remote_sites(sites=sites[0], idx=sites[1])
-    ref = bwa_index(ref=ref_obj)
-    alignment = fq2bam(reads=read_obj, sites=sites_obj, ref=ref_obj)
+    ref_idx = bwa_index(ref=ref_obj)
+    alignment = fq2bam(reads=read_obj, sites=sites_obj, ref=ref_idx)
     deepvar_vcf = pb_deepvar(bam=alignment, ref=ref)
     haplocall_vcf = pb_haplocall(bam=alignment, ref=ref)
-    return intersect_vars(vcf1=deepvar_vcf, vcf2=haplocall_vcf)
+    return intersect_vcfs(vcf1=deepvar_vcf, vcf2=haplocall_vcf)
 
-
-# @workflow
-# def comparison_wf() -> typing.Tuple[bool, bool, str, str, str]:
-#     data = get_data(
-#         url="https://s3.amazonaws.com/parabricks.sample/parabricks_sample.tar.gz"
-#     )
-    # ff1, s1 = dgx_pb_align(indir=data)
-    # ff2, s2 = dgx_basic_align(indir=data)
-    # ff3, s3 = demo_basic_align(indir=data)
-    # c1 = compare_bams(in1=ff1, in2=ff2)
-    # c2 = compare_bams(in1=ff1, in2=ff3)
-    # return c1, c2, s1, s2, s3
