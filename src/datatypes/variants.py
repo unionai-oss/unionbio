@@ -8,19 +8,15 @@ class VCF(DataClassJSONMixin):
     """
     Represents a VCF (Variant Call Format) file and its associated sample and index.
 
-    This class defines the structure for representing a SAM file along with attributes
-    that describe the associated sample and report.
+    This class defines the structure for representing a VCF file along with attributes
+    that describe the associated sample and index.
 
     Attributes:
-        sample (str): The name or identifier of the sample to which the SAM file belongs.
-        aligner (str): The name of the aligner used to generate the SAM file.
-        alignment (FlyteFile): A FlyteFile object representing the path to the alignment file.
-        alignment_report (FlyteFile): A FlyteFile object representing an associated report
-            for performance of the aligner.
-        sorted (bool): A boolean value indicating whether the SAM file has been sorted.
-        deduped (bool): A boolean value indicating whether the SAM file has been deduplicated.
-        bqsr_report (FlyteFile): A FlyteFile object representing a report from the Base Quality
-            Score Recalibration (BQSR) process.
+        sample (str): The name or identifier of the sample to which the VCF file belongs.
+        caller (str): The name of the variant caller used to generate the VCF.
+        vcf (FlyteFile): The VCF file.
+        vcf_idx (FlyteFile): The index file for the VCF.
+
     """
 
     sample: str

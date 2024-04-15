@@ -4,8 +4,10 @@ from filecmp import cmp
 from flytekit.types.directory import FlyteDirectory
 from tasks.hisat2 import hisat2_index, hisat2_align_paired_reads
 from tasks.bowtie2 import bowtie2_index, bowtie2_align_paired_reads
+from tasks.bwa import bwa_index
 from datatypes.alignment import Alignment
 from datatypes.reads import Reads
+from datatypes.reference import Reference
 from config import test_assets
 
 
@@ -66,3 +68,12 @@ def test_bowtie2_align():
         x in os.listdir(test_assets["bt2_sam_dir"])
         for x in [Path(i).name for i in [sam.sam.path, sam.alignment_report.path]]
     )
+
+
+def test_bwa_index(tmp_path):
+    ref_in = Reference(
+        ref_name=test_assets["ref_fn"],
+        ref_dir=FlyteDirectory(path=tmp_path),
+    )
+    ref_out = bwa_index(ref_obj=ref_in)
+    print(os.listdir(ref_out.ref_dir.path))

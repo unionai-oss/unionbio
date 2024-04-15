@@ -2,15 +2,14 @@ import gzip
 import shutil
 from pathlib import Path
 from flytekit import kwtypes, task, Resources, current_context, TaskMetadata
-from flytekit.extras.tasks.shell import OutputLocation, ShellTask
+from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
 from config import ref_hash, base_image, logger
 from datatypes.alignment import Alignment
 from datatypes.reads import Reads
-from tasks.utils import subproc_raise
-
+from datatypes.reference import Reference
 """
 Generate Hisat2 index files from a reference genome.
 
@@ -87,7 +86,7 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     ]
     logger.debug(f"Running command: {cmd}")
 
-    stdout, stderr = subproc_raise(cmd)
+    stdout, stderr = subproc_execute(cmd)
 
     setattr(alignment, "sam", FlyteFile(path=str(sam)))
     setattr(alignment, "alignment_report", FlyteFile(path=str(rep)))
