@@ -1,7 +1,11 @@
+import os
 from pathlib import Path
 from config import test_assets
+from flytekit.types.directory import FlyteDirectory
 from datatypes.alignment import Alignment
 from datatypes.reads import Reads
+from datatypes.reference import Reference
+from datatypes.known_sites import Sites
 
 
 def test_raw_sample_fname():
@@ -48,3 +52,9 @@ def test_sam_file_make_all():
     assert sams[0].aligner in ["hisat2", "bowtie2"]
     assert "ERR250683-tiny_bowtie2_aligned.sam" in sams[0].sam.path
     assert "ERR250683-tiny_bowtie2_aligned_report.txt" in sams[0].report.path
+
+def test_reference():
+    ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=test_assets["ref_dir"]))
+    assert isinstance(ref.ref_dir, FlyteDirectory)
+    assert ref.ref_name in os.listdir(ref.ref_dir.path)
+    assert ref.get_ref_path() == Path(test_assets["ref_dir"]).joinpath(test_assets["ref_fn"])

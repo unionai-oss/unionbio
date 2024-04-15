@@ -1,12 +1,11 @@
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.directory import FlyteDirectory
-from config import logger
 from pathlib import Path
 
 
 @dataclass
-class Reference(DataClassJSONMixin):
+class Reference:#(DataClassJSONMixin):
     """
     Represents a reference FASTA and associated index files.
 
@@ -28,3 +27,5 @@ class Reference(DataClassJSONMixin):
 
     def get_ref_path(self):
         return Path(self.ref_dir.path).joinpath(self.ref_name)
+    
+ref = Reference("name", "dir")
