@@ -33,5 +33,6 @@ test_assets = {
     "idx_dir": "/root/src/tests/assets/indices",
     "bt2_idx_dir": "/root/src/tests/assets/indices/bt2",
     "hs2_idx_dir": "/root/src/tests/assets/indices/hs2",
+    "bwa_idx_dir": "/root/src/tests/assets/indices/bwa",
     "fastqc_dir": "/root/src/tests/assets/fastqc",
 }

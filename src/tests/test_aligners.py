@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 from filecmp import cmp
 from flytekit.types.directory import FlyteDirectory
@@ -9,6 +10,7 @@ from datatypes.alignment import Alignment
 from datatypes.reads import Reads
 from datatypes.reference import Reference
 from config import test_assets
+from tests.utils import dir_contents_match
 
 
 def test_hisat2_index():
@@ -71,9 +73,12 @@ def test_bowtie2_align():
 
 
 def test_bwa_index(tmp_path):
+    shutil.copy(test_assets["ref_path"], tmp_path)
     ref_in = Reference(
         ref_name=test_assets["ref_fn"],
         ref_dir=FlyteDirectory(path=tmp_path),
     )
     ref_out = bwa_index(ref_obj=ref_in)
-    print(os.listdir(ref_out.ref_dir.path))
+    assert dir_contents_match(
+        Path(test_assets["bwa_idx_dir"]), Path(ref_out.ref_dir.path)
+    )
