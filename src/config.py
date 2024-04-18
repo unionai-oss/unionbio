@@ -9,8 +9,8 @@ console_handler.setFormatter(
 # logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-base_image = "localhost:30000/variant-discovery:20240220"
-pb_image = "ghcr.io/unionai/dgx-parabricks:20240202"
+base_image = "localhost:30000/variant-discovery:20240416"
+pb_image = "ghcr.io/unionai/dgx-parabricks:20240416"
 seq_dir_pth = "s3://my-s3-bucket/my-data/sequences"
 ref_loc = "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"
 ref_hash = str(hash(ref_loc))[:4]

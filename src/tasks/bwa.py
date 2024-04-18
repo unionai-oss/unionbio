@@ -1,4 +1,3 @@
-import gzip
 import shutil
 from pathlib import Path
 from flytekit import kwtypes, task, Resources, current_context, TaskMetadata
@@ -7,6 +6,7 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
 from config import ref_hash, base_image, logger
+from tasks.utils import gunzip_file
 from datatypes.reference import Reference
 
 
@@ -14,7 +14,7 @@ from datatypes.reference import Reference
     container_image=base_image,
     requests=Resources(cpu="4", mem="10Gi"),
     cache=True,
-    cache_version=ref_hash
+    cache_version=ref_hash,
 )
 def bwa_index(ref_obj: Reference) -> Reference:
     """Indexes a reference genome using BWA.

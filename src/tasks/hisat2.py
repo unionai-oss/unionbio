@@ -10,6 +10,7 @@ from config import ref_hash, base_image, logger
 from datatypes.alignment import Alignment
 from datatypes.reads import Reads
 from datatypes.reference import Reference
+
 """
 Generate Hisat2 index files from a reference genome.
 

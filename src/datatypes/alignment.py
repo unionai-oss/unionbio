@@ -43,7 +43,7 @@ class Alignment(DataClassJSONMixin):
 
     def get_alignment_fname(self):
         return f"{self._get_state_str()}_aligned.bam"
-    
+
     def get_alignment_idx_fname(self):
         return f"{self._get_state_str()}_aligned.bam.BAI"
 

@@ -55,21 +55,34 @@ def test_alignment_file_make_all():
     assert "ERR250683-tiny_bowtie2_aligned.bam" in sams[0].alignment.path
     assert "ERR250683-tiny_bowtie2_aligned_report.txt" in sams[0].alignment_report.path
 
+
 def test_reference():
     ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=test_assets["ref_dir"]))
     assert isinstance(ref.ref_dir, FlyteDirectory)
     assert ref.ref_name in os.listdir(ref.ref_dir.path)
-    assert ref.get_ref_path() == Path(test_assets["ref_dir"]).joinpath(test_assets["ref_fn"])
+    assert ref.get_ref_path() == Path(test_assets["ref_dir"]).joinpath(
+        test_assets["ref_fn"]
+    )
+
 
 def test_sites():
-    sites = Sites(FlyteFile(path=test_assets["sites_path"]), FlyteFile(path=test_assets["sites_idx_path"]))
+    sites = Sites(
+        FlyteFile(path=test_assets["sites_path"]),
+        FlyteFile(path=test_assets["sites_idx_path"]),
+    )
     assert isinstance(sites.sites, FlyteFile)
     assert isinstance(sites.idx, FlyteFile)
     assert sites.sites.path == test_assets["sites_path"]
     assert sites.idx.path == test_assets["sites_idx_path"]
 
+
 def test_vcf():
-    vcf = VCF("test_sample", "test_caller", FlyteFile(path="test.vcf"), FlyteFile(path="test.vcf.tbi"))
+    vcf = VCF(
+        "test_sample",
+        "test_caller",
+        FlyteFile(path="test.vcf"),
+        FlyteFile(path="test.vcf.tbi"),
+    )
     assert vcf.sample == "test_sample"
     assert vcf.caller == "test_caller"
     assert vcf.vcf.path == "test.vcf"

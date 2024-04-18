@@ -30,10 +30,10 @@ class VCF(DataClassJSONMixin):
 
     def get_vcf_fname(self):
         return f"{self._get_state_str()}.vcf"
-    
+
     def get_vcf_idx_fname(self):
         return f"{self._get_state_str()}.vcf.tbi"
-    
+
     def dl_all(self):
         self.vcf.download()
         self.vcf_idx.download()
