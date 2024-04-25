@@ -34,3 +34,5 @@ class Reference(DataClassJSONMixin):
             return unzipped
         else:
             return fp
+        
+

@@ -199,25 +199,24 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     Returns:
         VCF: Intersected and zipped VCF object.
     """
-    return VCF(sample=vcf1.sample, caller=f"{vcf1.caller}_{vcf2.caller}_isec")
-    # vcf1.dl_all()
-    # vcf2.dl_all()
-    # isec_out = VCF(sample=vcf1.sample, caller=f"{vcf1.caller}_{vcf2.caller}_isec")
+    vcf1.dl_all()
+    vcf2.dl_all()
+    isec_out = VCF(sample=vcf1.sample, caller=f"{vcf1.caller}_{vcf2.caller}_isec")
 
-    # cmd = " ".join([
-    #     "bcftools",
-    #     "isec",
-    #     "-n",
-    #     "+2",
-    #     vcf1.vcf.path,
-    #     vcf2.vcf.path,
-    #     "|",
-    #     "gzip",
-    #     "-c",
-    #     ">",
-    #     f"{isec_out.get_vcf_fname()}.gz",
-    # ])
+    cmd = " ".join([
+        "bcftools",
+        "isec",
+        "-n",
+        "+2",
+        vcf1.vcf.path,
+        vcf2.vcf.path,
+        "|",
+        "gzip",
+        "-c",
+        ">",
+        f"{isec_out.get_vcf_fname()}.gz",
+    ])
 
-    # result = subproc_execute(cmd, shell=True)
+    result = subproc_execute(cmd, shell=True)
 
-    # return isec_out
+    return isec_out

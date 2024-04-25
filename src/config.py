@@ -23,6 +23,8 @@ test_assets = {
     "filt_dir": "/root/src/tests/assets/sequences/filtered",
     "bt2_sam_dir": "/root/src/tests/assets/alignments/bt2",
     "hs2_sam_dir": "/root/src/tests/assets/alignments/hs2",
+    "pb_fq2bam_dir": "/root/src/tests/assets/alignments/pb_fq2bam",
+    "pb_haplocall_dir": "/root/src/tests/assets/alignments/pb_haplocall",
     "sort_dir": "/root/src/tests/assets/alignments/sorted",
     "dedup_dir": "/root/src/tests/assets/alignments/deduped",
     "ref_path": "/root/src/tests/assets/references/GRCh38_short.fasta",
