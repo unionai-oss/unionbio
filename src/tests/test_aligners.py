@@ -34,11 +34,14 @@ def test_hisat2_index():
 def test_hisat2_align():
     idx_dir = FlyteDirectory(test_assets["hs2_idx_dir"])
     filt_samples = Reads.make_all(Path(test_assets["filt_dir"]))
-    sam = hisat2_align_paired_reads(idx=idx_dir, fs=filt_samples[0])
-    assert isinstance(sam, Alignment)
+    al = hisat2_align_paired_reads(idx=idx_dir, fs=filt_samples[0])
+    print(al)
+    assert isinstance(al, Alignment)
+    print(os.listdir(test_assets["hs2_sam_dir"]))
+    print([Path(i).name for i in [al.alignment.path, al.alignment_report.path]])
     assert all(
         x in os.listdir(test_assets["hs2_sam_dir"])
-        for x in [Path(i).name for i in [sam.sam.path, sam.alignment_report.path]]
+        for x in [Path(i).name for i in [al.alignment.path, al.alignment_report.path]]
     )
 
 
@@ -64,11 +67,11 @@ def test_bowtie2_index():
 def test_bowtie2_align():
     idx_dir = FlyteDirectory(test_assets["bt2_idx_dir"])
     filt_samples = Reads.make_all(Path(test_assets["filt_dir"]))
-    sam = bowtie2_align_paired_reads(idx=idx_dir, fs=filt_samples[0])
-    assert isinstance(sam, Alignment)
+    al = bowtie2_align_paired_reads(idx=idx_dir, fs=filt_samples[0])
+    assert isinstance(al, Alignment)
     assert all(
         x in os.listdir(test_assets["bt2_sam_dir"])
-        for x in [Path(i).name for i in [sam.sam.path, sam.alignment_report.path]]
+        for x in [Path(i).name for i in [al.alignment.path, al.alignment_report.path]]
     )
 
 

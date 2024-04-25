@@ -1,10 +1,9 @@
 from pathlib import Path
 from flytekit import task, Resources, current_context
 from flytekit.types.file import FlyteFile
-
+from flytekit.extras.tasks.shell import subproc_execute
 from config import base_image, logger, fastp_cpu
 from datatypes.reads import Reads
-from tasks.utils import subproc_raise
 
 
 @task(
@@ -52,7 +51,7 @@ def pyfastp(rs: Reads) -> Reads:
     ]
     logger.debug(f"Running command: {cmd}")
 
-    subproc_raise(cmd)
+    subproc_execute(cmd)
 
     setattr(samp, "read1", FlyteFile(path=str(o1p)))
     setattr(samp, "read2", FlyteFile(path=str(o2p)))

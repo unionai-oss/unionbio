@@ -53,16 +53,16 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
         fs (Reads): A filtered sample Reads object containing filtered sample data to be aligned.
 
     Returns:
-        Alignment: A Alignment object representing the alignment result in SAM format.
+        Alignment: An Alignment object representing the alignment result.
     """
     idx.download()
     logger.debug(f"Index downloaded to {idx.path}")
     ldir = Path(current_context().working_directory)
 
-    alignment = Alignment(fs.sample, "bowtie2")
-    sam = ldir.joinpath(alignment.get_alignment_fname())
+    alignment = Alignment(fs.sample, "bowtie2", "sam")
+    al = ldir.joinpath(alignment.get_alignment_fname())
     rep = ldir.joinpath(alignment.get_report_fname())
-    logger.debug(f"Writing SAM to {sam} and report to {rep}")
+    logger.debug(f"Writing alignment to {al} and report to {rep}")
 
     cmd = [
         "bowtie2",
@@ -73,16 +73,16 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
         "-2",
         fs.read2,
         "-S",
-        sam,
+        al,
     ]
     logger.debug(f"Running command: {cmd}")
 
-    stdout, stderr = subproc_execute(cmd)
+    result = subproc_execute(cmd)
 
     with open(rep, "w") as f:
-        f.write(stderr)
+        f.write(result.error)
 
-    setattr(alignment, "sam", FlyteFile(path=str(sam)))
+    setattr(alignment, "alignment", FlyteFile(path=str(al)))
     setattr(alignment, "alignment_report", FlyteFile(path=str(rep)))
     setattr(alignment, "sorted", False)
     setattr(alignment, "deduped", False)

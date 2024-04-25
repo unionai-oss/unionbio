@@ -26,6 +26,7 @@ class Alignment(DataClassJSONMixin):
 
     sample: str
     aligner: str
+    format: str
     alignment: FlyteFile | None = None
     alignment_idx: FlyteFile | None = None
     alignment_report: FlyteFile | None = None
@@ -42,7 +43,7 @@ class Alignment(DataClassJSONMixin):
         return state
 
     def get_alignment_fname(self):
-        return f"{self._get_state_str()}_aligned.bam"
+        return f"{self._get_state_str()}_aligned.{self.format}"
 
     def get_alignment_idx_fname(self):
         return f"{self._get_state_str()}_aligned.bam.BAI"
@@ -75,7 +76,7 @@ class Alignment(DataClassJSONMixin):
             else:
                 setattr(samples[sample], "deduped", False)
 
-            if "bam" in fp.name:
+            if "bam" in fp.name or "sam" in fp.name:
                 setattr(samples[sample], "alignment", FlyteFile(path=str(fp)))
             elif "report" in fp.name:
                 setattr(samples[sample], "report", FlyteFile(path=str(fp)))

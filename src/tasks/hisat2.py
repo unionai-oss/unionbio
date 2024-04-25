@@ -54,14 +54,14 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
         fs (Reads): A Reads object containing filtered sample data to be aligned.
 
     Returns:
-        Alignment: An Alignment object representing the alignment result in SAM format.
+        Alignment: An Alignment object representing the alignment result.
     """
     idx.download()
     ldir = Path(current_context().working_directory)
-    alignment = Alignment(fs.sample, "hisat2")
-    sam = ldir.joinpath(alignment.get_alignment_fname())
+    alignment = Alignment(fs.sample, "hisat2", "sam")
+    al = ldir.joinpath(alignment.get_alignment_fname())
     rep = ldir.joinpath(alignment.get_report_fname())
-    logger.debug(f"Writing SAM to {sam} and report to {rep}")
+    logger.debug(f"Writing SAM to {al} and report to {rep}")
 
     unc_r1 = ldir.joinpath(f"{fs.sample}_1.fq")
     unc_r2 = ldir.joinpath(f"{fs.sample}_2.fq")
@@ -81,15 +81,15 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
         "-2",
         unc_r2,
         "-S",
-        sam,
+        al,
         "--summary-file",
         rep,
     ]
     logger.debug(f"Running command: {cmd}")
 
-    stdout, stderr = subproc_execute(cmd)
+    result = subproc_execute(cmd)
 
-    setattr(alignment, "sam", FlyteFile(path=str(sam)))
+    setattr(alignment, "al", FlyteFile(path=str(al)))
     setattr(alignment, "alignment_report", FlyteFile(path=str(rep)))
     setattr(alignment, "sorted", False)
     setattr(alignment, "deduped", False)

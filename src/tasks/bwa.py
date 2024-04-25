@@ -5,8 +5,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execu
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from config import ref_hash, base_image, logger
-from tasks.utils import gunzip_file
+from config import ref_hash, base_image
 from datatypes.reference import Reference
 
 
