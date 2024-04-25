@@ -61,7 +61,7 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     alignment = Alignment(fs.sample, "hisat2", "sam")
     al = ldir.joinpath(alignment.get_alignment_fname())
     rep = ldir.joinpath(alignment.get_report_fname())
-    logger.debug(f"Writing SAM to {al} and report to {rep}")
+    logger.debug(f"Writing alignment to {al} and report to {rep}")
 
     unc_r1 = ldir.joinpath(f"{fs.sample}_1.fq")
     unc_r2 = ldir.joinpath(f"{fs.sample}_2.fq")
@@ -88,8 +88,9 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     logger.debug(f"Running command: {cmd}")
 
     result = subproc_execute(cmd)
+    logger.info(f"Hisat exited with code {result.returncode}, output: {result.output}, error: {result.error}")
 
-    setattr(alignment, "al", FlyteFile(path=str(al)))
+    setattr(alignment, "alignment", FlyteFile(path=str(al)))
     setattr(alignment, "alignment_report", FlyteFile(path=str(rep)))
     setattr(alignment, "sorted", False)
     setattr(alignment, "deduped", False)

@@ -35,10 +35,7 @@ def test_hisat2_align():
     idx_dir = FlyteDirectory(test_assets["hs2_idx_dir"])
     filt_samples = Reads.make_all(Path(test_assets["filt_dir"]))
     al = hisat2_align_paired_reads(idx=idx_dir, fs=filt_samples[0])
-    print(al)
     assert isinstance(al, Alignment)
-    print(os.listdir(test_assets["hs2_sam_dir"]))
-    print([Path(i).name for i in [al.alignment.path, al.alignment_report.path]])
     assert all(
         x in os.listdir(test_assets["hs2_sam_dir"])
         for x in [Path(i).name for i in [al.alignment.path, al.alignment_report.path]]
