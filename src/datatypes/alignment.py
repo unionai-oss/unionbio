@@ -2,6 +2,7 @@ from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
 from pathlib import Path
+from config import logger
 
 
 @dataclass
@@ -26,7 +27,7 @@ class Alignment(DataClassJSONMixin):
 
     sample: str
     aligner: str
-    format: str
+    format: str | None = None
     alignment: FlyteFile | None = None
     alignment_idx: FlyteFile | None = None
     alignment_report: FlyteFile | None = None
@@ -60,7 +61,10 @@ class Alignment(DataClassJSONMixin):
     @classmethod
     def make_all(cls, dir: Path):
         samples = {}
-        for fp in list(dir.rglob("*aligned*")):
+        pattern = "*aligned*"
+        dir_contents = list(dir.rglob(pattern))
+        logger.info(f"Found following alignment files in {dir} matching {pattern}: {dir_contents}")
+        for fp in dir_contents:
             sample, aligner = fp.stem.split("_")[0:2]
 
             if sample not in samples:
@@ -76,9 +80,14 @@ class Alignment(DataClassJSONMixin):
             else:
                 setattr(samples[sample], "deduped", False)
 
-            if "bam" in fp.name or "sam" in fp.name:
+            if "bam" in fp.name:
+                setattr(samples[sample], "format", "bam")
+                setattr(samples[sample], "alignment", FlyteFile(path=str(fp)))
+            elif "sam" in fp.name:
+                setattr(samples[sample], "format", "sam")
                 setattr(samples[sample], "alignment", FlyteFile(path=str(fp)))
             elif "report" in fp.name:
-                setattr(samples[sample], "report", FlyteFile(path=str(fp)))
+                setattr(samples[sample], "alignment_report", FlyteFile(path=str(fp)))
 
+        logger.info(f"Created following Alignment objects from {dir}: {samples}")
         return list(samples.values())
