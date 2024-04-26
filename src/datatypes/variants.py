@@ -1,6 +1,8 @@
+from pathlib import Path
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
+from config import logger
 
 
 @dataclass
@@ -37,3 +39,37 @@ class VCF(DataClassJSONMixin):
     def dl_all(self):
         self.vcf.download()
         self.vcf_idx.download()
+
+    @classmethod
+    def make_all(cls, dir: Path):
+        samples = {}
+        pattern = "*vcf*"
+        dir_contents = list(dir.rglob(pattern))
+        logger.info(f"Found following VCF files in {dir} matching {pattern}: {dir_contents}")
+        for fp in dir_contents:
+            sample, aligner = fp.stem.split("_")[0:2]
+
+            if sample not in samples:
+                samples[sample] = VCF(sample=sample, aligner=aligner)
+
+            if "sorted" in fp.name:
+                setattr(samples[sample], "sorted", True)
+            else:
+                setattr(samples[sample], "sorted", False)
+
+            if "deduped" in fp.name:
+                setattr(samples[sample], "deduped", True)
+            else:
+                setattr(samples[sample], "deduped", False)
+
+            if "bam" in fp.name:
+                setattr(samples[sample], "format", "bam")
+                setattr(samples[sample], "alignment", FlyteFile(path=str(fp)))
+            elif "sam" in fp.name:
+                setattr(samples[sample], "format", "sam")
+                setattr(samples[sample], "alignment", FlyteFile(path=str(fp)))
+            elif "report" in fp.name:
+                setattr(samples[sample], "alignment_report", FlyteFile(path=str(fp)))
+
+        logger.info(f"Created following Alignment objects from {dir}: {samples}")
+        return list(samples.values())

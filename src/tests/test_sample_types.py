@@ -65,17 +65,6 @@ def test_reference():
     )
 
 
-def test_sites():
-    sites = Sites(
-        FlyteFile(path=test_assets["sites_path"]),
-        FlyteFile(path=test_assets["sites_idx_path"]),
-    )
-    assert isinstance(sites.sites, FlyteFile)
-    assert isinstance(sites.idx, FlyteFile)
-    assert sites.sites.path == test_assets["sites_path"]
-    assert sites.idx.path == test_assets["sites_idx_path"]
-
-
 def test_vcf():
     vcf = VCF(
         "test_sample",

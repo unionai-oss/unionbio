@@ -31,7 +31,6 @@ def test_fetch_ftp_file(tmp_path):
 
 
 def test_intersect_vcfs(tmp_path):
-    # Test that intersect_vcfs returns a FlyteFile
     vcf1 = tmp_path / "vcf1.vcf"
     vcf2 = tmp_path / "vcf2.vcf"
     vcf1.write_text(
