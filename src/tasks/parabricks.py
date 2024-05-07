@@ -4,7 +4,6 @@ from flytekit import task, Resources, current_context, ImageSpec
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-# from flytekitplugins.dgx import DGXConfig
 
 from datatypes.alignment import Alignment
 from datatypes.reference import Reference
@@ -19,9 +18,6 @@ pb_image = ImageSpec(
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
 )
 
-# Supported DGX instances:
-# dgxa100.80g.1.norm, dgxa100.80g.2.norm, dgxa100.80g.4.norm, dgxa100.80g.8.norm
-# @task(task_config=DGXConfig(instance="dgxa100.80g.1.norm"), container_image=pb_image)
 @task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
 def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
     """
@@ -76,7 +72,6 @@ def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
 
 
 @task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
-# @task(task_config=DGXConfig(instance="dgxa100.80g.1.norm"), container_image=pb_image)
 def basic_align(indir: FlyteDirectory) -> Tuple[FlyteFile, str]:
     """
     Aligns paired-end sequencing reads using BWA-MEM and GATK tools, and returns the path to the processed BAM file

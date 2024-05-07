@@ -79,7 +79,10 @@ RUN wget https://github.com/broadinstitute/gatk/releases/download/${GATK_VER}/ga
 RUN git clone --recurse-submodules https://github.com/samtools/htslib.git && \
     git clone https://github.com/samtools/bcftools.git && \
     cd bcftools && \
-    make
+    make && \
+    cd ../htslib && \
+    make && \
+    make install
 
 # Copy code and install deps
 COPY . /root

@@ -31,14 +31,8 @@ def test_fetch_ftp_file(tmp_path):
 
 
 def test_intersect_vcfs(tmp_path):
-    vcf1 = tmp_path / "vcf1.vcf"
-    vcf2 = tmp_path / "vcf2.vcf"
-    vcf1.write_text(
-        "##fileformat=VCFv4.2\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n"
-    )
-    vcf2.write_text(
-        "##fileformat=VCFv4.2\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n"
-    )
+    vcf1 = test_assets['vcf_path']
+    vcf2 = test_assets['vcf_path']
     vcf1_obj = FlyteFile(vcf1)
     vcf2_obj = FlyteFile(vcf2)
     out = intersect_vcfs(vcf1=vcf1_obj, vcf2=vcf2_obj)

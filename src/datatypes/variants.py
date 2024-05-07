@@ -31,10 +31,10 @@ class VCF(DataClassJSONMixin):
         return state
 
     def get_vcf_fname(self):
-        return f"{self._get_state_str()}.vcf"
+        return f"{self._get_state_str()}.vcf.gz"
 
     def get_vcf_idx_fname(self):
-        return f"{self._get_state_str()}.vcf.tbi"
+        return f"{self._get_state_str()}.vcf.gz.tbi"
 
     def dl_all(self):
         self.vcf.download()
@@ -47,15 +47,16 @@ class VCF(DataClassJSONMixin):
         dir_contents = list(dir.rglob(pattern))
         logger.info(f"Found following VCF files in {dir} matching {pattern}: {dir_contents}")
         for fp in dir_contents:
-            sample, aligner = fp.stem.split("_")[0:2]
+            stem = str(fp.stem).split(".")[0]
+            sample, caller = stem.split("_")[0:2]
 
             if sample not in samples:
-                samples[sample] = VCF(sample=sample, aligner=aligner)
+                samples[sample] = VCF(sample=sample, caller=caller)
 
-            if "vcf" in fp.name:
-                setattr(samples[sample], "vcf", FlyteFile(path=str(fp)))
-            elif "tbi" in fp.name:
+            if "tbi" in fp.name:
                 setattr(samples[sample], "vcf_idx", FlyteFile(path=str(fp)))
+            if "vcf" in fp.name and "tbi" not in fp.name:
+                setattr(samples[sample], "vcf", FlyteFile(path=str(fp)))
 
         logger.info(f"Created following VCF objects from {dir}: {samples}")
         return list(samples.values())

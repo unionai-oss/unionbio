@@ -66,14 +66,27 @@ def test_reference():
 
 def test_vcf():
     vcf = VCF(
-        "test_sample",
-        "test_caller",
-        FlyteFile(path=test_assets["sites_path"]),
-        FlyteFile(path=test_assets["sites_idx_path"]),
+        "test-sample",
+        "test-caller",
+        FlyteFile(path=test_assets["vcf_path"]),
+        FlyteFile(path=test_assets["vcf_idx_path"]),
     )
-    assert vcf.sample == "test_sample"
-    assert vcf.caller == "test_caller"
-    assert vcf.vcf.path == "test.vcf"
-    assert vcf.vcf_idx.path == "test.vcf.tbi"
-    assert vcf.get_vcf_fname() == "test_sample_test_caller.vcf"
-    assert vcf.get_vcf_idx_fname() == "test_sample_test_caller.vcf.tbi"
+    assert vcf.sample == "test-sample"
+    assert vcf.caller == "test-caller"
+    assert vcf.vcf.path == test_assets["vcf_path"]
+    assert vcf.vcf_idx.path == test_assets["vcf_idx_path"]
+    assert vcf.get_vcf_fname() == "test-sample_test-caller.vcf.gz"
+    assert vcf.get_vcf_idx_fname() == "test-sample_test-caller.vcf.gz.tbi"
+
+
+
+def test_vcf_make_all():
+    vcfs = VCF.make_all(Path(test_assets["vcf_dir"]))
+    assert len(vcfs) == 1
+    assert isinstance(vcfs[0], VCF)
+    assert vcfs[0].sample == "test-sample"
+    assert vcfs[0].caller == "test-caller"
+    assert vcfs[0].vcf.path == test_assets["vcf_path"]
+    assert vcfs[0].vcf_idx.path == test_assets["vcf_idx_path"]
+    assert vcfs[0].get_vcf_fname() == "test-sample_test-caller.vcf.gz"
+    assert vcfs[0].get_vcf_idx_fname() == "test-sample_test-caller.vcf.gz.tbi"
