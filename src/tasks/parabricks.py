@@ -1,39 +1,46 @@
 from typing import List, Tuple
 from pathlib import Path
-from flytekit import task, Resources, current_context
+from flytekit import task, Resources, current_context, ImageSpec
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 # from flytekitplugins.dgx import DGXConfig
 
-from config import pb_image
 from datatypes.alignment import Alignment
 from datatypes.reference import Reference
 from datatypes.reads import Reads
-from datatypes.known_sites import Sites
 from datatypes.variants import VCF
 
+pb_image = ImageSpec(
+    name="flyte-parabricks",
+    python_version="3.10",
+    packages=["flytekit"],
+    registry="ghcr.io/unionai-oss",
+    base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
+)
 
 # Supported DGX instances:
 # dgxa100.80g.1.norm, dgxa100.80g.2.norm, dgxa100.80g.4.norm, dgxa100.80g.8.norm
 # @task(task_config=DGXConfig(instance="dgxa100.80g.1.norm"), container_image=pb_image)
 @task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
-def pb_fq2bam(reads: Reads, sites: Sites, ref: Reference) -> Alignment:
+def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
     """
-    Takes an input directory containing sequence data and an indexed reference genome and
-    performs alignment using Parabricks' fq2bam tool.
+    Takes an input directory containing paired-end FASTQ files and an indexed reference genome and
+    performs alignment using Parabricks' accelerated version of BWA-MEM.
 
     Args:
-
+        reads (Reads): The input directory containing paired-end FASTQ files.
+        sites (VCF): The input VCF file containing known sites.
+        ref (Reference): The indexed reference genome.
 
     Returns:
-
+        Alignment: The resulting alignment in Alignment format.
     """
     RGTAG = "@RG\tID:HG002\tLB:lib\tPL:Illumina\tSM:HG002\tPU:HG002"
     reads.read1.download()
     reads.read2.download()
-    sites.sites.download()
-    sites.idx.download()
+    sites.vcf.download()
+    sites.vcf_idx.download()
     ref.ref_dir.download()
 
     al_out = Alignment(sample=reads.sample, aligner="pbrun_fq2bam")

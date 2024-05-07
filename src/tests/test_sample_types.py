@@ -6,7 +6,6 @@ from flytekit.types.file import FlyteFile
 from datatypes.alignment import Alignment
 from datatypes.reads import Reads
 from datatypes.reference import Reference
-from datatypes.known_sites import Sites
 from datatypes.variants import VCF
 
 
@@ -69,8 +68,8 @@ def test_vcf():
     vcf = VCF(
         "test_sample",
         "test_caller",
-        FlyteFile(path="test.vcf"),
-        FlyteFile(path="test.vcf.tbi"),
+        FlyteFile(path=test_assets["sites_path"]),
+        FlyteFile(path=test_assets["sites_idx_path"]),
     )
     assert vcf.sample == "test_sample"
     assert vcf.caller == "test_caller"

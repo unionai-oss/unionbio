@@ -16,7 +16,6 @@ from flytekit.extras.tasks.shell import subproc_execute
 from config import base_image, logger, pb_image
 from datatypes.reads import Reads
 from datatypes.reference import Reference
-from datatypes.known_sites import Sites
 from datatypes.variants import VCF
 from tasks.helpers import fetch_file
 
@@ -63,7 +62,7 @@ def fetch_remote_reads(urls: List[str]) -> Reads:
 
 
 @task(cache=True, cache_version="1.0")
-def fetch_remote_sites(sites: str, idx: str) -> Sites:
+def fetch_remote_sites(sites: str, idx: str) -> VCF:
     """
     Fetches remote known sites from a URL and returns a Sites object.
 
@@ -75,7 +74,7 @@ def fetch_remote_sites(sites: str, idx: str) -> Sites:
     workdir = current_context().working_directory
     sites_path = fetch_file(sites, workdir)
     idx_path = fetch_file(idx, workdir)
-    return Sites(sites=FlyteFile(path=sites_path), idx=FlyteFile(path=idx_path))
+    return VCF(sites=FlyteFile(path=sites_path), idx=FlyteFile(path=idx_path))
 
 
 @task
