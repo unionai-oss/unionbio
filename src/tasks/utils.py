@@ -185,7 +185,7 @@ def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
     return no_out
 
 
-@task(container_image=pb_image)
+@task(container_image=base_image)
 def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     """
     Takes the intersection of 2 VCF files and returns a new VCF file to increase
@@ -201,21 +201,23 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     vcf1.dl_all()
     vcf2.dl_all()
     isec_out = VCF(sample=vcf1.sample, caller=f"{vcf1.caller}_{vcf2.caller}_isec")
+    fname_out = isec_out.get_vcf_fname()
 
     cmd = " ".join([
         "bcftools",
         "isec",
-        "-n",
-        "+2",
+        "-n=2",
+        "-O",
+        "z",
+        "-w",
+        "1",
         vcf1.vcf.path,
         vcf2.vcf.path,
-        "|",
-        "gzip",
-        "-c",
-        ">",
-        f"{isec_out.get_vcf_fname()}.gz",
+        "-o",
+        fname_out,
     ])
 
-    result = subproc_execute(cmd, shell=True)
+    subproc_execute(cmd, shell=True)
+    setattr(isec_out, "vcf", FlyteFile(path=fname_out))
 
     return isec_out

@@ -75,12 +75,15 @@ RUN wget https://github.com/broadinstitute/gatk/releases/download/${GATK_VER}/ga
     chmod a+x /usr/local/bin/gatk && \
     rm -rf gatk-${GATK_VER}*
 
-# Install bcftools
+# Install htslib
 RUN git clone --recurse-submodules https://github.com/samtools/htslib.git && \
-    git clone https://github.com/samtools/bcftools.git && \
-    cd bcftools && \
+    cd htslib && \
     make && \
-    cd ../htslib && \
+    make install
+    
+# Install bcftools
+RUN git clone https://github.com/samtools/bcftools.git && \
+    cd bcftools && \
     make && \
     make install
 

@@ -6,6 +6,7 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from datatypes.alignment import Alignment
 from datatypes.reads import Reads
+from datatypes.variants import VCF
 from tasks.utils import fetch_file, intersect_vcfs
 from tasks.helpers import gunzip_file
 from config import test_assets
@@ -30,13 +31,12 @@ def test_fetch_ftp_file(tmp_path):
     assert outpath.name == "tech-report.txt"
 
 
-def test_intersect_vcfs(tmp_path):
-    vcf1 = test_assets['vcf_path']
-    vcf2 = test_assets['vcf_path']
-    vcf1_obj = FlyteFile(vcf1)
-    vcf2_obj = FlyteFile(vcf2)
-    out = intersect_vcfs(vcf1=vcf1_obj, vcf2=vcf2_obj)
-    assert isinstance(out, FlyteFile)
+def test_intersect_vcfs():
+    vcf1 = VCF.make_all(Path(test_assets["vcf_dir"]))[0]
+    vcf2 = VCF.make_all(Path(test_assets["vcf_dir"]))[0]
+    out = intersect_vcfs(vcf1=vcf1, vcf2=vcf2)
+    print(out)
+    assert isinstance(out, VCF)
 
 def test_gunzip():
     gzfile = test_assets['sites_path']
