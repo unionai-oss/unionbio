@@ -33,7 +33,7 @@ def test_hisat2_index():
 
 def test_hisat2_align():
     idx_dir = FlyteDirectory(test_assets["hs2_idx_dir"])
-    filt_samples = Reads.make_all(Path(test_assets["filt_dir"]))
+    filt_samples = Reads.make_all(Path(test_assets["filt_seq_dir"]))
     al = hisat2_align_paired_reads(idx=idx_dir, fs=filt_samples[0])
     assert isinstance(al, Alignment)
     assert all(
@@ -63,7 +63,7 @@ def test_bowtie2_index():
 
 def test_bowtie2_align():
     idx_dir = FlyteDirectory(test_assets["bt2_idx_dir"])
-    filt_samples = Reads.make_all(Path(test_assets["filt_dir"]))
+    filt_samples = Reads.make_all(Path(test_assets["filt_seq_dir"]))
     al = bowtie2_align_paired_reads(idx=idx_dir, fs=filt_samples[0])
     assert isinstance(al, Alignment)
     assert all(

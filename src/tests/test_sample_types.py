@@ -15,7 +15,7 @@ def test_raw_sample_fname():
 
 
 def test_raw_sample_make_all():
-    samps = Reads.make_all(Path(test_assets["seq_dir"]))
+    samps = Reads.make_all(Path(test_assets["raw_seq_dir"]))
     assert len(samps) == 1
     assert isinstance(samps[0], Reads)
     assert "ERR250683-tiny_1.fastq.gz" in samps[0].read1.path
@@ -23,7 +23,7 @@ def test_raw_sample_make_all():
 
 
 def test_filt_sample_fname():
-    filt_samp = Reads.make_all(Path(test_assets["filt_dir"]))[0]
+    filt_samp = Reads.make_all(Path(test_assets["filt_seq_dir"]))[0]
     o1, o2 = filt_samp.get_read_fnames()
     rep = filt_samp.get_report_fname()
     assert o1 == "ERR250683-tiny_1.filt.fastq.gz"
@@ -31,7 +31,7 @@ def test_filt_sample_fname():
 
 
 def test_filt_sample_make_all():
-    filt_samps = Reads.make_all(Path(test_assets["filt_dir"]))
+    filt_samps = Reads.make_all(Path(test_assets["filt_seq_dir"]))
     assert len(filt_samps) == 1
     assert isinstance(filt_samps[0], Reads)
     assert filt_samps[0].sample == "ERR250683-tiny"

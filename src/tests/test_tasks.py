@@ -13,7 +13,7 @@ from config import test_assets
 
 
 def test_fastqc():
-    qc_samp = fastqc(seq_dir=test_assets["seq_dir"])
+    qc_samp = fastqc(seq_dir=test_assets["raw_seq_dir"])
     assert isinstance(qc_samp, FlyteDirectory)
     assert all(
         i in os.listdir(test_assets["fastqc_dir"]) for i in os.listdir(qc_samp.path)
@@ -21,12 +21,12 @@ def test_fastqc():
 
 
 def test_fastp():
-    raw_samp = Reads.make_all(Path(test_assets["seq_dir"]))[0]
+    raw_samp = Reads.make_all(Path(test_assets["raw_seq_dir"]))[0]
     filt_samp = pyfastp(rs=raw_samp)
     assert isinstance(filt_samp, Reads)
     assert cmp(
         Path(filt_samp.read1.path),
-        Path(test_assets["filt_dir"]).joinpath("ERR250683-tiny_1.filt.fastq.gz"),
+        Path(test_assets["filt_seq_dir"]).joinpath("ERR250683-tiny_1.filt.fastq.gz"),
     )
 
 
