@@ -34,7 +34,7 @@ def test_sort_sam():
     alignment = Alignment.make_all(Path(test_assets["bt2_sam_dir"]))[0]
     alignment.sorted = True
     fname = alignment.get_alignment_fname()
-    sorted_alignment = sort_sam(out_fname=fname, sam=alignment.sam)
+    sorted_alignment = sort_sam(out_fname=fname, sam=alignment.alignment)
     assert isinstance(sorted_alignment, FlyteFile)
     assert cmp(
         Path(sorted_alignment.path),
@@ -51,7 +51,7 @@ def test_mark_dups():
     deduped, metrics = mark_dups(
         oafn=alignment.get_alignment_fname(),
         omfn=alignment.get_metrics_fname(),
-        al=alignment.sam,
+        al=alignment.alignment,
     )
     assert isinstance(deduped, FlyteFile)
     assert all(

@@ -1,13 +1,12 @@
 from tasks.parabricks import pb_fq2bam, pb_deepvar, pb_haplocall
 from datatypes.reference import Reference
-from datatypes.known_sites import Sites
 from datatypes.reads import Reads
 from datatypes.alignment import Alignment
 from datatypes.variants import VCF
 from config import test_assets
 
 ref_obj = Reference(ref_name=test_assets["ref_fn"], ref_dir=test_assets["ref_dir"])
-sites_obj = Sites(sites=test_assets["sites_path"], idx=test_assets["sites_idx_path"])
+sites_obj = VCF(vcf=test_assets["sites_path"], vcf_idx=test_assets["sites_idx_path"])
 
 def test_pb_fq2bam():
     reads_obj = Reads.make_all(test_assets["seq_dir"])
