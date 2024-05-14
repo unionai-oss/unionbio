@@ -4,25 +4,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 import py3Dmol # -> used to visualize protein structures
-import together # -> to call the API
-# ↓ Tools to process DNA and protein data
 import biotite.structure.io as bsio
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-# ↓ To load ESMFold from HuggingFace, which we use to predict protein foldings
-from transformers import (
-  AutoTokenizer,
-  EsmForProteinFolding,
-  set_seed
-)
 from flytekit import ImageSpec, Resources, task, workflow
 from datatypes.reads import Reads
 from datatypes.protein import Protein
 from config import test_assets
 
 folding_img = ImageSpec(
-    image_name="biobeyond/esmfold:latest",
+    image_name="protein_folding",
     base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
     packages=["biopython", "biotite", "transformers", "py3Dmol"],
     conda_channels=["bioconda"],

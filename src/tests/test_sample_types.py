@@ -7,6 +7,7 @@ from datatypes.alignment import Alignment
 from datatypes.reads import Reads
 from datatypes.reference import Reference
 from datatypes.variants import VCF
+from datatypes.protein import Protein
 
 
 def test_raw_sample_fname():
@@ -90,3 +91,11 @@ def test_vcf_make_all():
     assert vcfs[0].vcf_idx.path == test_assets["vcf_idx_path"]
     assert vcfs[0].get_vcf_fname() == "test-sample_test-caller.vcf.gz"
     assert vcfs[0].get_vcf_idx_fname() == "test-sample_test-caller.vcf.gz.tbi"
+
+
+def test_protein():
+    prot = Protein("test-protein", FlyteFile(path="test-path"))
+    assert prot.name == "test-protein"
+    assert prot.protein.path == "test-path"
+    assert prot.get_prot_fname() == "test-protein_proteins.fasta"
+    assert prot.get_genes_fname() == "test-protein_genes.gff"
