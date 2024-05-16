@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 # Setup the logger
 logger = logging.getLogger(__name__)
@@ -18,26 +19,28 @@ ref_hash = str(hash(ref_loc))[:4]
 # Tool config
 fastp_cpu = "3"
 
+root_dir = str(Path.cwd())
+
 test_assets = {
-    "seq_dir": "/root/src/tests/assets/sequences/raw",
-    "filt_dir": "/root/src/tests/assets/sequences/filtered",
-    "bt2_sam_dir": "/root/src/tests/assets/alignments/bt2",
-    "hs2_sam_dir": "/root/src/tests/assets/alignments/hs2",
-    "pb_fq2bam_dir": "/root/src/tests/assets/alignments/pb_fq2bam",
-    "pb_haplocall_dir": "/root/src/tests/assets/alignments/pb_haplocall",
-    "sort_dir": "/root/src/tests/assets/alignments/sorted",
-    "dedup_dir": "/root/src/tests/assets/alignments/deduped",
-    "ref_path": "/root/src/tests/assets/references/GRCh38_short.fasta",
-    "ref_dir": "/root/src/tests/assets/references/",
+    "seq_dir": f"{root_dir}/src/tests/assets/sequences/raw",
+    "filt_dir": f"{root_dir}/src/tests/assets/sequences/filtered",
+    "bt2_sam_dir": f"{root_dir}/src/tests/assets/alignments/bt2",
+    "hs2_sam_dir": f"{root_dir}/src/tests/assets/alignments/hs2",
+    "pb_fq2bam_dir": f"{root_dir}/src/tests/assets/alignments/pb_fq2bam",
+    "pb_haplocall_dir": f"{root_dir}/src/tests/assets/alignments/pb_haplocall",
+    "sort_dir": f"{root_dir}/src/tests/assets/alignments/sorted",
+    "dedup_dir": f"{root_dir}/src/tests/assets/alignments/deduped",
+    "ref_path": f"{root_dir}/src/tests/assets/references/GRCh38_short.fasta",
+    "ref_dir": f"{root_dir}/src/tests/assets/references/",
     "ref_fn": "GRCh38_short.fasta",
-    "sites_path": "/root/src/tests/assets/sites/known_indels_trunc.hg38.vcf.gz",
-    "sites_idx_path": "/root/src/tests/assets/sites/known_indels_trunc.hg38.vcf.gz.tbi",
-    "vcf_path": "/root/src/tests/assets/vcfs/test-sample_test-caller.vcf.gz",
-    "vcf_idx_path": "/root/src/tests/assets/vcfs/test-sample_test-caller.vcf.gz.tbi",
-    "vcf_dir": "/root/src/tests/assets/vcfs/",
-    "idx_dir": "/root/src/tests/assets/indices",
-    "bt2_idx_dir": "/root/src/tests/assets/indices/bt2",
-    "hs2_idx_dir": "/root/src/tests/assets/indices/hs2",
-    "bwa_idx_dir": "/root/src/tests/assets/indices/bwa",
-    "fastqc_dir": "/root/src/tests/assets/fastqc",
+    "sites_path": f"{root_dir}/src/tests/assets/sites/known_indels_trunc.hg38.vcf.gz",
+    "sites_idx_path": f"{root_dir}/src/tests/assets/sites/known_indels_trunc.hg38.vcf.gz.tbi",
+    "vcf_path": f"{root_dir}/src/tests/assets/vcfs/test-sample_test-caller.vcf.gz",
+    "vcf_idx_path": f"{root_dir}/src/tests/assets/vcfs/test-sample_test-caller.vcf.gz.tbi",
+    "vcf_dir": f"{root_dir}/src/tests/assets/vcfs/",
+    "idx_dir": f"{root_dir}/src/tests/assets/indices",
+    "bt2_idx_dir": f"{root_dir}/src/tests/assets/indices/bt2",
+    "hs2_idx_dir": f"{root_dir}/src/tests/assets/indices/hs2",
+    "bwa_idx_dir": f"{root_dir}/src/tests/assets/indices/bwa",
+    "fastqc_dir": f"{root_dir}/src/tests/assets/fastqc",
 }

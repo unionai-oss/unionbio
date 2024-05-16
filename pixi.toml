@@ -1,0 +1,47 @@
+[project]
+name = "testo"
+version = "0.1.0"
+description = "Add a short description here"
+authors = ["pryce-turner <pryce.turner@gmail.com>"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64", "osx-64"]
+
+[tasks]
+
+[dependencies]
+python = "3.11.*"
+flytekit = ">=1.12.0,<1.13"
+
+[feature.main]
+channels = ["bioconda"]
+platforms = ["linux-64"]
+
+[feature.main.dependencies]
+multiqc = "*"
+samtools = "*"
+bcftools = "*"
+htslib = "*"
+tabix = "*"
+gatk4 = "*"
+bowtie2 = "*"
+hisat2 = "*"
+fastp = "*"
+bwa = "*"
+requests = ">=2.23.0,<2.32"
+
+[feature.test.dependencies]
+pytest = ">=7.2.0,<8.3"
+
+[feature.parabricks]
+platforms = ["linux-64"]
+
+[feature.parabricks.dependencies]
+flytekit = ">=1.12.0,<1.13"
+
+[feature.folding]
+channels = ["bioconda"]
+
+[feature.folding.dependencies]
+biopython = ">=1.83,<2"
+py3dmol = ">=2.1.0,<2.2"
+prodigal = "*"
