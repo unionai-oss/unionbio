@@ -9,7 +9,7 @@ platforms = ["osx-arm64", "linux-64", "osx-64"]
 [tasks]
 
 [dependencies]
-python = "3.9.*"
+python = "3.10.*"
 
 [feature.main]
 channels = ["conda-forge", "bioconda"]
@@ -31,22 +31,24 @@ requests = "*"
 [feature.test.dependencies]
 pytest = ">=7.2.0,<8.3"
 
-# [feature.parabricks]
-# platforms = ["linux-64"]
+[feature.parabricks]
+platforms = ["linux-64"]
 
-# [feature.parabricks.dependencies]
-# flytekit = ">=1.12.0,<1.13"
+[feature.parabricks.dependencies]
+flytekit = ">=1.12.0,<1.13"
 
-# [feature.folding]
-# channels = ["bioconda"]
+[feature.folding]
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64"]
 
-# [feature.folding.dependencies]
-# biopython = ">=1.83,<2"
-# py3dmol = ">=2.1.0,<2.2"
-# prodigal = "*"
+[feature.folding.dependencies]
+prodigal = "*"
+biopython = ">=1.83,<2"
+biotite = ">=0.40.0,<0.41"
+py3dmol = ">=2.1.0,<2.2"
 
 [environments]
 main = ["main"]
 test = ["test"]
-# parabricks = ["parabricks"]
-# folding = ["folding"]
+parabricks = ["parabricks"]
+folding = ["folding"]
