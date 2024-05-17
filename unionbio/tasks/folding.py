@@ -2,7 +2,6 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import torch
 import py3Dmol # -> used to visualize protein structures
 import biotite.structure.io as bsio
 from Bio import SeqIO
@@ -22,7 +21,7 @@ folding_img = ImageSpec(
     registry="ghcr.io/pryce-turner"
 )
 
-@task
+@task(container_image=folding_img)
 def prodigal_predict(in_seq: Reads) -> Protein:
     """
     Predicts protein sequences from a DNA sequence using Prodigal.
