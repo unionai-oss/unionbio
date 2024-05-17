@@ -1,5 +1,4 @@
 import logging
-import tomllib
 from typing import List, Dict
 from pprint import pprint
 from pathlib import Path
@@ -14,27 +13,38 @@ console_handler.setFormatter(
 # logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-env_path = Path(__file__).parent.parent.joinpath("pixi.toml")
-env = {}
-with open(env_path, "rb") as f:
-    env = tomllib.load(f)
+folding_img = ImageSpec(
+    name="unionbio-protein",
+    base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
+    packages=["requests"],
+    # conda_channels=["bioconda"],
+    # conda_packages=["biopython", "biotite", "py3Dmol"],
+    registry="ghcr.io/unionai-oss"
+)
 
-def make_paks(deps: Dict) -> List[str]:
-    conda_paks = []
-    for k,v in deps.items():
-        if v == "*":
-            conda_paks.append(k)
-        else:
-            conda_paks.append(f"{k}{v}")
-    return conda_paks
+parabricks_img = ImageSpec(
+    name="unionbio-parabricks",
+    base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
+    python_version="3.10",
+    packages=["flytekit"],
+    registry="ghcr.io/unionai-oss"
+)
 
-# Define main image
-main_image = ImageSpec(
-    name="unionbio-main",
-    base_image="ghcr.io/flyteorg/flytekit:latest",
-    conda_channels=env['feature']['main']['channels'],
-    conda_packages=make_paks(env['feature']['main']['dependencies']),
-    registry="ghcr.io/unionai-oss",
+# main_img = ImageSpec(
+#     name="unionbio-main",
+#     base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
+#     # conda_channels=["bioconda"],
+#     conda_packages=["requests"],
+#     registry="ghcr.io/unionai-oss",
+#     platform="linux/amd64"
+# )
+
+main_img = ImageSpec(
+    base_image="ubuntu:20.04",
+    python_version="3.11",
+    packages=["flytekit"],
+    conda_packages=["pytorch", "cpuonly"],
+    conda_channels=["pytorch"],
 )
 
 # Define parabricks image

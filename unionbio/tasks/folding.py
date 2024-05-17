@@ -2,24 +2,15 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import py3Dmol # -> used to visualize protein structures
+import py3Dmol
 import biotite.structure.io as bsio
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from flytekit import ImageSpec, Resources, task, workflow
-from datatypes.reads import Reads
-from datatypes.protein import Protein
-from config import test_assets
-
-folding_img = ImageSpec(
-    image_name="protein_folding",
-    base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
-    packages=["biopython", "biotite", "transformers", "py3Dmol"],
-    conda_channels=["bioconda"],
-    conda_packages=["prodigal"],
-    registry="ghcr.io/pryce-turner"
-)
+from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.protein import Protein
+from unionbio.config import folding_img
 
 @task(container_image=folding_img)
 def prodigal_predict(in_seq: Reads) -> Protein:

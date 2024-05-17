@@ -2,7 +2,7 @@ from pathlib import Path
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
-from config import logger
+from unionbio.config import logger
 
 
 @dataclass

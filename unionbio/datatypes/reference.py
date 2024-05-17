@@ -2,7 +2,7 @@ from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.directory import FlyteDirectory
 from pathlib import Path
-from tasks.helpers import gunzip_file
+from unionbio.tasks.helpers import gunzip_file
 
 
 @dataclass

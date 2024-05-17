@@ -5,20 +5,13 @@ from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 
-from datatypes.alignment import Alignment
-from datatypes.reference import Reference
-from datatypes.reads import Reads
-from datatypes.variants import VCF
+from unionbio.datatypes.alignment import Alignment
+from unionbio.datatypes.reference import Reference
+from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.variants import VCF
+from unionbio.config import parabricks_img
 
-pb_image = ImageSpec(
-    name="flyte-parabricks",
-    python_version="3.10",
-    packages=["flytekit"],
-    registry="ghcr.io/unionai-oss",
-    base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
-)
-
-@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
+@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img)
 def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
     """
     Takes an input directory containing paired-end FASTQ files and an indexed reference genome and
@@ -71,7 +64,7 @@ def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
     return FlyteFile(path=bam_out), FlyteFile(path=recal_out)
 
 
-@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
+@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img)
 def basic_align(indir: FlyteDirectory) -> Tuple[FlyteFile, str]:
     """
     Aligns paired-end sequencing reads using BWA-MEM and GATK tools, and returns the path to the processed BAM file
@@ -159,7 +152,7 @@ def basic_align(indir: FlyteDirectory) -> Tuple[FlyteFile, str]:
     return FlyteFile(path=dup_bam)
 
 
-@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
+@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img)
 def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
     """
     Takes an input directory containing BAM files and an indexed reference genome and
@@ -198,7 +191,7 @@ def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
     return deepvar_dir
 
 
-@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=pb_image)
+@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img)
 def pb_haplocall(al: Alignment, ref: Reference) -> VCF:
     """
     Takes an input directory containing BAM files and an indexed reference genome and
