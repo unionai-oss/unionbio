@@ -1,6 +1,6 @@
 from pathlib import Path
 
-cwd = str(Path.cwd())
+cwd = Path(__file__).parent
 
 test_assets = {
     "seq_dir": f"{cwd}/assets/sequences/raw",

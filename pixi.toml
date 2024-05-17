@@ -4,12 +4,16 @@ version = "0.1.0"
 description = "Add a short description here"
 authors = ["pryce-turner <pryce.turner@gmail.com>"]
 channels = ["conda-forge"]
-platforms = ["osx-arm64", "linux-64", "osx-64"]
+platforms = ["osx-arm64", "linux-64"]
 
 [tasks]
 
 [dependencies]
-python = "3.10.*"
+python = ">=3.12.3,<3.13"
+
+[pypi-dependencies]
+flytekitplugins-envd = "*"
+unionai = "*"
 
 [feature.main]
 channels = ["conda-forge", "bioconda"]
@@ -48,7 +52,4 @@ biotite = ">=0.40.0,<0.41"
 py3dmol = ">=2.1.0,<2.2"
 
 [environments]
-main = ["main"]
 test = ["test"]
-parabricks = ["parabricks"]
-folding = ["folding"]
