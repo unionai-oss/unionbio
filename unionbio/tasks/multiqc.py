@@ -9,7 +9,7 @@ from pathlib import Path
 from config import logger, base_image
 from datatypes.alignment import Alignment
 from datatypes.reads import Reads
-from tasks.utils import subproc_raise
+
 
 # Add MultiQC to the base image
 multiqc_image_spec = ImageSpec(

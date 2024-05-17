@@ -1,0 +1,55 @@
+[project]
+name = "unionbio"
+version = "0.1.0"
+description = "Add a short description here"
+authors = ["pryce-turner <pryce.turner@gmail.com>"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+
+[tasks]
+
+[dependencies]
+python = ">=3.12.3,<3.13"
+
+[pypi-dependencies]
+flytekitplugins-envd = "*"
+unionai = "*"
+
+[feature.main]
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64"]
+
+[feature.main.dependencies]
+multiqc = "*"
+samtools = "*"
+bcftools = "*"
+htslib = "*"
+tabix = "*"
+gatk4 = "*"
+bowtie2 = "*"
+hisat2 = "*"
+fastp = "*"
+bwa = "*"
+requests = "*"
+
+[feature.test.dependencies]
+pytest = ">=7.2.0,<8.3"
+
+[feature.parabricks]
+platforms = ["linux-64"]
+
+[feature.parabricks.dependencies]
+flytekit = ">=1.12.0,<1.13"
+
+[feature.folding]
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64"]
+
+[feature.folding.dependencies]
+prodigal = "*"
+biopython = ">=1.83,<2"
+biotite = ">=0.40.0,<0.41"
+py3dmol = ">=2.1.0,<2.2"
+
+[environments]
+test = ["test"]
