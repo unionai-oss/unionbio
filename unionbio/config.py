@@ -16,10 +16,16 @@ logger.setLevel(logging.DEBUG)
 folding_img = ImageSpec(
     name="unionbio-protein",
     base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
-    packages=["requests"],
-    # conda_channels=["bioconda"],
-    # conda_packages=["biopython", "biotite", "py3Dmol"],
-    registry="ghcr.io/unionai-oss"
+    python_version="3.11",
+    conda_channels=["bioconda", "conda-forge"],
+    conda_packages=[
+        "prodigal",
+        "biotite", 
+        # "biopython",
+        # "py3Dmol"
+        ],
+    registry="ghcr.io/unionai-oss",
+    platform="linux/amd64",
 )
 
 parabricks_img = ImageSpec(
@@ -30,25 +36,24 @@ parabricks_img = ImageSpec(
     registry="ghcr.io/unionai-oss"
 )
 
-# main_img = ImageSpec(
-#     name="unionbio-main",
-#     base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
-#     # conda_channels=["bioconda"],
-#     conda_packages=["requests"],
-#     registry="ghcr.io/unionai-oss",
-#     platform="linux/amd64"
-# )
-
 main_img = ImageSpec(
-    base_image="ubuntu:20.04",
+    name="unionbio-main",
+    base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
     python_version="3.11",
-    packages=["flytekit"],
-    conda_packages=["pytorch", "cpuonly"],
-    conda_channels=["pytorch"],
+    conda_channels=["bioconda"],
+    conda_packages=[
+        "samtools",
+        "bcftools",
+        "bwa",
+        "fastp",
+        "hisat2",
+        # "bowtie2",
+        "gatk4",
+        "fastqc",
+        "htslib"
+        ],
+    registry="ghcr.io/unionai-oss",
 )
-
-# Define parabricks image
-pb_image = "ghcr.io/unionai/dgx-parabricks:20240416"
 
 seq_dir_pth = "s3://my-s3-bucket/my-data/sequences"
 ref_loc = "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"
