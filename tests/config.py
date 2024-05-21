@@ -3,8 +3,8 @@ from pathlib import Path
 cwd = Path(__file__).parent
 
 test_assets = {
-    "seq_dir": f"{cwd}/assets/sequences/raw",
-    "filt_dir": f"{cwd}/assets/sequences/filtered",
+    "raw_seq_dir": f"{cwd}/assets/sequences/raw",
+    "filt_seq_dir": f"{cwd}/assets/sequences/filtered",
     "bt2_sam_dir": f"{cwd}/assets/alignments/bt2",
     "hs2_sam_dir": f"{cwd}/assets/alignments/hs2",
     "pb_fq2bam_dir": f"{cwd}/assets/alignments/pb_fq2bam",

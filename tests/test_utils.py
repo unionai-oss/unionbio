@@ -4,12 +4,12 @@ from filecmp import cmp
 from pathlib import Path
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from datatypes.alignment import Alignment
-from datatypes.reads import Reads
-from datatypes.variants import VCF
+from unionbio.datatypes.alignment import Alignment
+from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.variants import VCF
 from tasks.utils import fetch_file, intersect_vcfs
 from tasks.helpers import gunzip_file
-from config import test_assets
+from tests.config import test_assets
 
 
 def test_fetch_http_file(tmp_path):

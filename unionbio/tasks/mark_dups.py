@@ -4,8 +4,8 @@ from flytekit import TaskMetadata, dynamic, kwtypes
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 
-from datatypes.alignment import Alignment
-from config import base_image
+from unionbio.datatypes.alignment import Alignment
+from unionbio.config import main_img
 
 """
 Identify and remove duplicates from an alignment file using GATK's MarkDuplicates tool.
@@ -45,7 +45,7 @@ mark_dups = ShellTask(
             var="m", var_type=FlyteFile, location="/tmp/dedup/{inputs.omfn}"
         ),
     ],
-    container_image=base_image,
+    container_image=main_img,
 )
 
 

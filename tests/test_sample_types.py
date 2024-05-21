@@ -1,13 +1,13 @@
 import os
 from pathlib import Path
-from config import test_assets
+from tests.config import test_assets
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from datatypes.alignment import Alignment
-from datatypes.reads import Reads
-from datatypes.reference import Reference
-from datatypes.variants import VCF
-from datatypes.protein import Protein
+from unionbio.datatypes.alignment import Alignment
+from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.reference import Reference
+from unionbio.datatypes.variants import VCF
+from unionbio.datatypes.protein import Protein
 
 
 def test_raw_sample_fname():

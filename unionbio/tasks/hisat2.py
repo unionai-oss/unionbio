@@ -6,10 +6,10 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execu
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from config import ref_hash, base_image, logger
-from datatypes.alignment import Alignment
-from datatypes.reads import Reads
-from datatypes.reference import Reference
+from unionbio.config import ref_hash, main_img, logger
+from unionbio.datatypes.alignment import Alignment
+from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.reference import Reference
 
 """
 Generate Hisat2 index files from a reference genome.
@@ -25,7 +25,7 @@ hisat2_index = ShellTask(
     debug=True,
     metadata=TaskMetadata(retries=3, cache=True, cache_version=ref_hash),
     requests=Resources(cpu="4", mem="10Gi"),
-    container_image=base_image,
+    container_image=main_img,
     script="""
     mkdir {outputs.idx}
     hisat2-build {inputs.ref} {outputs.idx}/hs2_idx
@@ -38,7 +38,7 @@ hisat2_index = ShellTask(
 
 
 @task(
-    container_image=base_image,
+    container_image=main_img,
     requests=Resources(cpu="4", mem="10Gi"),
 )
 def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:

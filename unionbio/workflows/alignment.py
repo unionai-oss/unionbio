@@ -4,7 +4,7 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit import map_task
 
-from config import ref_loc, seq_dir_pth
+from unionbio.config import ref_loc, seq_dir_pth
 from tasks.fastqc import fastqc
 from tasks.fastp import pyfastp
 from tasks.utils import prepare_raw_samples, check_fastqc_reports

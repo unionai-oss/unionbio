@@ -6,9 +6,9 @@ from flytekit.types.file import FlyteFile
 from typing import List
 from pathlib import Path
 
-from config import logger, base_image
-from datatypes.alignment import Alignment
-from datatypes.reads import Reads
+from unionbio.config import logger, main_img
+from unionbio.datatypes.alignment import Alignment
+from unionbio.datatypes.reads import Reads
 
 
 # Add MultiQC to the base image
@@ -16,7 +16,7 @@ multiqc_image_spec = ImageSpec(
     name="multiqc",
     packages=["multiqc"],
     registry="ghcr.io/pryce-turner",
-    base_image=base_image,
+    main_img=main_img,
 )
 
 

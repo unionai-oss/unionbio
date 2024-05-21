@@ -3,13 +3,13 @@ import shutil
 from pathlib import Path
 from filecmp import cmp
 from flytekit.types.directory import FlyteDirectory
-from tasks.hisat2 import hisat2_index, hisat2_align_paired_reads
-from tasks.bowtie2 import bowtie2_index, bowtie2_align_paired_reads
-from tasks.bwa import bwa_index
-from datatypes.alignment import Alignment
-from datatypes.reads import Reads
-from datatypes.reference import Reference
-from config import test_assets
+from unionbio.tasks.hisat2 import hisat2_index, hisat2_align_paired_reads
+from unionbio.tasks.bowtie2 import bowtie2_index, bowtie2_align_paired_reads
+from unionbio.tasks.bwa import bwa_index
+from unionbio.datatypes.alignment import Alignment
+from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.reference import Reference
+from tests.config import test_assets
 from tests.utils import dir_contents_match
 
 

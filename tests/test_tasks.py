@@ -3,13 +3,13 @@ from filecmp import cmp
 from pathlib import Path
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from datatypes.alignment import Alignment
-from datatypes.reads import Reads
-from tasks.fastp import pyfastp
-from tasks.fastqc import fastqc
-from tasks.mark_dups import mark_dups
-from tasks.sort_sam import sort_sam
-from config import test_assets
+from unionbio.datatypes.alignment import Alignment
+from unionbio.datatypes.reads import Reads
+from unionbio.tasks.fastp import pyfastp
+from unionbio.tasks.fastqc import fastqc
+from unionbio.tasks.mark_dups import mark_dups
+from unionbio.tasks.sort_sam import sort_sam
+from tests.config import test_assets
 
 
 def test_fastqc():

@@ -13,14 +13,14 @@ from flytekit.configuration import Config
 from flytekit.remote import FlyteRemote
 from flytekit.extras.tasks.shell import subproc_execute
 
-from config import base_image, logger, pb_image
-from datatypes.reads import Reads
-from datatypes.reference import Reference
-from datatypes.variants import VCF
+from unionbio.config import main_img, logger, pb_image
+from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.reference import Reference
+from unionbio.datatypes.variants import VCF
 from tasks.helpers import fetch_file
 
 
-@task(container_image=base_image)
+@task(container_image=main_img)
 def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     """
     Prepare and process raw sequencing data to create a list of RawSample objects.
@@ -185,7 +185,7 @@ def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
     return no_out
 
 
-@task(container_image=base_image)
+@task(container_image=main_img)
 def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     """
     Takes the intersection of 2 VCF files and returns a new VCF file to increase

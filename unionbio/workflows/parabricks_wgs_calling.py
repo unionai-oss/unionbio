@@ -8,7 +8,7 @@ from tasks.utils import (
 )
 from tasks.bwa import bwa_index
 from tasks.parabricks import pb_fq2bam, pb_deepvar, pb_haplocall
-from datatypes.variants import VCF
+from unionbio.datatypes.variants import VCF
 
 
 @workflow

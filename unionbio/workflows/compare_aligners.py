@@ -5,7 +5,7 @@ from flytekit import approve, conditional, dynamic, map_task, workflow
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 
-from config import ref_loc, seq_dir_pth
+from unionbio.config import ref_loc, seq_dir_pth
 from tasks.bowtie2 import bowtie2_align_paired_reads, bowtie2_index
 from tasks.fastp import pyfastp
 from tasks.fastqc import fastqc

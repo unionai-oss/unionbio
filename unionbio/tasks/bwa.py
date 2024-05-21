@@ -5,12 +5,12 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execu
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from config import ref_hash, base_image
-from datatypes.reference import Reference
+from unionbio.config import ref_hash, main_img
+from unionbio.datatypes.reference import Reference
 
 
 @task(
-    container_image=base_image,
+    container_image=main_img,
     requests=Resources(cpu="4", mem="10Gi"),
     cache=True,
     cache_version=ref_hash,

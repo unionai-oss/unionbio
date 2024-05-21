@@ -1,6 +1,5 @@
 import logging
 from typing import List, Dict
-from pprint import pprint
 from pathlib import Path
 from flytekit import ImageSpec
 
