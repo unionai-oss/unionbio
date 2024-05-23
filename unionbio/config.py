@@ -1,6 +1,4 @@
 import logging
-from typing import List, Dict
-from pathlib import Path
 from flytekit import ImageSpec
 
 # Setup the logger
@@ -9,7 +7,7 @@ console_handler = logging.StreamHandler()
 console_handler.setFormatter(
     logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s")
 )
-# logger.addHandler(console_handler)
+logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
 folding_img = ImageSpec(
@@ -20,11 +18,10 @@ folding_img = ImageSpec(
     conda_packages=[
         "prodigal",
         "biotite", 
-        # "biopython",
-        # "py3Dmol"
+        "biopython",
+        "py3Dmol"
         ],
-    registry="localhost:30000",
-    # registry="ghcr.io/unionai-oss",
+    registry="ghcr.io/unionai-oss",
     platform="linux/amd64",
 )
 
@@ -33,7 +30,7 @@ parabricks_img = ImageSpec(
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
     python_version="3.10",
     packages=["flytekit"],
-    registry="ghcr.io/unionai-oss"
+    registry="ghcr.io/unionai-oss",
 )
 
 main_img = ImageSpec(
@@ -47,11 +44,12 @@ main_img = ImageSpec(
         "bwa",
         "fastp",
         "hisat2",
-        # "bowtie2",
+        "bowtie2",
         "gatk4",
         "fastqc",
         "htslib"
         ],
+    builder="fast-builder",
     registry="ghcr.io/unionai-oss",
 )
 
