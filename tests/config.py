@@ -25,4 +25,6 @@ test_assets = {
     "hs2_idx_dir": f"{cwd}/assets/indices/hs2",
     "bwa_idx_dir": f"{cwd}/assets/indices/bwa",
     "fastqc_dir": f"{cwd}/assets/fastqc",
+    "prot_path": f"{cwd}/assets/proteins/folding_proteins.fasta",
+    "genes_path": f"{cwd}/assets/genes/folding_genes.gff",
 }
