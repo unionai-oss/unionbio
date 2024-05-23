@@ -7,7 +7,7 @@ console_handler = logging.StreamHandler()
 console_handler.setFormatter(
     logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s")
 )
-logger.addHandler(console_handler)
+# logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
 current_registry = "localhost:30000"
@@ -22,7 +22,8 @@ folding_img = ImageSpec(
         "prodigal",
         "biotite", 
         "biopython",
-        "py3Dmol"
+        "py3Dmol",
+        "matplotlib",
         ],
     registry=current_registry,
     platform="linux/amd64",

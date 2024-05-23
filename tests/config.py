@@ -5,6 +5,7 @@ cwd = Path(__file__).parent
 test_assets = {
     "raw_seq_dir": f"{cwd}/assets/sequences/raw",
     "filt_seq_dir": f"{cwd}/assets/sequences/filtered",
+    "folding_seq_dir": f"{cwd}/assets/sequences/folding",
     "bt2_sam_dir": f"{cwd}/assets/alignments/bt2",
     "hs2_sam_dir": f"{cwd}/assets/alignments/hs2",
     "pb_fq2bam_dir": f"{cwd}/assets/alignments/pb_fq2bam",

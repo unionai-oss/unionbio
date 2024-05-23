@@ -24,6 +24,7 @@ class Reads(DataClassJSONMixin):
     sample: str
     filtered: bool | None = None
     filt_report: FlyteFile | None = None
+    uread: FlyteFile | None = None
     read1: FlyteFile | None = None
     read2: FlyteFile | None = None
 
@@ -41,21 +42,23 @@ class Reads(DataClassJSONMixin):
     @classmethod
     def make_all(cls, dir: Path):
         samples = {}
-        for fp in list(dir.rglob("*fastq*")):
+        for fp in list(dir.rglob("*fast*")):
             logger.debug(f"Processing {fp}")
-            sample = fp.name.split("_")[0]
+            sample = fp.stem.split("_")[0]
             logger.debug(f"Found sample {sample}")
 
             if sample not in samples:
                 samples[sample] = Reads(sample=sample)
 
-            if ".fastq.gz" in fp.name:
+            if ".fastq.gz" in fp.name or "fasta" in fp.name:
                 mate = fp.name.strip(".fastq.gz").strip(".filt").split("_")[-1]
                 logger.debug(f"Found mate {mate} for {sample}")
                 if "1" in mate:
                     setattr(samples[sample], "read1", FlyteFile(path=str(fp)))
                 elif "2" in mate:
                     setattr(samples[sample], "read2", FlyteFile(path=str(fp)))
+                else:
+                    setattr(samples[sample], "uread", FlyteFile(path=str(fp)))
             elif "filter-report" in fp.name:
                 logger.debug(f"Found filter report for {sample}")
                 setattr(samples[sample], "filtered", True)
