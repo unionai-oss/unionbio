@@ -23,7 +23,8 @@ folding_img = ImageSpec(
         # "biopython",
         # "py3Dmol"
         ],
-    registry="ghcr.io/unionai-oss",
+    registry="localhost:30000",
+    # registry="ghcr.io/unionai-oss",
     platform="linux/amd64",
 )
 

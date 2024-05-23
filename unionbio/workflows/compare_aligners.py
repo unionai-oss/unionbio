@@ -6,13 +6,13 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 
 from unionbio.config import ref_loc, seq_dir_pth
-from tasks.bowtie2 import bowtie2_align_paired_reads, bowtie2_index
-from tasks.fastp import pyfastp
-from tasks.fastqc import fastqc
-from tasks.hisat2 import hisat2_align_paired_reads, hisat2_index
-from tasks.multiqc import render_multiqc
-from tasks.sample_types import FiltSample, Alignment
-from tasks.utils import check_fastqc_reports, prepare_raw_samples
+from unionbio.tasks.bowtie2 import bowtie2_align_paired_reads, bowtie2_index
+from unionbio.tasks.fastp import pyfastp
+from unionbio.tasks.fastqc import fastqc
+from unionbio.tasks.hisat2 import hisat2_align_paired_reads, hisat2_index
+from unionbio.tasks.multiqc import render_multiqc
+from unionbio.tasks.sample_types import FiltSample, Alignment
+from unionbio.tasks.utils import check_fastqc_reports, prepare_raw_samples
 
 
 @dynamic

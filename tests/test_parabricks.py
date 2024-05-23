@@ -1,4 +1,4 @@
-from tasks.parabricks import pb_fq2bam, pb_deepvar, pb_haplocall
+from unionbio.tasks.parabricks import pb_fq2bam, pb_deepvar, pb_haplocall
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.alignment import Alignment

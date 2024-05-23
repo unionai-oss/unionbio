@@ -1,13 +1,13 @@
 from typing import List
 from flytekit import workflow
-from tasks.utils import (
+from unionbio.tasks.utils import (
     fetch_remote_reads,
     fetch_remote_reference,
     fetch_remote_sites,
     intersect_vcfs,
 )
-from tasks.bwa import bwa_index
-from tasks.parabricks import pb_fq2bam, pb_deepvar, pb_haplocall
+from unionbio.tasks.bwa import bwa_index
+from unionbio.tasks.parabricks import pb_fq2bam, pb_deepvar, pb_haplocall
 from unionbio.datatypes.variants import VCF
 
 

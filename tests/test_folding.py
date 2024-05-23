@@ -1,7 +1,7 @@
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.protein import Protein
 from pathlib import Path
-from tasks.folding import prodigal_predict
+from unionbio.tasks.folding import prodigal_predict
 from tests.config import test_assets
 
 def test_prodigal_predict():

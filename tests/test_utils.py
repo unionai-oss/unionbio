@@ -7,8 +7,8 @@ from flytekit.types.file import FlyteFile
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.variants import VCF
-from tasks.utils import fetch_file, intersect_vcfs
-from tasks.helpers import gunzip_file
+from unionbio.tasks.utils import fetch_file, intersect_vcfs
+from unionbio.tasks.helpers import gunzip_file
 from tests.config import test_assets
 
 
