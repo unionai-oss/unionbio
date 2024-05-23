@@ -10,10 +10,13 @@ console_handler.setFormatter(
 logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
+current_registry = "localhost:30000"
+
 folding_img = ImageSpec(
     name="unionbio-protein",
-    base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
+    # base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
     python_version="3.11",
+    packages=["flytekit"],
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
         "prodigal",
@@ -21,7 +24,7 @@ folding_img = ImageSpec(
         "biopython",
         "py3Dmol"
         ],
-    registry="ghcr.io/unionai-oss",
+    registry=current_registry,
     platform="linux/amd64",
 )
 
@@ -30,7 +33,7 @@ parabricks_img = ImageSpec(
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
     python_version="3.10",
     packages=["flytekit"],
-    registry="ghcr.io/unionai-oss",
+    registry=current_registry,
 )
 
 main_img = ImageSpec(
@@ -50,7 +53,7 @@ main_img = ImageSpec(
         "htslib"
         ],
     builder="fast-builder",
-    registry="ghcr.io/unionai-oss",
+    registry=current_registry,
 )
 
 seq_dir_pth = "s3://my-s3-bucket/my-data/sequences"
