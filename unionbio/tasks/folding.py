@@ -4,14 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import py3Dmol
 import biotite.structure.io as bsio
+import torch
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from flytekit import ImageSpec, Resources, task, workflow
 from flytekit.extras.tasks.shell import subproc_execute
+from flytekit.types.file import FlyteFile
+from transformers import AutoTokenizer, EsmForProteinFolding, set_seed
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.protein import Protein
 from unionbio.config import folding_img, logger
+
+@task(container_image=folding_img)
+def test_unionbio_install() -> str:
+    return "UnionBio package installed successfully."
 
 @task(container_image=folding_img)
 def prodigal_predict(in_seq: Reads) -> Protein:
@@ -43,3 +50,43 @@ def prodigal_predict(in_seq: Reads) -> Protein:
     logger.info(f"Returning protein object: {prot}")
 
     return prot
+
+@task(container_image=folding_img, requests=Resources(gpu='1'))#, cpu='2', mem='12Gi', ephemeral_storage='100Gi'))
+def esm_fold(prot: FlyteFile) -> FlyteFile:
+    esmfold = EsmForProteinFolding.from_pretrained(
+    "facebook/esmfold_v1",
+    low_cpu_mem_usage = True # we set this flag to save some RAM during loading
+    )
+    # esmfold = esmfold.to(device) # -> move ESMFold to the GPU
+    esmfold.esm = esmfold.esm.half() # -> make sure we use a lightweight precision
+    esmfold_tokenizer = AutoTokenizer.from_pretrained("facebook/esmfold_v1")
+
+    # 1. Select a predicted protein-coding gene that we want to fold:
+    i = 0 # lets just use the first one.
+    protein_record = list(SeqIO.parse(prot.path, "fasta"))[i]
+    protein_seq = str(protein_record.seq)[:-1] # remove stop codon
+
+    # 2. Tokenize the gene to make it digestible for ESMFold:
+    esmfold_in = esmfold_tokenizer(
+    [protein_seq],
+    return_tensors="pt",
+    add_special_tokens=False
+    )
+
+    # 3. Feed the tokenized sequence to ESMfold:
+    # (in PyTorch's inference_mode to avoid any costly gradient computations)
+    with torch.inference_mode():
+        esmfold_out = esmfold(**esmfold_in.to('cuda'))
+        esmfold_out_pdb = esmfold.output_to_pdb(esmfold_out)[0]
+
+    protein_structure_pdb = 'protein_structure.pdb'
+    with open(protein_structure_pdb, "w") as f:
+        f.write(esmfold_out_pdb)
+
+    protein_structure = bsio.load_structure(
+        protein_structure_pdb,
+        extra_fields=["b_factor"]
+        )
+    print('Generated protein structure: ', protein_structure)
+
+    return FlyteFile(path=protein_structure_pdb)

@@ -11,3 +11,4 @@ def test_prodigal_predict():
     assert isinstance(prot, Protein)
     assert cmp(test_assets["prot_path"], prot.protein.path)
     assert cmp(test_assets["genes_path"], prot.genes.path)
+

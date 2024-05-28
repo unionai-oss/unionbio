@@ -3,6 +3,8 @@ from flytekit.image_spec.image_spec import ImageBuildEngine
 
 # Build the images
 builder = ImageBuildEngine()
+
+folding_img.registry = "localhost:30000"
 builder.build(folding_img.with_packages("pytest"))
 
 # builder.build(parabricks_img)

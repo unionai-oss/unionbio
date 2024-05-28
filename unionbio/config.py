@@ -10,13 +10,13 @@ console_handler.setFormatter(
 # logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-current_registry = "localhost:30000"
+current_registry = "ghcr.io/unionai-oss"
 
 folding_img = ImageSpec(
     name="unionbio-protein",
-    # base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
+    platform="linux/amd64",
     python_version="3.11",
-    packages=["flytekit"],
+    packages=["flytekit", "transformers", "torch", "poetry"],
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
         "prodigal",
@@ -25,8 +25,8 @@ folding_img = ImageSpec(
         "py3Dmol",
         "matplotlib",
         ],
+    env={"PYTHONPATH": "/root:/root/unionbio"},
     registry=current_registry,
-    platform="linux/amd64",
 )
 
 parabricks_img = ImageSpec(
@@ -34,6 +34,7 @@ parabricks_img = ImageSpec(
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
     python_version="3.10",
     packages=["flytekit"],
+    env={"PYTHONPATH": "/root:/root/unionbio"},
     registry=current_registry,
 )
 
@@ -54,6 +55,7 @@ main_img = ImageSpec(
         "htslib"
         ],
     builder="fast-builder",
+    env={"PYTHONPATH": "/root:/root/unionbio"},
     registry=current_registry,
 )
 
