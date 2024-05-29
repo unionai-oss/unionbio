@@ -14,7 +14,7 @@ from flytekit.types.file import FlyteFile
 from transformers import AutoTokenizer, EsmForProteinFolding, set_seed
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.protein import Protein
-from unionbio.config import folding_img, logger
+from unionbio.config import logger, folding_img
 
 @task(container_image=folding_img)
 def test_unionbio_install() -> str:

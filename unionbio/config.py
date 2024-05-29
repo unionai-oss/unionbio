@@ -1,5 +1,9 @@
+import os
 import logging
+from pathlib import Path
 from flytekit import ImageSpec
+from flytekit.image_spec.image_spec import ImageBuildEngine
+from flytekit import task
 
 # Setup the logger
 logger = logging.getLogger(__name__)
@@ -10,10 +14,22 @@ console_handler.setFormatter(
 # logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-current_registry = "ghcr.io/unionai-oss"
+# current_registry = "ghcr.io/unionai-oss"
+current_registry = "localhost:30000"
+
+test_spec = ImageSpec(
+    name="unionbio-test-10",
+    platform="linux/amd64",
+    python_version="3.11",
+    packages=["flytekit"],
+    registry=current_registry,
+    # source_root=os.fspath(),
+)
+pkgd = test_spec.with_packages("dist/unionbio-0.1.0-py3-none-any.whl")
+# ^^ Doens't work
 
 folding_img = ImageSpec(
-    name="unionbio-protein",
+    name="unionbio-protein-7",
     platform="linux/amd64",
     python_version="3.11",
     packages=["flytekit", "transformers", "torch", "poetry"],
@@ -66,3 +82,6 @@ ref_hash = str(hash(ref_loc))[:4]
 # Tool config
 fastp_cpu = "3"
 
+@task(container_image=folding_img)
+def foo() -> str:
+    return "foo"
