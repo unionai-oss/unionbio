@@ -18,7 +18,7 @@ logger.setLevel(logging.DEBUG)
 current_registry = "localhost:30000"
 
 test_spec = ImageSpec(
-    name="unionbio-test-10",
+    name="unionbio-test-11",
     platform="linux/amd64",
     python_version="3.11",
     packages=["flytekit"],
@@ -29,7 +29,7 @@ pkgd = test_spec.with_packages("dist/unionbio-0.1.0-py3-none-any.whl")
 # ^^ Doens't work
 
 folding_img = ImageSpec(
-    name="unionbio-protein-7",
+    name="unionbio-protein-8",
     platform="linux/amd64",
     python_version="3.11",
     packages=["flytekit", "transformers", "torch", "poetry"],
