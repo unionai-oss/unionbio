@@ -16,47 +16,38 @@ logger.setLevel(logging.DEBUG)
 
 # current_registry = "ghcr.io/unionai-oss"
 current_registry = "localhost:30000"
-
-test_spec = ImageSpec(
-    name="unionbio-test-11",
-    platform="linux/amd64",
-    python_version="3.11",
-    packages=["flytekit"],
-    registry=current_registry,
-    # source_root=os.fspath(),
-)
-pkgd = test_spec.with_packages("dist/unionbio-0.1.0-py3-none-any.whl")
-# ^^ Doens't work
+src_rt = Path(__file__).parent.parent
 
 folding_img = ImageSpec(
-    name="unionbio-protein-8",
+    name="unionbio-protein-12",
     platform="linux/amd64",
     python_version="3.11",
-    packages=["flytekit", "transformers", "torch", "poetry"],
+    source_root=src_rt,
+    packages=["flytekit", "transformers", "torch"],
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
         "prodigal",
-        "biotite", 
+        "biotite",
         "biopython",
         "py3Dmol",
         "matplotlib",
         ],
-    env={"PYTHONPATH": "/root:/root/unionbio"},
     registry=current_registry,
 )
 
 parabricks_img = ImageSpec(
     name="unionbio-parabricks",
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
+    source_root=src_rt,
     python_version="3.10",
     packages=["flytekit"],
-    env={"PYTHONPATH": "/root:/root/unionbio"},
     registry=current_registry,
 )
 
 main_img = ImageSpec(
     name="unionbio-main",
     base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
+    source_root=src_rt,
     python_version="3.11",
     conda_channels=["bioconda"],
     conda_packages=[
@@ -71,7 +62,6 @@ main_img = ImageSpec(
         "htslib"
         ],
     builder="fast-builder",
-    env={"PYTHONPATH": "/root:/root/unionbio"},
     registry=current_registry,
 )
 
@@ -81,7 +71,3 @@ ref_hash = str(hash(ref_loc))[:4]
 
 # Tool config
 fastp_cpu = "3"
-
-@task(container_image=folding_img)
-def foo() -> str:
-    return "foo"
