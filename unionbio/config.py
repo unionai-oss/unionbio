@@ -2,8 +2,6 @@ import os
 import logging
 from pathlib import Path
 from flytekit import ImageSpec
-from flytekit.image_spec.image_spec import ImageBuildEngine
-from flytekit import task
 
 # Setup the logger
 logger = logging.getLogger(__name__)
@@ -14,12 +12,42 @@ console_handler.setFormatter(
 # logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
+seq_dir_pth = "s3://my-s3-bucket/my-data/sequences"
+ref_loc = "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"
+ref_hash = str(hash(ref_loc))[:4]
+
+# Tool config
+fastp_cpu = "3"
+
+# Images
+
 # current_registry = "ghcr.io/unionai-oss"
 current_registry = "localhost:30000"
 src_rt = Path(__file__).parent.parent
 
+main_img = ImageSpec(
+    name="unionbio-main",
+    source_root=src_rt,
+    packages=["flytekit"],
+    python_version="3.11",
+    conda_channels=["bioconda"],
+    conda_packages=[
+        "samtools",
+        "bcftools",
+        "bwa",
+        "fastp",
+        "hisat2",
+        "bowtie2",
+        "gatk4",
+        "fastqc",
+        "htslib"
+        ],
+    builder="fast-builder",
+    registry=current_registry,
+)
+
 folding_img = ImageSpec(
-    name="unionbio-protein-13",
+    name="unionbio-protein",
     platform="linux/amd64",
     python_version="3.11",
     source_root=src_rt,
@@ -44,30 +72,9 @@ parabricks_img = ImageSpec(
     registry=current_registry,
 )
 
-main_img = ImageSpec(
-    name="unionbio-main",
-    base_image="ghcr.io/flyteorg/flytekit:py3.11-1.12.0",
-    source_root=src_rt,
-    python_version="3.11",
-    conda_channels=["bioconda"],
-    conda_packages=[
-        "samtools",
-        "bcftools",
-        "bwa",
-        "fastp",
-        "hisat2",
-        "bowtie2",
-        "gatk4",
-        "fastqc",
-        "htslib"
-        ],
-    builder="fast-builder",
-    registry=current_registry,
-)
-
-seq_dir_pth = "s3://my-s3-bucket/my-data/sequences"
-ref_loc = "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"
-ref_hash = str(hash(ref_loc))[:4]
-
-# Tool config
-fastp_cpu = "3"
+# Image tags
+# While tasks can reference imageSpec directly, using the tag allows registering tasks
+# from a containerized environment. These also contain the actual unionbio package.
+main_img_fqn = "localhost:30000/unionbio-main:GldhRy3CEvGm1sYKRcgxZw"
+folding_img_fqn = "localhost:30000/unionbio-protein:vsQmb4hJrIfEEHy_qhrEzw"
+parabricks_img_fqn = "localhost:30000/unionbio-parabricks:E5n0itZmu16zJOd6VIg76A"
