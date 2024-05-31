@@ -100,22 +100,22 @@ class ImageFactory:
         with open(self.config_path, 'w') as f:
             f.write(cfg_content)
 
-    def build(self):
+def build():
 
-        whl = self.built_wheel()
-        fqns = {}
+    factory = ImageFactory()
+    whl = factory.built_wheel()
+    fqns = {}
 
-        # Prepare builds
-        for img_str in self.build_scope:
-            spec = eval(img_str)
-            spec.with_packages(whl)
-            fqns[f'{img_str}_fqn'] = spec.image_name()
+    # Prepare builds
+    for img_str in factory.build_scope:
+        spec = eval(img_str)
+        spec.with_packages(whl)
+        fqns[f'{img_str}_fqn'] = spec.image_name()
 
-        self.update_img_config(fqns)
+    factory.update_img_config(fqns)
 
-        # Build images
-        for img_str in self.build_scope:
-            spec = eval(img_str)
-            ImageBuildEngine().build(spec)
+    # Build images
+    for img_str in factory.build_scope:
+        spec = eval(img_str)
+        ImageBuildEngine().build(spec)
 
-ImageFactory().build()
