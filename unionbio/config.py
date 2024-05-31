@@ -19,7 +19,7 @@ current_registry = "localhost:30000"
 src_rt = Path(__file__).parent.parent
 
 folding_img = ImageSpec(
-    name="unionbio-protein-12",
+    name="unionbio-protein-13",
     platform="linux/amd64",
     python_version="3.11",
     source_root=src_rt,
