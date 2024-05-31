@@ -19,62 +19,13 @@ ref_hash = str(hash(ref_loc))[:4]
 # Tool config
 fastp_cpu = "3"
 
-# Images
-
 # current_registry = "ghcr.io/unionai-oss"
 current_registry = "localhost:30000"
 src_rt = Path(__file__).parent.parent
 
-main_img = ImageSpec(
-    name="unionbio-main",
-    source_root=src_rt,
-    packages=["flytekit"],
-    python_version="3.11",
-    conda_channels=["bioconda"],
-    conda_packages=[
-        "samtools",
-        "bcftools",
-        "bwa",
-        "fastp",
-        "hisat2",
-        "bowtie2",
-        "gatk4",
-        "fastqc",
-        "htslib"
-        ],
-    builder="fast-builder",
-    registry=current_registry,
-)
-
-folding_img = ImageSpec(
-    name="unionbio-protein",
-    platform="linux/amd64",
-    python_version="3.11",
-    source_root=src_rt,
-    packages=["flytekit", "transformers", "torch"],
-    conda_channels=["bioconda", "conda-forge"],
-    conda_packages=[
-        "prodigal",
-        "biotite",
-        "biopython",
-        "py3Dmol",
-        "matplotlib",
-        ],
-    registry=current_registry,
-)
-
-parabricks_img = ImageSpec(
-    name="unionbio-parabricks",
-    base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
-    source_root=src_rt,
-    python_version="3.10",
-    packages=["flytekit"],
-    registry=current_registry,
-)
-
 # Image tags
 # While tasks can reference imageSpec directly, using the tag allows registering tasks
 # from a containerized environment. These also contain the actual unionbio package.
-main_img_fqn = "localhost:30000/unionbio-main:GldhRy3CEvGm1sYKRcgxZw"
-folding_img_fqn = "localhost:30000/unionbio-protein:vsQmb4hJrIfEEHy_qhrEzw"
-parabricks_img_fqn = "localhost:30000/unionbio-parabricks:E5n0itZmu16zJOd6VIg76A"
+main_img_fqn = "localhost:30000/unionbio-main:F1ZEbiZS9mI_kmXWD1u7Qw"
+folding_img_fqn = "localhost:30000/unionbio-protein:MPAPS3hUgxqj_aNz_pYAAQ"
+parabricks_img_fqn = "localhost:30000/unionbio-parabricks:C2vDLaKsjcKqcGtd_0cqCQ"
