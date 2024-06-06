@@ -63,7 +63,9 @@ class Alignment(DataClassJSONMixin):
         samples = {}
         pattern = "*aligned*"
         dir_contents = list(dir.rglob(pattern))
-        logger.info(f"Found following alignment files in {dir} matching {pattern}: {dir_contents}")
+        logger.info(
+            f"Found following alignment files in {dir} matching {pattern}: {dir_contents}"
+        )
         for fp in dir_contents:
             sample, aligner = fp.stem.split("_")[0:2]
 

@@ -37,7 +37,6 @@ class Reads(DataClassJSONMixin):
 
     def get_report_fname(self):
         return f"{self.sample}_fastq-filter-report.json"
-    
 
     @classmethod
     def make_all(cls, dir: Path):

@@ -80,7 +80,6 @@ def test_vcf():
     assert vcf.get_vcf_idx_fname() == "test-sample_test-caller.vcf.gz.tbi"
 
 
-
 def test_vcf_make_all():
     vcfs = VCF.make_all(Path(test_assets["vcf_dir"]))
     assert len(vcfs) == 1

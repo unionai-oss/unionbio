@@ -203,19 +203,21 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     isec_out = VCF(sample=vcf1.sample, caller=f"{vcf1.caller}_{vcf2.caller}_isec")
     fname_out = isec_out.get_vcf_fname()
 
-    cmd = " ".join([
-        "bcftools",
-        "isec",
-        "-n=2",
-        "-O",
-        "z",
-        "-w",
-        "1",
-        vcf1.vcf.path,
-        vcf2.vcf.path,
-        "-o",
-        fname_out,
-    ])
+    cmd = " ".join(
+        [
+            "bcftools",
+            "isec",
+            "-n=2",
+            "-O",
+            "z",
+            "-w",
+            "1",
+            vcf1.vcf.path,
+            vcf2.vcf.path,
+            "-o",
+            fname_out,
+        ]
+    )
 
     subproc_execute(cmd, shell=True)
     setattr(isec_out, "vcf", FlyteFile(path=fname_out))

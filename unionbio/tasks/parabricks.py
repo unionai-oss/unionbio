@@ -11,6 +11,7 @@ from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.variants import VCF
 from unionbio.config import parabricks_img
 
+
 @task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img)
 def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
     """
@@ -180,7 +181,7 @@ def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
             "--in-bam",
             str(al.alignment.path),
             "--out-variants",
-            vcf_out
+            vcf_out,
         ]
     )
 
@@ -222,7 +223,7 @@ def pb_haplocall(al: Alignment, ref: Reference) -> VCF:
             "--in-recal-file",
             str(al.bqsr_report.path),
             "--out-variants",
-            vcf_out
+            vcf_out,
         ]
     )
 

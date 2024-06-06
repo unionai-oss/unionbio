@@ -88,7 +88,9 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     logger.debug(f"Running command: {cmd}")
 
     result = subproc_execute(cmd)
-    logger.info(f"Hisat exited with code {result.returncode}, output: {result.output}, error: {result.error}")
+    logger.info(
+        f"Hisat exited with code {result.returncode}, output: {result.output}, error: {result.error}"
+    )
 
     setattr(alignment, "alignment", FlyteFile(path=str(al)))
     setattr(alignment, "alignment_report", FlyteFile(path=str(rep)))

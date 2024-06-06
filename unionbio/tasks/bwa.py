@@ -25,21 +25,13 @@ def bwa_index(ref_obj: Reference) -> Reference:
         Reference: The updated reference object with associated index and metadata.
     """
     ref_obj.ref_dir.download()
-    sam_idx = [
-        'samtools',
-        'faidx',
-        str(ref_obj.get_ref_path())
-    ]
+    sam_idx = ["samtools", "faidx", str(ref_obj.get_ref_path())]
     sam_result = subproc_execute(sam_idx, cwd=ref_obj.ref_dir.path)
 
-    bwa_idx = [
-        'bwa',
-        'index',
-        str(ref_obj.get_ref_path())
-    ]
+    bwa_idx = ["bwa", "index", str(ref_obj.get_ref_path())]
     bwa_result = subproc_execute(bwa_idx, cwd=ref_obj.ref_dir.path)
 
-    setattr(ref_obj, 'index_name', ref_obj.ref_name)
-    setattr(ref_obj, 'indexed_with', 'bwa')
+    setattr(ref_obj, "index_name", ref_obj.ref_name)
+    setattr(ref_obj, "indexed_with", "bwa")
 
     return ref_obj

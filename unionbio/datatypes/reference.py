@@ -28,11 +28,9 @@ class Reference(DataClassJSONMixin):
 
     def get_ref_path(self, unzip=True):
         fp = Path(self.ref_dir.path).joinpath(self.ref_name)
-        if '.gz' in self.ref_name and unzip:
+        if ".gz" in self.ref_name and unzip:
             unzipped = gunzip_file(fp)
             self.ref_name = unzipped.name
             return unzipped
         else:
             return fp
-        
-

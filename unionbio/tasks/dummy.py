@@ -8,6 +8,7 @@ img = ImageSpec(
     registry="localhost:30000",
 )
 
+
 @task(container_image=img)
 def test_unionbio_install() -> str:
     return "UnionBio package installed successfully."

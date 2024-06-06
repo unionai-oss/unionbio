@@ -38,8 +38,9 @@ def test_intersect_vcfs():
     print(out)
     assert isinstance(out, VCF)
 
+
 def test_gunzip():
-    gzfile = test_assets['sites_path']
+    gzfile = test_assets["sites_path"]
     unzipped = gunzip_file(Path(gzfile))
     assert unzipped.exists()
     assert all([c in string.printable for c in open(unzipped).readline().strip()])

@@ -24,8 +24,8 @@ main_img = ImageSpec(
         "bowtie2",
         "gatk4",
         "fastqc",
-        "htslib"
-        ],
+        "htslib",
+    ],
     builder="fast-builder",
     registry=current_registry,
 )
@@ -43,7 +43,7 @@ folding_img = ImageSpec(
         "biopython",
         "py3Dmol",
         "matplotlib",
-        ],
+    ],
     registry=current_registry,
 )
 
@@ -56,21 +56,25 @@ parabricks_img = ImageSpec(
     registry=current_registry,
 )
 
-class ImageFactory:
 
+class ImageFactory:
     def __init__(self):
-        self.config_path = Path('unionbio/config.py')
+        self.config_path = Path("unionbio/config.py")
         self.build_scope = [
-            'main_img',
-            'folding_img',
-            'parabricks_img',
+            "main_img",
+            "folding_img",
+            "parabricks_img",
         ]
 
-    def built_wheel(self, output_dirname: str='dist', fmt: str='wheel') -> str:
+    def built_wheel(self, output_dirname: str = "dist", fmt: str = "wheel") -> str:
         """Build the wheel package using Poetry and return the wheel file name."""
 
         # Build package
-        result = sp.run(['poetry', 'build', '-o', output_dirname, '-f', fmt], capture_output=True, text=True)
+        result = sp.run(
+            ["poetry", "build", "-o", output_dirname, "-f", fmt],
+            capture_output=True,
+            text=True,
+        )
 
         # Check if the command was successful
         if result.returncode != 0:
@@ -80,28 +84,27 @@ class ImageFactory:
 
         # Extract the wheel name from the output
         output = result.stdout
-        matches = re.findall(r'unionbio.*\.whl', output)
+        matches = re.findall(r"unionbio.*\.whl", output)
         if matches and len(matches) == 1:
             wheel = matches[0]
         else:
             print("Wheel file name not found in the output")
             exit(1)
-        
+
         return f"{output_dirname}/{wheel}"
 
     def update_img_config(self, tags: dict[str, str]):
-        
-        with open(self.config_path, 'r') as f:
+        with open(self.config_path, "r") as f:
             cfg_content = f.read()
-        
-        for var, tag in tags.items():
-            cfg_content = re.sub(rf"{var} = .+", f"{var} = \"{tag}\"", cfg_content)
 
-        with open(self.config_path, 'w') as f:
+        for var, tag in tags.items():
+            cfg_content = re.sub(rf"{var} = .+", f'{var} = "{tag}"', cfg_content)
+
+        with open(self.config_path, "w") as f:
             f.write(cfg_content)
 
-def build():
 
+def build():
     factory = ImageFactory()
     whl = factory.built_wheel()
     fqns = {}
@@ -110,7 +113,7 @@ def build():
     for img_str in factory.build_scope:
         spec = eval(img_str)
         spec.with_packages(whl)
-        fqns[f'{img_str}_fqn'] = spec.image_name()
+        fqns[f"{img_str}_fqn"] = spec.image_name()
 
     factory.update_img_config(fqns)
 
@@ -118,4 +121,3 @@ def build():
     for img_str in factory.build_scope:
         spec = eval(img_str)
         ImageBuildEngine().build(spec)
-

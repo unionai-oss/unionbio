@@ -45,7 +45,9 @@ class VCF(DataClassJSONMixin):
         samples = {}
         pattern = "*vcf*"
         dir_contents = list(dir.rglob(pattern))
-        logger.info(f"Found following VCF files in {dir} matching {pattern}: {dir_contents}")
+        logger.info(
+            f"Found following VCF files in {dir} matching {pattern}: {dir_contents}"
+        )
         for fp in dir_contents:
             stem = str(fp.stem).split(".")[0]
             sample, caller = stem.split("_")[0:2]

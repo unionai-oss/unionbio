@@ -5,24 +5,26 @@ from pathlib import Path
 from flytekit.remote import FlyteRemote
 from flytekit.configuration import Config
 
+
 def gunzip_file(gzip_file: Path) -> Path:
     # Ensure the input file exists
     if not gzip_file.exists():
         raise FileNotFoundError(f"{gzip_file} not found")
 
     # Ensure the file has a .gz extension
-    if not gzip_file.suffix == '.gz':
+    if not gzip_file.suffix == ".gz":
         raise ValueError("Input file is not a gzip file")
 
     # Define the output file path
     output_file = gzip_file.with_suffix("")
 
     # Open input and output files
-    with gzip.open(gzip_file, 'rb') as f_in, open(output_file, 'wb') as f_out:
+    with gzip.open(gzip_file, "rb") as f_in, open(output_file, "wb") as f_out:
         # Decompress and write to output file
         f_out.write(f_in.read())
 
     return output_file
+
 
 def get_remote(local=None, config_file=None):
     """
@@ -54,6 +56,7 @@ def get_remote(local=None, config_file=None):
         default_project="flytesnacks",
         default_domain="development",
     )
+
 
 def fetch_file(url: str, local_dir: str) -> Path:
     """
