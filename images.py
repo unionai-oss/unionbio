@@ -121,3 +121,23 @@ def build():
     for img_str in factory.build_scope:
         spec = eval(img_str)
         ImageBuildEngine().build(spec)
+
+def build_test():
+    factory = ImageFactory()
+    factory.config_path = Path("tests/config.py")
+    whl = factory.built_wheel()
+    fqns = {}
+
+    # Prepare builds
+    for img_str in factory.build_scope:
+        spec = eval(img_str)
+        spec.with_packages([whl, "pytest"])
+        fqns[f"{img_str}_test_fqn"] = spec.image_name()
+
+    factory.update_img_config(fqns)
+
+    # Build images
+    for img_str in factory.build_scope:
+        spec = eval(img_str)
+        ImageBuildEngine().build(spec)
+

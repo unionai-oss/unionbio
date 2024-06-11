@@ -28,3 +28,10 @@ test_assets = {
     "prot_path": f"{cwd}/assets/proteins/folding_proteins.fasta",
     "genes_path": f"{cwd}/assets/genes/folding_genes.gff",
 }
+
+# Image tags
+# While tasks can reference imageSpec directly, using the tag allows registering tasks
+# from a containerized environment. These also contain the actual unionbio package.
+main_img_test_fqn = ""
+folding_img_test_fqn = ""
+parabricks_img_test_fqn = ""
