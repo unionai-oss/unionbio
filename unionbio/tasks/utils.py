@@ -13,14 +13,14 @@ from flytekit.configuration import Config
 from flytekit.remote import FlyteRemote
 from flytekit.extras.tasks.shell import subproc_execute
 
-from unionbio.config import main_img, logger, parabricks_img
+from unionbio.config import main_img_fqn, logger, parabricks_img_fqn
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.variants import VCF
 from unionbio.tasks.helpers import fetch_file
 
 
-@task(container_image=main_img)
+@task(container_image=main_img_fqn)
 def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     """
     Prepare and process raw sequencing data to create a list of RawSample objects.
@@ -149,7 +149,7 @@ def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
     return "PASS"
 
 
-@task(container_image=parabricks_img)
+@task(container_image=parabricks_img_fqn)
 def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
     """
     Compares two BAM files and returns True if they are identical, False otherwise.
@@ -185,7 +185,7 @@ def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
     return no_out
 
 
-@task(container_image=main_img)
+@task(container_image=main_img_fqn)
 def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     """
     Takes the intersection of 2 VCF files and returns a new VCF file to increase

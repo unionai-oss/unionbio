@@ -12,7 +12,7 @@ console_handler.setFormatter(
 # logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-seq_dir_pth = "s3://my-s3-bucket/my-data/sequences"
+seq_dir = "s3://my-s3-bucket/my-data/sequences/"
 ref_loc = "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"
 ref_hash = str(hash(ref_loc))[:4]
 
@@ -26,6 +26,6 @@ src_rt = Path(__file__).parent.parent
 # Image tags
 # While tasks can reference imageSpec directly, using the tag allows registering tasks
 # from a containerized environment. These also contain the actual unionbio package.
-main_img_fqn = "localhost:30000/unionbio-main:1lcYd1C7nLKI0AI8t9R5Zg"
-folding_img_fqn = "localhost:30000/unionbio-protein:utBZQwIhQ42CmFIh30m17Q"
-parabricks_img_fqn = "localhost:30000/unionbio-parabricks:arCmyJ63MW_F8T8zSMe0Sw"
+main_img_fqn = "localhost:30000/unionbio-main:8M489LU0HM2ZVijzU3kvYA"
+folding_img_fqn = "localhost:30000/unionbio-protein:fKfXjxCzbEFqTbdNQKbnHw"
+parabricks_img_fqn = "localhost:30000/unionbio-parabricks:T0KD0cB_ZptnIQskdM9Lqw"

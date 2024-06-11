@@ -25,6 +25,8 @@ main_img = ImageSpec(
         "gatk4",
         "fastqc",
         "htslib",
+        "multiqc",
+        "pytest", # Temporary
     ],
     builder="fast-builder",
     registry=current_registry,
@@ -62,8 +64,8 @@ class ImageFactory:
         self.config_path = Path("unionbio/config.py")
         self.build_scope = [
             "main_img",
-            "folding_img",
-            "parabricks_img",
+            # "folding_img",
+            # "parabricks_img",
         ]
 
     def built_wheel(self, output_dirname: str = "dist", fmt: str = "wheel") -> str:

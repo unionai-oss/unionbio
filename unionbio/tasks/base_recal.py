@@ -3,7 +3,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from unionbio.config import main_img
+from unionbio.config import main_img_fqn
 
 """
 Produce a base quality score recalibration report from a deduped alignment file.
@@ -41,5 +41,5 @@ base_recal = ShellTask(
             var="bqsr", var_type=FlyteFile, location="/tmp/recal/{inputs.rfn}"
         )
     ],
-    container_image=main_img,
+    container_image=main_img_fqn,
 )

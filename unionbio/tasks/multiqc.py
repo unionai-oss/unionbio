@@ -3,24 +3,16 @@ import shutil
 from flytekit import ImageSpec, current_context, task
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
+from flytekit.extras.tasks.shell import subproc_execute
 from typing import List
 from pathlib import Path
 
-from unionbio.config import logger, main_img
+from unionbio.config import logger, main_img_fqn
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.reads import Reads
 
 
-# Add MultiQC to the base image
-multiqc_image_spec = ImageSpec(
-    name="multiqc",
-    packages=["multiqc"],
-    registry="ghcr.io/pryce-turner",
-    main_img=main_img,
-)
-
-
-@task(container_image=multiqc_image_spec, enable_deck=True)
+@task(container_image=main_img_fqn, enable_deck=True)
 def render_multiqc(
     fqc: FlyteDirectory, filt_reps: List[Reads], sams: List[Alignment]
 ) -> FlyteFile:
@@ -51,19 +43,19 @@ def render_multiqc(
     logger.debug(f"FastQC reports downloaded to {ldir}")
 
     for filt_rep in filt_reps:
-        filt_rep.report.download()
-        shutil.move(filt_rep.report.path, ldir)
+        filt_rep.filt_report.download()
+        shutil.move(filt_rep.filt_report.path, ldir)
     logger.debug(f"FastP reports downloaded to {ldir}")
 
     for sam in sams:
-        sam.report.download()
-        shutil.move(sam.report.path, ldir)
+        sam.alignment_report.download()
+        shutil.move(sam.alignment_report.path, ldir)
     logger.debug(f"Alignment reports for {sams} downloaded to {ldir}")
 
     final_report = ldir.joinpath("multiqc_report.html")
     mqc_cmd = ["multiqc", str(ldir), "-n", str(final_report)]
     logger.debug(f"Generating MultiQC report at {final_report} with command: {mqc_cmd}")
-    subproc_raise(mqc_cmd)
+    subproc_execute(mqc_cmd)
 
     # Hack to force render plots on page load
     report_html_lst = []
