@@ -112,7 +112,7 @@ class ImageFactory:
 
         # Build images
         for spec in self.build_specs:
-            spec.packages.append(whl)
+            spec.with_packages(whl)
             ImageBuildEngine().build(spec)
 
 
@@ -137,6 +137,7 @@ def build_test():
         spec.name = f"{spec.name}-test"
         spec.packages.append("pytest")
         factory.fqns[f"{img_str}_test_fqn"] = spec.image_name()
+        factory.build_specs.append(spec)
 
     factory.build_all()
 
