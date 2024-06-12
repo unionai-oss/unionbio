@@ -7,11 +7,12 @@ from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
 
 current_registry = "localhost:30000"
-src_rt = Path(__file__).parent
+dir_rt = Path(__file__).parent
+prod_rt = dir_rt.joinpath("unionbio")
 
 main_img = ImageSpec(
     name="unionbio-main",
-    source_root=src_rt,
+    source_root=dir_rt,
     packages=["flytekit"],
     python_version="3.11",
     conda_channels=["bioconda"],
@@ -34,7 +35,7 @@ folding_img = ImageSpec(
     name="unionbio-protein",
     platform="linux/amd64",
     python_version="3.11",
-    source_root=src_rt,
+    source_root=dir_rt,
     packages=["flytekit", "transformers", "torch"],
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
@@ -50,7 +51,7 @@ folding_img = ImageSpec(
 parabricks_img = ImageSpec(
     name="unionbio-parabricks",
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
-    source_root=src_rt,
+    source_root=dir_rt,
     python_version="3.10",
     packages=["flytekit"],
     registry=current_registry,
@@ -62,13 +63,13 @@ class ImageFactory:
         self.config_path = Path("unionbio/config.py")
         self.build_scope = [
             "main_img",
-            "folding_img",
-            "parabricks_img",
+            # "folding_img",
+            # "parabricks_img",
         ]
         self.fqns = {}
         self.build_specs = []
 
-    def built_wheel(self, output_dirname: str = "dist", fmt: str = "wheel") -> str:
+    def built_wheel(self, output_dirname: str = "unionbio", fmt: str = "wheel") -> str:
         """Build the wheel package using Poetry and return the wheel file name."""
 
         # Build package
