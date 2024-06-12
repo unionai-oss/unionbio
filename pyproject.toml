@@ -13,6 +13,7 @@ imagespec-fast-builder = "0.0.20b1"
 
 [tool.poetry.scripts]
 image-builder = "images:build"
+test-image-builder = "images:build_test"
 
 [build-system]
 requires = ["poetry-core"]

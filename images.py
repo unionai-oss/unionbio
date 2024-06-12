@@ -65,6 +65,8 @@ class ImageFactory:
             "folding_img",
             "parabricks_img",
         ]
+        self.fqns = {}
+        self.build_specs = []
 
     def built_wheel(self, output_dirname: str = "dist", fmt: str = "wheel") -> str:
         """Build the wheel package using Poetry and return the wheel file name."""
@@ -93,51 +95,48 @@ class ImageFactory:
 
         return f"{output_dirname}/{wheel}"
 
-    def update_img_config(self, tags: dict[str, str]):
+    def update_img_config(self):
         with open(self.config_path, "r") as f:
             cfg_content = f.read()
 
-        for var, tag in tags.items():
+        for var, tag in self.fqns.items():
             cfg_content = re.sub(rf"{var} = .+", f'{var} = "{tag}"', cfg_content)
 
         with open(self.config_path, "w") as f:
             f.write(cfg_content)
 
+    def build_all(self):
+
+        self.update_img_config()
+        whl = self.built_wheel()
+
+        # Build images
+        for spec in self.build_specs:
+            spec.packages.append(whl)
+            ImageBuildEngine().build(spec)
+
 
 def build():
     factory = ImageFactory()
-    whl = factory.built_wheel()
-    fqns = {}
 
     # Prepare builds
     for img_str in factory.build_scope:
         spec = eval(img_str)
-        spec.with_packages(whl)
-        fqns[f"{img_str}_fqn"] = spec.image_name()
+        factory.fqns[f"{img_str}_fqn"] = spec.image_name()
+        factory.build_specs.append(spec)
 
-    factory.update_img_config(fqns)
-
-    # Build images
-    for img_str in factory.build_scope:
-        spec = eval(img_str)
-        ImageBuildEngine().build(spec)
+    factory.build_all()
 
 def build_test():
     factory = ImageFactory()
     factory.config_path = Path("tests/config.py")
-    whl = factory.built_wheel()
-    fqns = {}
 
     # Prepare builds
     for img_str in factory.build_scope:
         spec = eval(img_str)
-        spec.with_packages([whl, "pytest"])
-        fqns[f"{img_str}_test_fqn"] = spec.image_name()
+        spec.name = f"{spec.name}-test"
+        spec.packages.append("pytest")
+        factory.fqns[f"{img_str}_test_fqn"] = spec.image_name()
 
-    factory.update_img_config(fqns)
-
-    # Build images
-    for img_str in factory.build_scope:
-        spec = eval(img_str)
-        ImageBuildEngine().build(spec)
+    factory.build_all()
 
