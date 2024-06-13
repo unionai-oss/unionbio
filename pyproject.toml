@@ -10,6 +10,8 @@ python = ">=3.10,<3.13"
 flytekit = "^1.12.0"
 unionai = "^0.1.22"
 imagespec-fast-builder = "0.0.20b1"
+docker = "<7.0.0"
+requests = "2.31.0"
 
 [tool.poetry.scripts]
 image-builder = "images:build"

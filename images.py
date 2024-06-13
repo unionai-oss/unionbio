@@ -57,91 +57,57 @@ parabricks_img = ImageSpec(
     registry=current_registry,
 )
 
+build_scope = [
+    "main_img",
+    "folding_img",
+    "parabricks_img",
+]
 
-class ImageFactory:
-    def __init__(self):
-        self.config_path = Path("src/unionbio/config.py")
-        self.build_scope = [
-            "main_img",
-            # "folding_img",
-            # "parabricks_img",
-        ]
-        self.fqns = {}
-        self.build_specs = []
 
-    # def built_wheel(self, output_dirname: str = "unionbio", fmt: str = "wheel") -> str:
-    #     """Build the wheel package using Poetry and return the wheel file name."""
+def update_img_config(config_path: Path, fqns: dict[str, str]):
 
-    #     # Build package
-    #     result = sp.run(
-    #         ["poetry", "build", "-o", output_dirname, "-f", fmt],
-    #         capture_output=True,
-    #         text=True,
-    #     )
+    with open(config_path, "r") as f:
+        cfg_content = f.read()
 
-    #     # Check if the command was successful
-    #     if result.returncode != 0:
-    #         print(f"Poetry build failed with exit code {result.returncode}")
-    #         print(result.stderr)
-    #         exit(1)
+    for var, tag in fqns.items():
+        cfg_content = re.sub(rf"{var} = .+", f'{var} = "{tag}"', cfg_content)
 
-    #     # Extract the wheel name from the output
-    #     output = result.stdout
-    #     matches = re.findall(r"unionbio.*\.whl", output)
-    #     if matches and len(matches) == 1:
-    #         wheel = matches[0]
-    #     else:
-    #         print("Wheel file name not found in the output")
-    #         exit(1)
-
-    #     # return f"{output_dirname}/{wheel}"
-    #     return wheel
-
-    def update_img_config(self):
-
-        with open(self.config_path, "r") as f:
-            cfg_content = f.read()
-
-        for var, tag in self.fqns.items():
-            cfg_content = re.sub(rf"{var} = .+", f'{var} = "{tag}"', cfg_content)
-
-        with open(self.config_path, "w") as f:
-            f.write(cfg_content)
-
-    def build_all(self):
-
-        self.update_img_config()
-        # whl = self.built_wheel()
-
-        # Build images
-        for spec in self.build_specs:
-            # spec.packages.append(whl)
-            ImageBuildEngine().build(spec)
+    with open(config_path, "w") as f:
+        f.write(cfg_content)
 
 
 def build():
-    factory = ImageFactory()
+
+    build_specs = []
+    fqns = {}
 
     # Prepare builds
-    for img_str in factory.build_scope:
+    for img_str in build_scope:
         spec = eval(img_str)
-        factory.fqns[f"{img_str}_fqn"] = spec.image_name()
-        factory.build_specs.append(spec)
+        fqns[f"{img_str}_fqn"] = spec.image_name()
+        build_specs.append(spec)
 
-    factory.build_all()
+    update_img_config(Path("src/unionbio/config.py"), fqns)
+
+    for spec in build_specs:
+        ImageBuildEngine().build(spec)
 
 def build_test():
-    factory = ImageFactory()
-    factory.config_path = Path("tests/config.py")
+
+    build_specs = []
+    fqns = {}
 
     # Prepare builds
-    for img_str in factory.build_scope:
+    for img_str in build_scope:
         spec = eval(img_str)
         spec.name = f"{spec.name}-test"
         spec.source_root = test_rt
         spec.packages.append("pytest")
-        factory.fqns[f"{img_str}_test_fqn"] = spec.image_name()
-        factory.build_specs.append(spec)
+        fqns[f"{img_str}_test_fqn"] = spec.image_name()
+        build_specs.append(spec)
 
-    factory.build_all()
+    update_img_config(Path("tests/config.py"), fqns)
+
+    for spec in build_specs:
+        ImageBuildEngine().build(spec)
 
