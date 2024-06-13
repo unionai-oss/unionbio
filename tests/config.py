@@ -32,6 +32,6 @@ test_assets = {
 # Image tags
 # While tasks can reference imageSpec directly, using the tag allows registering tasks
 # from a containerized environment. These also contain the actual unionbio package.
-main_img_test_fqn = "localhost:30000/unionbio-main-test:EM6Emh77akIXTWqq4Lz5wQ"
+main_img_test_fqn = "localhost:30000/unionbio-main-test:P3d18IYutyTyRyEIXKgyow"
 folding_img_test_fqn = "localhost:30000/unionbio-protein-test:B1sS5rC06HVI7oi_Pc5xTg"
 parabricks_img_test_fqn = "localhost:30000/unionbio-parabricks-test:ZuppfEBDvTgefYkFKKGqSQ"
