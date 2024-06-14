@@ -23,7 +23,7 @@ def run_pytest_in_docker():
                     "mode": "rw",
                 },
             },
-            command="pytest /root/tests/main/test_tasks.py",
+            command="pytest /root/tests/main",
             stdout=True,
             stderr=True,
         )
