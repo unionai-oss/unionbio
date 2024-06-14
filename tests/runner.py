@@ -1,5 +1,5 @@
 import docker
-from config import proj_rt, main_img_test_fqn
+from .config import proj_rt, main_img_test_fqn
 
 
 def run_pytest_in_docker():
@@ -23,7 +23,7 @@ def run_pytest_in_docker():
                     "mode": "rw",
                 },
             },
-            command="pytest /root/tests/main/test_utils.py::test_intersect_vcfs",
+            command="pytest /root/tests/main/test_tasks.py",
             stdout=True,
             stderr=True,
         )
@@ -45,6 +45,3 @@ def run_pytest_in_docker():
         if con is not None:
             con.remove(force=True)
             print(f"Container {con.id} removed")
-
-
-run_pytest_in_docker()

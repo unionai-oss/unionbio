@@ -71,6 +71,7 @@ def update_img_config(config_path: Path, fqns: dict[str, str]):
     with open(config_path, "w") as f:
         f.write(cfg_content)
 
+## Entrypoints ##
 
 def build():
     build_specs = []

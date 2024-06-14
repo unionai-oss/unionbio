@@ -23,9 +23,7 @@ sort_sam = ShellTask(
     metadata=TaskMetadata(retries=3, cache=True, cache_version="1"),
     script="""
     mkdir /tmp/sort_sam
-    "java" \
-    "-jar" \
-    "/usr/local/bin/gatk" \
+    "gatk" \
     "SortSam" \
     -I {inputs.sam} \
     -O {outputs.o} \

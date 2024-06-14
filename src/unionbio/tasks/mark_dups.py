@@ -28,9 +28,7 @@ mark_dups = ShellTask(
     metadata=TaskMetadata(retries=3, cache=True, cache_version="1"),
     script="""
     mkdir /tmp/dedup
-    "java" \
-    "-jar" \
-    "/usr/local/bin/gatk" \
+    "gatk" \
     "MarkDuplicates" \
     -I {inputs.al} \
     -O {outputs.dal} \

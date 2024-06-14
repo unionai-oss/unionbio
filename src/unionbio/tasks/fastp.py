@@ -47,7 +47,7 @@ def pyfastp(rs: Reads) -> Reads:
         "-O",
         o2p,
         "-j",
-        rep,
+        repp,
     ]
     logger.debug(f"Running command: {cmd}")
 
