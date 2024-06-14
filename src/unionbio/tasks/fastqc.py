@@ -2,7 +2,7 @@ from flytekit import kwtypes, TaskMetadata
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.directory import FlyteDirectory
 
-from unionbio.config import main_img
+from unionbio.config import main_img_fqn
 
 """
 Perform quality control using FastQC.
@@ -27,5 +27,5 @@ fastqc = ShellTask(
     """,
     inputs=kwtypes(seq_dir=FlyteDirectory),
     output_locs=[OutputLocation(var="qc", var_type=FlyteDirectory, location="/tmp/qc")],
-    container_image=main_img,
+    container_image=main_img_fqn,
 )

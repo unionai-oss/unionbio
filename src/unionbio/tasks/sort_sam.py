@@ -5,7 +5,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 
 from unionbio.datatypes.alignment import Alignment
-from unionbio.config import main_img
+from unionbio.config import main_img_fqn
 
 """
 Sort SAM file based on coordinate.
@@ -37,7 +37,7 @@ sort_sam = ShellTask(
             var="o", var_type=FlyteFile, location="/tmp/sort_sam/{inputs.out_fname}"
         )
     ],
-    container_image=main_img,
+    container_image=main_img_fqn,
 )
 
 

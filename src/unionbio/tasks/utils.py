@@ -2,25 +2,23 @@ import os
 import zipfile
 import requests
 import tarfile
-import gzip
-import ftplib
 from pathlib import Path
 from typing import List
 from flytekit import task, current_context
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from flytekit.configuration import Config
-from flytekit.remote import FlyteRemote
 from flytekit.extras.tasks.shell import subproc_execute
 
-from unionbio.config import main_img, logger, parabricks_img
+from unionbio.config import main_img_fqn, logger, parabricks_img_fqn
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.variants import VCF
 from unionbio.tasks.helpers import fetch_file
 
 
-@task(container_image=main_img)
+@task(
+    container_image=main_img_fqn,
+)
 def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     """
     Prepare and process raw sequencing data to create a list of RawSample objects.
@@ -149,7 +147,7 @@ def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
     return "PASS"
 
 
-@task(container_image=parabricks_img)
+@task(container_image=parabricks_img_fqn)
 def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
     """
     Compares two BAM files and returns True if they are identical, False otherwise.
@@ -185,7 +183,9 @@ def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
     return no_out
 
 
-@task(container_image=main_img)
+@task(
+    container_image=main_img_fqn,
+)
 def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     """
     Takes the intersection of 2 VCF files and returns a new VCF file to increase
@@ -198,8 +198,9 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     Returns:
         VCF: Intersected and zipped VCF object.
     """
-    vcf1.dl_all()
-    vcf2.dl_all()
+    wd = Path(current_context().working_directory)
+    vcf1.dl_all(workdir=wd)
+    vcf2.dl_all(workdir=wd)
     isec_out = VCF(sample=vcf1.sample, caller=f"{vcf1.caller}_{vcf2.caller}_isec")
     fname_out = isec_out.get_vcf_fname()
 

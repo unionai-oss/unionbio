@@ -1,7 +1,5 @@
-import os
 import logging
 from pathlib import Path
-from flytekit import ImageSpec
 
 # Setup the logger
 logger = logging.getLogger(__name__)

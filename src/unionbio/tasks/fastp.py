@@ -2,13 +2,13 @@ from pathlib import Path
 from flytekit import task, Resources, current_context
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
-from unionbio.config import main_img, logger, fastp_cpu
+from unionbio.config import main_img_fqn, logger, fastp_cpu
 from unionbio.datatypes.reads import Reads
 
 
 @task(
     requests=Resources(cpu=fastp_cpu, mem="2Gi"),
-    container_image=main_img,
+    container_image=main_img_fqn,
 )
 def pyfastp(rs: Reads) -> Reads:
     """

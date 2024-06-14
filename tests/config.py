@@ -35,4 +35,6 @@ test_assets = {
 # from a containerized environment. These also contain the actual unionbio package.
 main_img_test_fqn = "localhost:30000/unionbio-main-test:z_VQI0cxFSK_kj7GgYpbsQ"
 folding_img_test_fqn = "localhost:30000/unionbio-protein-test:NlNhyap5cebT0lMp_D4hmQ"
-parabricks_img_test_fqn = "localhost:30000/unionbio-parabricks-test:tjWURFYPRxGXDlo8r09GKQ"
+parabricks_img_test_fqn = (
+    "localhost:30000/unionbio-parabricks-test:tjWURFYPRxGXDlo8r09GKQ"
+)

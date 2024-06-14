@@ -1,8 +1,5 @@
-import os
 import re
-import subprocess as sp
 from pathlib import Path
-from dataclasses import dataclass
 from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
 
@@ -65,7 +62,6 @@ build_scope = [
 
 
 def update_img_config(config_path: Path, fqns: dict[str, str]):
-
     with open(config_path, "r") as f:
         cfg_content = f.read()
 
@@ -77,7 +73,6 @@ def update_img_config(config_path: Path, fqns: dict[str, str]):
 
 
 def build():
-
     build_specs = []
     fqns = {}
 
@@ -92,8 +87,8 @@ def build():
     for spec in build_specs:
         ImageBuildEngine().build(spec)
 
-def build_test():
 
+def build_test():
     build_specs = []
     fqns = {}
 
@@ -110,4 +105,3 @@ def build_test():
 
     for spec in build_specs:
         ImageBuildEngine().build(spec)
-
