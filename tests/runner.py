@@ -2,16 +2,16 @@ import docker
 from .config import proj_rt, main_img_test_fqn
 
 
-def run_pytest_in_docker():
+def run_pytest_in_docker(fqn: str, test_dir: str):
     client = docker.from_env()
 
     try:
         # Run the Docker container
         print("\nRunning pytest in Docker container...")
-        con_name = "unionbio-main-test-container"
+        con_name = f"unionbio-{test_dir}-test-container"
         container = client.containers.run(
             name=con_name,
-            image=main_img_test_fqn,
+            image=fqn,
             volumes={
                 proj_rt.joinpath("tests"): {
                     "bind": "/root/tests",
@@ -23,7 +23,7 @@ def run_pytest_in_docker():
                     "mode": "rw",
                 },
             },
-            command="pytest /root/tests/main",
+            command=f"pytest /root/tests/{test_dir}",
             stdout=True,
             stderr=True,
         )
@@ -45,3 +45,6 @@ def run_pytest_in_docker():
         if con is not None:
             con.remove(force=True)
             print(f"Container {con.id} removed")
+
+def test_main():
+    run_pytest_in_docker(main_img_test_fqn, "main")

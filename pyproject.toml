@@ -16,7 +16,7 @@ requests = "2.31.0"
 [tool.poetry.scripts]
 image-builder = "images:build"
 test-image-builder = "images:build_test"
-tests = "tests.runner:run_pytest_in_docker"
+main-tests = "tests.runner:test_main"
 
 [build-system]
 requires = ["poetry-core"]
