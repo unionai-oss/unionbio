@@ -24,12 +24,9 @@ def test_fastp():
     raw_samp = Reads.make_all(Path(test_assets["raw_seq_dir"]))[0]
     filt_samp = pyfastp(rs=raw_samp)
     assert isinstance(filt_samp, Reads)
-    print(filt_samp)
-    assert(Path(filt_samp.filt_report.path).exists())
-    # assert cmp(
-    #     Path(filt_samp.read1.path),
-    #     Path(test_assets["filt_seq_dir"]).joinpath("ERR250683-tiny_1.filt.fastq.gz"),
-    # )
+    r1a = Path(filt_samp.read1.path)
+    r1e = Path(test_assets["filt_seq_dir"]).joinpath("ERR250683-tiny_1.filt.fastq.gz")
+    assert cmp(r1a, r1e)
 
 
 def test_sort_sam():

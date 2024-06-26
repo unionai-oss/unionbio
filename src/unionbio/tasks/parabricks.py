@@ -1,6 +1,6 @@
-from typing import List, Tuple
+from typing import Tuple
 from pathlib import Path
-from flytekit import task, Resources, current_context, ImageSpec
+from flytekit import task, Resources
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile

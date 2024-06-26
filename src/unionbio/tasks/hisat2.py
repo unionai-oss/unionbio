@@ -9,7 +9,6 @@ from flytekit.types.directory import FlyteDirectory
 from unionbio.config import ref_hash, main_img_fqn, logger
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.reference import Reference
 
 """
 Generate Hisat2 index files from a reference genome.

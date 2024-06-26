@@ -82,14 +82,14 @@ def test_vcf():
 
 def test_vcf_make_all():
     vcfs = VCF.make_all(Path(test_assets["vcf_dir"]))
-    assert len(vcfs) == 1
+    assert len(vcfs) == 2
     assert isinstance(vcfs[0], VCF)
-    assert vcfs[0].sample == "test-sample"
+    assert vcfs[0].sample == "test-sample-1"
     assert vcfs[0].caller == "test-caller"
     assert vcfs[0].vcf.path == test_assets["vcf_path"]
     assert vcfs[0].vcf_idx.path == test_assets["vcf_idx_path"]
-    assert vcfs[0].get_vcf_fname() == "test-sample_test-caller.vcf.gz"
-    assert vcfs[0].get_vcf_idx_fname() == "test-sample_test-caller.vcf.gz.tbi"
+    assert vcfs[0].get_vcf_fname() == "test-sample-1_test-caller.vcf.gz"
+    assert vcfs[0].get_vcf_idx_fname() == "test-sample-1_test-caller.vcf.gz.tbi"
 
 
 def test_protein():

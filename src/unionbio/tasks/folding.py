@@ -1,17 +1,11 @@
 # Ok, we are ready to begin and import all tools we will use in this colab:
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-import py3Dmol
 import biotite.structure.io as bsio
 import torch
 from Bio import SeqIO
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-from flytekit import ImageSpec, Resources, task, workflow
+from flytekit import Resources, task
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
-from transformers import AutoTokenizer, EsmForProteinFolding, set_seed
+from transformers import AutoTokenizer, EsmForProteinFolding
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.protein import Protein
 from unionbio.config import logger, folding_img

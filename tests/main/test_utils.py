@@ -1,11 +1,5 @@
-import os
 import string
-from filecmp import cmp
 from pathlib import Path
-from flytekit.types.directory import FlyteDirectory
-from flytekit.types.file import FlyteFile
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.variants import VCF
 from unionbio.tasks.utils import fetch_file, intersect_vcfs
 from unionbio.tasks.helpers import gunzip_file
@@ -32,9 +26,9 @@ def test_fetch_ftp_file(tmp_path):
 
 
 def test_intersect_vcfs():
-    vcf1 = VCF.make_all(Path(test_assets["vcf_dir"]))[0]
-    vcf2 = VCF.make_all(Path(test_assets["vcf_dir"]))[0]
-    out = intersect_vcfs(vcf1=vcf1, vcf2=vcf2)
+    vcfs = VCF.make_all(Path(test_assets["vcf_dir"]))
+    # vcf2 = VCF.make_all(Path(test_assets["vcf_dir"]))[0]
+    out = intersect_vcfs(vcf1=vcfs[0], vcf2=vcfs[1])
     print(out)
     assert isinstance(out, VCF)
 

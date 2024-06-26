@@ -36,9 +36,17 @@ class VCF(DataClassJSONMixin):
     def get_vcf_idx_fname(self):
         return f"{self._get_state_str()}.vcf.gz.tbi"
 
-    def dl_all(self):
-        self.vcf.download()
-        self.vcf_idx.download()
+    def dl_all(self, workdir: Path):
+        v_loc = Path(self.vcf.download())
+        i_loc = Path(self.vcf_idx.download())
+        v_name = v_loc.name
+        i_name = i_loc.name
+        v_new = workdir.joinpath(v_name)
+        i_new = workdir.joinpath(i_name)
+        v_loc.rename(v_new)
+        i_loc.rename(i_new)
+        self.vcf = FlyteFile(path=str(v_new))
+        self.vcf_idx = FlyteFile(path=str(i_new))
 
     @classmethod
     def make_all(cls, dir: Path):
