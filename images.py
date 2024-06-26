@@ -3,7 +3,7 @@ from pathlib import Path
 from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
 
-current_registry = "localhost:30000"
+current_registry = "ghcr.io/pryce-turner"
 test_rt = Path(__file__).parent
 prod_rt = test_rt.joinpath("src")
 
@@ -57,9 +57,9 @@ parabricks_img = ImageSpec(
 )
 
 build_scope = [
-    "main_img",
+    # "main_img",
     "folding_img",
-    "parabricks_img",
+    # "parabricks_img",
 ]
 
 

@@ -1,0 +1,13 @@
+name: folding-workspace
+# Make sure that the project and domain exists
+project: default
+domain: development
+container_image: ghcr.io/unionai/workspace:0.0.3
+
+resources:
+    cpu: "2"
+    mem: "4Gi"
+    gpu: "1"
+
+on_startup: null
+metadata: null

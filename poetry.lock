@@ -676,6 +676,20 @@ files = [
 ]
 
 [[package]]
+name = "envd"
+version = "0.3.45"
+description = "A development environment management tool for data scientists."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "envd-0.3.45-py2.py3-none-macosx_10_9_x86_64.whl", hash = "sha256:1e8fecf69293a3cd42f7ab544323f355831b0a5ee02827c25f4d142f49783799"},
+    {file = "envd-0.3.45-py2.py3-none-macosx_11_0_arm64.whl", hash = "sha256:a8032bc2374f15f0fc7b9230b9cb771e6b220ffb58990d3ea97699e34bc853b0"},
+    {file = "envd-0.3.45-py2.py3-none-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4b3b1a196bfbf889d7d793c23896fe8c58efb14923790d787a7fe1ebed7a644f"},
+    {file = "envd-0.3.45-py2.py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:278218a7c269dbc2e75b46cf4e810c5e3ac2ae560730b2f1e66edcb62729d553"},
+    {file = "envd-0.3.45.tar.gz", hash = "sha256:d475cc0fec647127bb0d765a9be0c69ac31d7beee1f83ebf6253893320f2ae0b"},
+]
+
+[[package]]
 name = "flyteidl"
 version = "1.12.0"
 description = "IDL for Flyte Platform"
@@ -693,13 +707,13 @@ protoc-gen-openapiv2 = "*"
 
 [[package]]
 name = "flytekit"
-version = "1.12.0"
+version = "1.12.3"
 description = "Flyte SDK for Python"
 optional = false
 python-versions = "<3.13,>=3.8"
 files = [
-    {file = "flytekit-1.12.0-py3-none-any.whl", hash = "sha256:ffd25ef72678fce58bcb24e605dd34b2a5a1d74db6108ef08657dc64271d06c5"},
-    {file = "flytekit-1.12.0.tar.gz", hash = "sha256:82d744149e2172ed9fecf73a549a6d5de7a7553bee0f967da2d971820e795524"},
+    {file = "flytekit-1.12.3-py3-none-any.whl", hash = "sha256:c0fc969a1ee9c4f7841d58f2dfa3e230f322ae46e1e6a03b3d744ee456b614aa"},
+    {file = "flytekit-1.12.3.tar.gz", hash = "sha256:9c9bb5f7cf3b37fc345cb59c846edc51a8fa099550174e64bd693927c0f95af0"},
 ]
 
 [package.dependencies]
@@ -711,7 +725,7 @@ dataclasses-json = ">=0.5.2,<0.5.12"
 diskcache = ">=5.2.1"
 docker = ">=4.0.0,<7.0.0"
 docstring-parser = ">=0.9.0"
-flyteidl = ">=1.11.0b1"
+flyteidl = ">=1.12.0"
 fsspec = ">=2023.3.0"
 gcsfs = ">=2023.3.0"
 googleapis-common-protos = ">=1.57"
@@ -719,26 +733,44 @@ grpcio = "*"
 grpcio-status = "*"
 importlib-metadata = "*"
 isodate = "*"
+jinja2 = "*"
 joblib = "*"
+jsonlines = "*"
 jsonpickle = "*"
 keyring = ">=18.0.1"
 markdown-it-py = "*"
 marshmallow-enum = "*"
 marshmallow-jsonschema = ">=0.12.0"
 mashumaro = ">=3.11"
+numpy = "<2"
 protobuf = "!=4.25.0"
 pyarrow = "*"
 pygments = "*"
 python-json-logger = ">=2.0.0"
 pytimeparse = ">=1.1.8,<2.0.0"
 pyyaml = "<5.4.0 || >5.4.0,<5.4.1 || >5.4.1,<6.0.0 || >6.0.0"
-requests = ">=2.18.4,<3.0.0"
+requests = ">=2.18.4,<2.32.0 || >2.32.0,<2.32.1 || >2.32.1,<2.32.2 || >2.32.2,<2.32.3 || >2.32.3,<3.0.0"
 rich = "*"
 rich-click = "*"
 s3fs = ">=2023.3.0,<2024.3.1 || >2024.3.1"
 statsd = ">=3.0.0,<4.0.0"
 typing-extensions = "*"
-urllib3 = ">=1.22,<2.0.0"
+urllib3 = ">=1.22,<3.0.0"
+
+[[package]]
+name = "flytekitplugins-envd"
+version = "1.12.3"
+description = "This package enables users to easily build a Docker image for tasks or workflows."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "flytekitplugins_envd-1.12.3-py3-none-any.whl", hash = "sha256:6a5b428fb18e9479685c0e4eba7943584b6f418f1d1179b54d22925ad1a43b67"},
+    {file = "flytekitplugins_envd-1.12.3.tar.gz", hash = "sha256:b3b93d49958c8c7943eb816ecaf91a23dcc19f4d02afc764a88f9763435c3601"},
+]
+
+[package.dependencies]
+envd = "*"
+flytekit = ">=1.12.0"
 
 [[package]]
 name = "frozenlist"
@@ -1346,6 +1378,20 @@ files = [
     {file = "joblib-1.4.2-py3-none-any.whl", hash = "sha256:06d478d5674cbc267e7496a410ee875abd68e4340feff4490bcb7afb88060ae6"},
     {file = "joblib-1.4.2.tar.gz", hash = "sha256:2382c5816b2636fbd20a09e0f4e9dad4736765fdfb7dca582943b9c1366b3f0e"},
 ]
+
+[[package]]
+name = "jsonlines"
+version = "4.0.0"
+description = "Library with helpers for the jsonlines file format"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "jsonlines-4.0.0-py3-none-any.whl", hash = "sha256:185b334ff2ca5a91362993f42e83588a360cf95ce4b71a73548502bda52a7c55"},
+    {file = "jsonlines-4.0.0.tar.gz", hash = "sha256:0c6d2c09117550c089995247f605ae4cf77dd1533041d366351f6f298822ea74"},
+]
+
+[package.dependencies]
+attrs = ">=19.2.0"
 
 [[package]]
 name = "jsonpickle"
@@ -2556,4 +2602,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "46f1d45dcfbda9365ae1b438745f450b02455c0694159226c16b6c73a742a2d1"
+content-hash = "50b8e78c88959eda90862e7a365c99ce786498712aa6d649a6a6fc6838331926"

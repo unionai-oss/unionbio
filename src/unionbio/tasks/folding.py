@@ -8,15 +8,15 @@ from flytekit.types.file import FlyteFile
 from transformers import AutoTokenizer, EsmForProteinFolding
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.protein import Protein
-from unionbio.config import logger, folding_img
+from unionbio.config import logger, folding_img_fqn
 
 
-@task(container_image=folding_img)
+@task(container_image=folding_img_fqn)
 def test_unionbio_install() -> str:
     return "UnionBio package installed successfully."
 
 
-@task(container_image=folding_img)
+@task(container_image=folding_img_fqn)
 def prodigal_predict(in_seq: Reads) -> Protein:
     """
     Predicts protein sequences from a DNA sequence using Prodigal.
@@ -55,9 +55,7 @@ def prodigal_predict(in_seq: Reads) -> Protein:
     return prot
 
 
-@task(
-    container_image=folding_img, requests=Resources(gpu="1")
-)  # , cpu='2', mem='12Gi', ephemeral_storage='100Gi'))
+@task(container_image=folding_img_fqn, requests=Resources(gpu="1"))
 def esm_fold(prot: FlyteFile) -> FlyteFile:
     esmfold = EsmForProteinFolding.from_pretrained(
         "facebook/esmfold_v1",
