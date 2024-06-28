@@ -33,6 +33,6 @@ test_assets = {
 # Image tags
 # While tasks can reference imageSpec directly, using the tag allows registering tasks
 # from a containerized environment. These also contain the actual unionbio package.
-main_img_test_fqn = "localhost:30000/unionbio-main-test:eLCtoWzFf9FgubVLVV_stw"
-folding_img_test_fqn = "ghcr.io/pryce-turner/unionbio-protein-test:xtGwQ4JxerzTUWKweO9N8Q"
-parabricks_img_test_fqn = "localhost:30000/unionbio-parabricks-test:RmHZYhWpqRehPiBgW5EqSA"
+main_img_test_fqn = "docker.io/unionbio/main-test:sgNTqt6lG16YmqWaO1wxzQ"
+folding_img_test_fqn = "docker.io/unionbio/folding-test:snQccIukFt9qaNQLb4Q9oA"
+parabricks_img_test_fqn = "docker.io/unionbio/parabricks-test:wHf1KJIZyUy6JrYkJ1qfdg"

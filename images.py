@@ -11,7 +11,7 @@ main_img = ImageSpec(
     name="main",
     platform="linux/amd64",
     python_version="3.11",
-    packages=["flytekit", "unionai==0.1.42"],
+    packages=["unionai==0.1.42"],
     source_root=prod_rt,
     conda_channels=["bioconda"],
     conda_packages=[
@@ -34,7 +34,7 @@ folding_img = ImageSpec(
     name="folding",
     platform="linux/amd64",
     python_version="3.11",
-    packages=["flytekit", "transformers", "torch", "unionai"],
+    packages=["transformers", "torch", "unionai==0.1.42"],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
@@ -53,7 +53,7 @@ parabricks_img = ImageSpec(
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
     platform="linux/amd64",
     python_version="3.10",
-    packages=["flytekit", "unionai"],
+    packages=["unionai==0.1.42"],
     source_root=prod_rt,
     builder="fast-builder",
     registry=current_registry,
@@ -61,8 +61,8 @@ parabricks_img = ImageSpec(
 
 build_scope = [
     "main_img",
-    # "folding_img",
-    # "parabricks_img",
+    "folding_img",
+    "parabricks_img",
 ]
 
 
