@@ -11,7 +11,7 @@ main_img = ImageSpec(
     name="main",
     platform="linux/amd64",
     python_version="3.11",
-    packages=["flytekit", "unionai"],
+    packages=["flytekit", "unionai==0.1.42"],
     source_root=prod_rt,
     conda_channels=["bioconda"],
     conda_packages=[

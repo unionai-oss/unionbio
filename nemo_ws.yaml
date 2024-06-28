@@ -3,10 +3,10 @@ project: default
 domain: development
 container_image:
     base_image: "nvcr.io/nvidia/clara/bionemo-framework:1.3"
-    builder: "envd"
+    builder: "fast-builder"
     packages: 
      - "unionai"
-     - "setuptools"
+    #  - "setuptools"
 
 resources:
     cpu: "2"
@@ -14,5 +14,4 @@ resources:
     gpu: null
 
 metadata: null
-on_startup:
- - "chown -R 1000:1000 /"
+on_startup: null

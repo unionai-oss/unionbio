@@ -2,13 +2,13 @@ name: main-workspace
 # Make sure that the project and domain exists
 project: default
 domain: development
-container_image: docker.io/unionbio/main:5989LIGJAjd7Sii4nFgzyQ
+container_image: docker.io/unionbio/main:mozjgEp0iVGcoWbG45OLGQ
 
 resources:
     cpu: "2"
     mem: "4Gi"
-    gpu: null
+    gpu: "1"
 
 workspace_root: /root
-on_startup: null
 metadata: null
+on_startup: null
