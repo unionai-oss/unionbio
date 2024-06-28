@@ -1,0 +1,32 @@
+name: folding-workspace
+project: default
+domain: development
+container_image:
+    name: workspace
+    platform: linux/amd64
+    python_version: "3.11"
+    # base_image: "ghcr.io/pryce-turner/unionbio-protein-test:xtgwq4jxerztuwkweo9n8q"
+    builder: "fast-builder"
+    packages:
+      - flytekit
+      - transformers
+      - torch
+      - unionai
+    conda_channels:
+      - bioconda
+      - conda-forge
+    conda_packages:
+      - prodigal
+      - biotite
+      - biopython
+      - py3Dmol
+      - matplotlib
+    registry: "docker.io/unionbio/folding"
+
+resources:
+    cpu: "2"
+    mem: "4Gi"
+    gpu: null
+
+on_startup: null
+metadata: null

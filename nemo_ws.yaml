@@ -1,0 +1,18 @@
+name: bionemo-workspace-2
+project: default
+domain: development
+container_image:
+    base_image: "nvcr.io/nvidia/clara/bionemo-framework:1.3"
+    builder: "envd"
+    packages: 
+     - "unionai"
+     - "setuptools"
+
+resources:
+    cpu: "2"
+    mem: "4Gi"
+    gpu: null
+
+metadata: null
+on_startup:
+ - "chown -R 1000:1000 /"

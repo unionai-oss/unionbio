@@ -8,10 +8,11 @@ test_rt = Path(__file__).parent
 prod_rt = test_rt.joinpath("src")
 
 main_img = ImageSpec(
-    name="unionbio-main",
-    source_root=prod_rt,
-    packages=["flytekit", "unionai"],
+    name="main",
+    platform="linux/amd64",
     python_version="3.11",
+    packages=["flytekit", "unionai"],
+    source_root=prod_rt,
     conda_channels=["bioconda"],
     conda_packages=[
         "samtools",
@@ -24,18 +25,17 @@ main_img = ImageSpec(
         "fastqc",
         "htslib",
         "multiqc",
-        "pytest", # Temporary
     ],
     builder="fast-builder",
     registry=current_registry,
 )
 
 folding_img = ImageSpec(
-    name="unionbio-protein",
+    name="folding",
     platform="linux/amd64",
     python_version="3.11",
-    source_root=prod_rt,
     packages=["flytekit", "transformers", "torch", "unionai"],
+    source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
         "prodigal",
@@ -44,22 +44,25 @@ folding_img = ImageSpec(
         "py3Dmol",
         "matplotlib",
     ],
+    builder="fast-builder",
     registry=current_registry,
 )
 
 parabricks_img = ImageSpec(
-    name="unionbio-parabricks",
+    name="parabricks",
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
-    source_root=prod_rt,
+    platform="linux/amd64",
     python_version="3.10",
     packages=["flytekit", "unionai"],
+    source_root=prod_rt,
+    builder="fast-builder",
     registry=current_registry,
 )
 
 build_scope = [
     "main_img",
-    "folding_img",
-    "parabricks_img",
+    # "folding_img",
+    # "parabricks_img",
 ]
 
 

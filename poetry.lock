@@ -1226,13 +1226,13 @@ files = [
 
 [[package]]
 name = "imagespec-fast-builder"
-version = "0.0.20b1"
+version = "0.0.30"
 description = "A faster ImageSpec builder for flytekit"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "imagespec_fast_builder-0.0.20b1-py3-none-any.whl", hash = "sha256:4bf0dfb54b38edb0728ffc6f5cde629900632d036b7f927519fad451ff8a1963"},
-    {file = "imagespec_fast_builder-0.0.20b1.tar.gz", hash = "sha256:925e6447ade751166f15cbd3c43a9475491c3d440ce976da65e4d73141a8b7df"},
+    {file = "imagespec_fast_builder-0.0.30-py3-none-any.whl", hash = "sha256:978de0c1eafb0ce5cd14ef143fe30257ceafb4ede0717450efe5342c98854bf1"},
+    {file = "imagespec_fast_builder-0.0.30.tar.gz", hash = "sha256:eb16a472938f54e62fac96bd519b0aaf2cb0af2227255e9fb95cff7330a71ae7"},
 ]
 
 [package.dependencies]
@@ -2297,6 +2297,56 @@ cryptography = ">=2.0"
 jeepney = ">=0.6"
 
 [[package]]
+name = "sentry-sdk"
+version = "2.7.1"
+description = "Python client for Sentry (https://sentry.io)"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "sentry_sdk-2.7.1-py2.py3-none-any.whl", hash = "sha256:ef1b3d54eb715825657cd4bb3cb42bb4dc85087bac14c56b0fd8c21abd968c9a"},
+    {file = "sentry_sdk-2.7.1.tar.gz", hash = "sha256:25006c7e68b75aaa5e6b9c6a420ece22e8d7daec4b7a906ffd3a8607b67c037b"},
+]
+
+[package.dependencies]
+certifi = "*"
+urllib3 = ">=1.26.11"
+
+[package.extras]
+aiohttp = ["aiohttp (>=3.5)"]
+anthropic = ["anthropic (>=0.16)"]
+arq = ["arq (>=0.23)"]
+asyncpg = ["asyncpg (>=0.23)"]
+beam = ["apache-beam (>=2.12)"]
+bottle = ["bottle (>=0.12.13)"]
+celery = ["celery (>=3)"]
+celery-redbeat = ["celery-redbeat (>=2)"]
+chalice = ["chalice (>=1.16.0)"]
+clickhouse-driver = ["clickhouse-driver (>=0.2.0)"]
+django = ["django (>=1.8)"]
+falcon = ["falcon (>=1.4)"]
+fastapi = ["fastapi (>=0.79.0)"]
+flask = ["blinker (>=1.1)", "flask (>=0.11)", "markupsafe"]
+grpcio = ["grpcio (>=1.21.1)", "protobuf (>=3.8.0)"]
+httpx = ["httpx (>=0.16.0)"]
+huey = ["huey (>=2)"]
+huggingface-hub = ["huggingface-hub (>=0.22)"]
+langchain = ["langchain (>=0.0.210)"]
+loguru = ["loguru (>=0.5)"]
+openai = ["openai (>=1.0.0)", "tiktoken (>=0.3.0)"]
+opentelemetry = ["opentelemetry-distro (>=0.35b0)"]
+opentelemetry-experimental = ["opentelemetry-instrumentation-aio-pika (==0.46b0)", "opentelemetry-instrumentation-aiohttp-client (==0.46b0)", "opentelemetry-instrumentation-aiopg (==0.46b0)", "opentelemetry-instrumentation-asgi (==0.46b0)", "opentelemetry-instrumentation-asyncio (==0.46b0)", "opentelemetry-instrumentation-asyncpg (==0.46b0)", "opentelemetry-instrumentation-aws-lambda (==0.46b0)", "opentelemetry-instrumentation-boto (==0.46b0)", "opentelemetry-instrumentation-boto3sqs (==0.46b0)", "opentelemetry-instrumentation-botocore (==0.46b0)", "opentelemetry-instrumentation-cassandra (==0.46b0)", "opentelemetry-instrumentation-celery (==0.46b0)", "opentelemetry-instrumentation-confluent-kafka (==0.46b0)", "opentelemetry-instrumentation-dbapi (==0.46b0)", "opentelemetry-instrumentation-django (==0.46b0)", "opentelemetry-instrumentation-elasticsearch (==0.46b0)", "opentelemetry-instrumentation-falcon (==0.46b0)", "opentelemetry-instrumentation-fastapi (==0.46b0)", "opentelemetry-instrumentation-flask (==0.46b0)", "opentelemetry-instrumentation-grpc (==0.46b0)", "opentelemetry-instrumentation-httpx (==0.46b0)", "opentelemetry-instrumentation-jinja2 (==0.46b0)", "opentelemetry-instrumentation-kafka-python (==0.46b0)", "opentelemetry-instrumentation-logging (==0.46b0)", "opentelemetry-instrumentation-mysql (==0.46b0)", "opentelemetry-instrumentation-mysqlclient (==0.46b0)", "opentelemetry-instrumentation-pika (==0.46b0)", "opentelemetry-instrumentation-psycopg (==0.46b0)", "opentelemetry-instrumentation-psycopg2 (==0.46b0)", "opentelemetry-instrumentation-pymemcache (==0.46b0)", "opentelemetry-instrumentation-pymongo (==0.46b0)", "opentelemetry-instrumentation-pymysql (==0.46b0)", "opentelemetry-instrumentation-pyramid (==0.46b0)", "opentelemetry-instrumentation-redis (==0.46b0)", "opentelemetry-instrumentation-remoulade (==0.46b0)", "opentelemetry-instrumentation-requests (==0.46b0)", "opentelemetry-instrumentation-sklearn (==0.46b0)", "opentelemetry-instrumentation-sqlalchemy (==0.46b0)", "opentelemetry-instrumentation-sqlite3 (==0.46b0)", "opentelemetry-instrumentation-starlette (==0.46b0)", "opentelemetry-instrumentation-system-metrics (==0.46b0)", "opentelemetry-instrumentation-threading (==0.46b0)", "opentelemetry-instrumentation-tornado (==0.46b0)", "opentelemetry-instrumentation-tortoiseorm (==0.46b0)", "opentelemetry-instrumentation-urllib (==0.46b0)", "opentelemetry-instrumentation-urllib3 (==0.46b0)", "opentelemetry-instrumentation-wsgi (==0.46b0)"]
+pure-eval = ["asttokens", "executing", "pure-eval"]
+pymongo = ["pymongo (>=3.1)"]
+pyspark = ["pyspark (>=2.4.4)"]
+quart = ["blinker (>=1.1)", "quart (>=0.16.1)"]
+rq = ["rq (>=0.6)"]
+sanic = ["sanic (>=0.8)"]
+sqlalchemy = ["sqlalchemy (>=1.2)"]
+starlette = ["starlette (>=0.19.1)"]
+starlite = ["starlite (>=1.48)"]
+tornado = ["tornado (>=6)"]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -2346,20 +2396,20 @@ typing-extensions = ">=3.7.4"
 
 [[package]]
 name = "unionai"
-version = "0.1.22"
+version = "0.1.41"
 description = "Adds Union specific functionality to Flytekit"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "unionai-0.1.22-py3-none-any.whl", hash = "sha256:953498f40aab1add706ce2f49dc47249bbb85ade07dee30adcb6efd22b197b6a"},
-    {file = "unionai-0.1.22.tar.gz", hash = "sha256:239e7e06ec2bcba99ac3f839ce801ddec7c320ecac00479b60cfe156d81e582b"},
+    {file = "unionai-0.1.41-py3-none-any.whl", hash = "sha256:a935c142c49a107047936291d129aae69d72556c9c897321be7d41848d7cc0e5"},
+    {file = "unionai-0.1.41.tar.gz", hash = "sha256:3a38e3f783bf54cb93d7d4b877179a773f62766c7c447291d2cbb1d5108497ad"},
 ]
 
 [package.dependencies]
 aiofiles = ">=23.2.1"
 click = "*"
 flyteidl = ">=1.12.0"
-flytekit = ">=1.12.0"
+flytekit = ">=1.12.2"
 fsspec = ">=2023.3.0"
 googleapis-common-protos = ">=1.57"
 grpcio = "*"
@@ -2369,6 +2419,21 @@ jinja2 = "*"
 mashumaro = "*"
 rich = "*"
 rich-click = "*"
+sentry-sdk = ">=2.0.0"
+unionai-actor = {version = "*", markers = "platform_system == \"Linux\" and platform_machine == \"x86_64\""}
+
+[package.extras]
+byoc = ["unionmeta-byoc"]
+
+[[package]]
+name = "unionai-actor"
+version = "0.1.0"
+description = "Enables Union.ai actors"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "unionai_actor-0.1.0-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:15acc1e23b7f73259bcf623315e4eb8683fb0112d56dce0de5da8f22d62e62ca"},
+]
 
 [[package]]
 name = "urllib3"
@@ -2602,4 +2667,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "50b8e78c88959eda90862e7a365c99ce786498712aa6d649a6a6fc6838331926"
+content-hash = "101581ffedad4f6f4620b163d3b7777a3a8369a5531a35b2a486e0c54a62834e"
