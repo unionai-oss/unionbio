@@ -34,23 +34,23 @@ spec:
             values:
             - ON_DEMAND
   containers:
-  - command: ["/bin/sh"]
-    args: ["-c", "pyflyte-execute --inputs s3://union-cloud-oc-staging-dogfood/metadata/propeller/default-development-f3a3a97917dcf4c58b58/unionaiworkspacevscodeworkspace/data/inputs.pb --output-prefix s3://union-cloud-oc-staging-dogfood/metadata/propeller/default-development-f3a3a97917dcf4c58b58/unionaiworkspacevscodeworkspace/data/3 --raw-output-data-prefix s3://union-cloud-oc-staging-dogfood/ex/f3a3a97917dcf4c58b58-f4vl3keq-3 --checkpoint-path s3://union-cloud-oc-staging-dogfood/ex/f3a3a97917dcf4c58b58-f4vl3keq-3/_flytecheckpoints --prev-checkpoint s3://union-cloud-oc-staging-dogfood/py/f3a3a97917dcf4c58b58-f4vl3keq-2/_flytecheckpoints --resolver unionai.workspace._vscode.resolver -- workspace"]
-    # - pyflyte-execute
-    # - --inputs
-    # - s3://union-cloud-oc-staging-dogfood/metadata/propeller/default-development-f3a3a97917dcf4c58b58/unionaiworkspacevscodeworkspace/data/inputs.pb
-    # - --output-prefix
-    # - s3://union-cloud-oc-staging-dogfood/metadata/propeller/default-development-f3a3a97917dcf4c58b58/unionaiworkspacevscodeworkspace/data/3
-    # - --raw-output-data-prefix
-    # - s3://union-cloud-oc-staging-dogfood/ex/f3a3a97917dcf4c58b58-f4vl3keq-3
-    # - --checkpoint-path
-    # - s3://union-cloud-oc-staging-dogfood/ex/f3a3a97917dcf4c58b58-f4vl3keq-3/_flytecheckpoints
-    # - --prev-checkpoint
-    # - s3://union-cloud-oc-staging-dogfood/py/f3a3a97917dcf4c58b58-f4vl3keq-2/_flytecheckpoints
-    # - --resolver
-    # - unionai.workspace._vscode.resolver
-    # - --
-    # - workspace
+  - args: # this works ["pyflyte-execute --inputs s3://union-cloud-oc-staging-dogfood/metadata/propeller/default-development-f3a3a97917dcf4c58b58/unionaiworkspacevscodeworkspace/data/inputs.pb --output-prefix s3://union-cloud-oc-staging-dogfood/metadata/propeller/default-development-f3a3a97917dcf4c58b58/unionaiworkspacevscodeworkspace/data/3 --raw-output-data-prefix s3://union-cloud-oc-staging-dogfood/ex/f3a3a97917dcf4c58b58-f4vl3keq-3 --checkpoint-path s3://union-cloud-oc-staging-dogfood/ex/f3a3a97917dcf4c58b58-f4vl3keq-3/_flytecheckpoints --prev-checkpoint s3://union-cloud-oc-staging-dogfood/py/f3a3a97917dcf4c58b58-f4vl3keq-2/_flytecheckpoints --resolver unionai.workspace._vscode.resolver -- workspace"]
+    # but below doesn't
+    - pyflyte-execute
+    - --inputs
+    - s3://union-cloud-oc-staging-dogfood/metadata/propeller/default-development-f3a3a97917dcf4c58b58/unionaiworkspacevscodeworkspace/data/inputs.pb
+    - --output-prefix
+    - s3://union-cloud-oc-staging-dogfood/metadata/propeller/default-development-f3a3a97917dcf4c58b58/unionaiworkspacevscodeworkspace/data/3
+    - --raw-output-data-prefix
+    - s3://union-cloud-oc-staging-dogfood/ex/f3a3a97917dcf4c58b58-f4vl3keq-3
+    - --checkpoint-path
+    - s3://union-cloud-oc-staging-dogfood/ex/f3a3a97917dcf4c58b58-f4vl3keq-3/_flytecheckpoints
+    - --prev-checkpoint
+    - s3://union-cloud-oc-staging-dogfood/py/f3a3a97917dcf4c58b58-f4vl3keq-2/_flytecheckpoints
+    - --resolver
+    - unionai.workspace._vscode.resolver
+    - --
+    - workspace
     env:
     - name: FLYTE_INTERNAL_EXECUTION_WORKFLOW
       value: default:development:.flytegen.unionai.workspace._vscode.workspace
