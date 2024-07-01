@@ -139,6 +139,7 @@ _pb_output/*
 flyte-package.tgz
 
 # Pryce's
-**/scratch*.py
+**/scratch*
+**/debug*
 .DS_Store
 .pixi/
