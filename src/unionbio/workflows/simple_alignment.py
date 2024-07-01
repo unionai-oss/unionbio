@@ -3,7 +3,7 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit import map_task
 
-from unionbio.config import ref_loc, seq_dir_pth
+from unionbio.config import ref_loc, seq_dir
 from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.fastp import pyfastp
 from unionbio.tasks.utils import prepare_raw_samples
@@ -12,12 +12,12 @@ from unionbio.tasks.multiqc import render_multiqc
 
 
 @workflow
-def simple_alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
+def simple_alignment_wf(seq_dir: FlyteDirectory = seq_dir) -> FlyteFile:
     """
     Run an alignment workflow on FastQ files contained in the configured seq_dir.
 
-    This function performs QC, preprocessing, index generation, and finally aligments
-    on FastQ input files present in a preconfigured S3 prefix. It returns a FlyteFile
+    This function performs QC, preprocessing, index generation, and finally alignments
+    on FastQ input files present in a pre-configured S3 prefix. It returns a FlyteFile
     of a MultiQC report containing all relevant statistics of the different steps.
 
     Args:

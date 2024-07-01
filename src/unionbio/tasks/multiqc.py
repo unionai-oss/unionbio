@@ -43,13 +43,13 @@ def render_multiqc(
     logger.debug(f"FastQC reports downloaded to {ldir}")
 
     for filt_rep in filt_reps:
-        filt_rep.report.download()
-        shutil.move(filt_rep.report.path, ldir)
+        filt_rep.filt_report.download()
+        shutil.move(filt_rep.filt_report.path, ldir)
     logger.debug(f"FastP reports downloaded to {ldir}")
 
     for sam in sams:
-        sam.report.download()
-        shutil.move(sam.report.path, ldir)
+        sam.alignment_report.download()
+        shutil.move(sam.alignment_report.path, ldir)
     logger.debug(f"Alignment reports for {sams} downloaded to {ldir}")
 
     final_report = ldir.joinpath("multiqc_report.html")

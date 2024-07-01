@@ -53,6 +53,8 @@ def pyfastp(rs: Reads) -> Reads:
 
     subproc_execute(cmd)
 
+    print
+
     setattr(samp, "read1", FlyteFile(path=str(o1p)))
     setattr(samp, "read2", FlyteFile(path=str(o2p)))
     setattr(samp, "filt_report", FlyteFile(path=str(repp)))
