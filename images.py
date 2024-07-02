@@ -101,7 +101,7 @@ def build_test():
     # Prepare builds
     for img_str in build_scope:
         spec = eval(img_str)
-        spec.name = f"{spec.name}-test"
+        spec.tag_format="{spec_hash}-test"
         spec.source_root = test_rt
         spec.packages.append("pytest")
         fqns[f"{img_str}_test_fqn"] = spec.image_name()
