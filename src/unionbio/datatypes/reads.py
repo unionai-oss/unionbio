@@ -53,15 +53,15 @@ class Reads(DataClassJSONMixin):
                 mate = fp.name.strip(".fastq.gz").strip(".filt").split("_")[-1]
                 logger.debug(f"Found mate {mate} for {sample}")
                 if "1" in mate:
-                    setattr(samples[sample], "read1", FlyteFile(path=str(fp)))
+                    samples[sample].read1 = FlyteFile(path=str(fp))
                 elif "2" in mate:
-                    setattr(samples[sample], "read2", FlyteFile(path=str(fp)))
+                    samples[sample].read2 = FlyteFile(path=str(fp))
                 else:
-                    setattr(samples[sample], "uread", FlyteFile(path=str(fp)))
+                    samples[sample].uread = FlyteFile(path=str(fp))
             elif "filter-report" in fp.name:
                 logger.debug(f"Found filter report for {sample}")
-                setattr(samples[sample], "filtered", True)
-                setattr(samples[sample], "filt_report", FlyteFile(path=str(fp)))
+                samples[sample].filtered = True
+                samples[sample].filt_report = FlyteFile(path=str(fp))
 
         logger.info(f"Created {samples} from {dir}")
         return list(samples.values())

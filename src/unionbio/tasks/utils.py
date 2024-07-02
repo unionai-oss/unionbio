@@ -221,6 +221,6 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     )
 
     subproc_execute(cmd, shell=True)
-    setattr(isec_out, "vcf", FlyteFile(path=fname_out))
+    isec_out.vcf = FlyteFile(path=fname_out)
 
     return isec_out

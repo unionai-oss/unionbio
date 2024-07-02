@@ -82,10 +82,10 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     with open(rep, "w") as f:
         f.write(result.error)
 
-    setattr(alignment, "alignment", FlyteFile(path=str(al)))
-    setattr(alignment, "alignment_report", FlyteFile(path=str(rep)))
-    setattr(alignment, "sorted", False)
-    setattr(alignment, "deduped", False)
+    alignment.alignment = FlyteFile(path=str(al))
+    alignment.alignment_report = FlyteFile(path=str(rep))
+    alignment.sorted = False
+    alignment.deduped = False
 
     return alignment
 

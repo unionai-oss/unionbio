@@ -58,9 +58,9 @@ def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
         ]
     )
 
-    setattr(al_out, "alignment", FlyteFile(path=bam_out))
-    setattr(al_out, "alignment_index", FlyteFile(path=bam_idx_out))
-    setattr(al_out, "recal_file", FlyteFile(path=recal_out))
+    al_out.alignment = FlyteFile(path=bam_out)
+    al_out.alignment_index = FlyteFile(path=bam_idx_out)
+    al_out.recal_file = FlyteFile(path=recal_out)
 
     return FlyteFile(path=bam_out), FlyteFile(path=recal_out)
 
@@ -185,8 +185,8 @@ def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
         ]
     )
 
-    setattr(vcf_out, "vcf", FlyteFile(path=vcf_fname))
-    setattr(vcf_out, "vcf_idx", FlyteFile(path=vcf_idx_fname))
+    vcf_out.vcf = FlyteFile(path=vcf_fname)
+    vcf_out.vcf_idx = FlyteFile(path=vcf_idx_fname)
 
     deepvar_dir = FlyteDirectory(path="/tmp")
     return deepvar_dir
@@ -227,8 +227,8 @@ def pb_haplocall(al: Alignment, ref: Reference) -> VCF:
         ]
     )
 
-    setattr(vcf_out, "vcf", FlyteFile(path=vcf_fname))
-    setattr(vcf_out, "vcf_idx", FlyteFile(path=vcf_idx_fname))
+    vcf_out.vcf = FlyteFile(path=vcf_fname)
+    vcf_out.vcf_idx = FlyteFile(path=vcf_idx_fname)
 
     deepvar_dir = FlyteDirectory(path="/tmp")
     return deepvar_dir

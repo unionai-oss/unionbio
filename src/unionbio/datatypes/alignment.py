@@ -73,23 +73,23 @@ class Alignment(DataClassJSONMixin):
                 samples[sample] = Alignment(sample=sample, aligner=aligner)
 
             if "sorted" in fp.name:
-                setattr(samples[sample], "sorted", True)
+                samples[sample].sorted = True
             else:
-                setattr(samples[sample], "sorted", False)
+                samples[sample].sorted = False
 
             if "deduped" in fp.name:
-                setattr(samples[sample], "deduped", True)
+                samples[sample].deduped = True
             else:
-                setattr(samples[sample], "deduped", False)
+                samples[sample].deduped = False
 
             if "bam" in fp.name:
-                setattr(samples[sample], "format", "bam")
-                setattr(samples[sample], "alignment", FlyteFile(path=str(fp)))
+                samples[sample].format = "bam"
+                samples[sample].alignment = FlyteFile(path=str(fp))
             elif "sam" in fp.name:
-                setattr(samples[sample], "format", "sam")
-                setattr(samples[sample], "alignment", FlyteFile(path=str(fp)))
+                samples[sample].format = "sam"
+                samples[sample].alignment = FlyteFile(path=str(fp))
             elif "report" in fp.name:
-                setattr(samples[sample], "alignment_report", FlyteFile(path=str(fp)))
+                samples[sample].alignment_report = FlyteFile(path=str(fp))
 
         logger.info(f"Created following Alignment objects from {dir}: {samples}")
         return list(samples.values())

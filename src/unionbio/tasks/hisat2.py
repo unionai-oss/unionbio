@@ -91,9 +91,9 @@ def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
         f"Hisat exited with code {result.returncode}, output: {result.output}, error: {result.error}"
     )
 
-    setattr(alignment, "alignment", FlyteFile(path=str(al)))
-    setattr(alignment, "alignment_report", FlyteFile(path=str(rep)))
-    setattr(alignment, "sorted", False)
-    setattr(alignment, "deduped", False)
+    alignment.alignment = FlyteFile(path=str(al))
+    alignment.alignment_report = FlyteFile(path=str(rep))
+    alignment.sorted = False
+    alignment.deduped = False
 
     return alignment

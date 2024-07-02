@@ -48,8 +48,8 @@ def prodigal_predict(in_seq: Reads) -> Protein:
         f"Command exited with code {result.returncode} and stdout {result.output}"
     )
 
-    setattr(prot, "protein", prot_out)
-    setattr(prot, "genes", genes_out)
+    prot.protein = prot_out
+    prot.genes = genes_out
     logger.info(f"Returning protein object: {prot}")
 
     return prot
