@@ -70,7 +70,7 @@ class Alignment(DataClassJSONMixin):
             sample, aligner = fp.stem.split("_")[0:2]
 
             if sample not in samples:
-                samples[sample] = Alignment(sample=sample, aligner=aligner)
+                samples[sample] = cls(sample=sample, aligner=aligner)
 
             if "sorted" in fp.name:
                 samples[sample].sorted = True

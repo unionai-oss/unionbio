@@ -1,8 +1,9 @@
+import os
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.directory import FlyteDirectory
 from pathlib import Path
-from unionbio.tasks.helpers import gunzip_file
+from unionbio.tasks.helpers import gunzip_file, fetch_file
 
 
 @dataclass
@@ -34,3 +35,8 @@ class Reference(DataClassJSONMixin):
             return unzipped
         else:
             return fp
+    
+    @classmethod
+    def from_remote(cls, url: str):
+        ref = fetch_file(url, "/tmp")
+        return cls(ref.name, FlyteDirectory(ref.parent))

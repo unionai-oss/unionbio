@@ -2,13 +2,13 @@ import docker
 from .config import proj_rt, main_img_test_fqn
 
 
-def run_pytest_in_docker(fqn: str, test_dir: str):
+def run_pytest_in_docker(fqn: str, test_prefix: str):
     client = docker.from_env()
 
     try:
         # Run the Docker container
         print("\nRunning pytest in Docker container...")
-        con_name = f"unionbio-{test_dir}-test-container"
+        con_name = f"unionbio-test-container"
         container = client.containers.run(
             name=con_name,
             image=fqn,
@@ -23,7 +23,7 @@ def run_pytest_in_docker(fqn: str, test_dir: str):
                     "mode": "rw",
                 },
             },
-            command=f"pytest /root/tests/{test_dir}",
+            command=f"pytest /root/tests/{test_prefix}",
             stdout=True,
             stderr=True,
         )

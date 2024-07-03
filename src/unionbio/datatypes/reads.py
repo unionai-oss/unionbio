@@ -47,7 +47,7 @@ class Reads(DataClassJSONMixin):
             logger.debug(f"Found sample {sample}")
 
             if sample not in samples:
-                samples[sample] = Reads(sample=sample)
+                samples[sample] = cls(sample=sample)
 
             if ".fastq.gz" in fp.name or "fasta" in fp.name:
                 mate = fp.name.strip(".fastq.gz").strip(".filt").split("_")[-1]

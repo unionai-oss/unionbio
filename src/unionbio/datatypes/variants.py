@@ -61,7 +61,7 @@ class VCF(DataClassJSONMixin):
             sample, caller = stem.split("_")[0:2]
 
             if sample not in samples:
-                samples[sample] = VCF(sample=sample, caller=caller)
+                samples[sample] = cls(sample=sample, caller=caller)
 
             if "tbi" in fp.name:
                 samples[sample].vcf_idx = FlyteFile(path=str(fp))

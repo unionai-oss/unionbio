@@ -53,8 +53,6 @@ def pyfastp(rs: Reads) -> Reads:
 
     subproc_execute(cmd)
 
-    print
-
     samp.read1 = FlyteFile(path=str(o1p))
     samp.read2 = FlyteFile(path=str(o2p))
     samp.filt_report = FlyteFile(path=str(repp))

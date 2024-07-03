@@ -63,7 +63,7 @@ def fetch_file(url: str, local_dir: str) -> Path:
     Downloads a file from the specified URL.
 
     Args:
-        url (str): The URL of the tar.gz file to download.
+        url (str): The URL of the file to download.
         local_dir (Path): The directory where you would like this file saved.
 
     Returns:

@@ -64,6 +64,11 @@ def test_reference():
         test_assets["ref_fn"]
     )
 
+def test_remote_reference():
+    ref = Reference.from_remote(url="https://raw.githubusercontent.com/unionai-oss/unionbio/main/tests/assets/references/GRCh38_short.fasta")
+    assert isinstance(ref, Reference)
+    assert ref.ref_name == "GRCh38_short.fasta"
+    assert Path(ref.ref_dir.path).exists()
 
 def test_vcf():
     vcf = VCF(
