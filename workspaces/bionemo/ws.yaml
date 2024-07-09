@@ -9,6 +9,7 @@ container_image:
     packages: 
      - "unionai==0.1.42"
      - "protobuf<5"
+    entrypoint: []
     registry: docker.io/unionbio
 
 resources:
