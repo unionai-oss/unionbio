@@ -1,15 +1,15 @@
 name: bionemo-workspace
 project: default
 domain: development
-container_image: docker.io/unionbio/bionemo:from_dockerfile3
-    # name: bionemo
-    # base_image: "nvcr.io/nvidia/clara/bionemo-framework:1.3"
-    # python_version: 3.11
-    # builder: "envd"
-    # packages: 
-    #  - "unionai==0.1.42"
-    #  - "protobuf<5"
-    # registry: docker.io/unionbio
+container_image:
+    name: bionemo
+    base_image: "nvcr.io/nvidia/clara/bionemo-framework:1.3"
+    python_version: 3.11
+    builder: "fast-builder"
+    packages: 
+     - "unionai==0.1.42"
+     - "protobuf<5"
+    registry: docker.io/unionbio
 
 resources:
     cpu: "2"
