@@ -1228,13 +1228,13 @@ files = [
 
 [[package]]
 name = "imagespec-fast-builder"
-version = "0.0.30"
+version = "0.0.33"
 description = "A faster ImageSpec builder for flytekit"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "imagespec_fast_builder-0.0.30-py3-none-any.whl", hash = "sha256:978de0c1eafb0ce5cd14ef143fe30257ceafb4ede0717450efe5342c98854bf1"},
-    {file = "imagespec_fast_builder-0.0.30.tar.gz", hash = "sha256:eb16a472938f54e62fac96bd519b0aaf2cb0af2227255e9fb95cff7330a71ae7"},
+    {file = "imagespec_fast_builder-0.0.33-py3-none-any.whl", hash = "sha256:8bf2d0ebfbae76d94da68b0f2e8012214d72d74995ceb44a36979dbfe8e5b01b"},
+    {file = "imagespec_fast_builder-0.0.33.tar.gz", hash = "sha256:5ede3489ac90e4061ae13f120fdd025e09fabb714ddb1e0b112dc054dec8338d"},
 ]
 
 [package.dependencies]
@@ -2666,4 +2666,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "7c331c040b203fe5165257fd4cd3fad3f84bd9e82e8fa8f680d8b1ae05aa4562"
+content-hash = "60f980ed7643bb42719aae4741637ccf9e625786bcdfff10e55abc35d0b160ce"
