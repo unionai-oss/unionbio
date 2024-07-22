@@ -1,20 +1,20 @@
 import string
 from pathlib import Path
+from filecmp import cmp
 from unionbio.datatypes.variants import VCF
-from unionbio.tasks.utils import fetch_file, intersect_vcfs
-from unionbio.tasks.helpers import gunzip_file
+from unionbio.tasks.utils import intersect_vcfs
+from unionbio.tasks.helpers import gunzip_file, fetch_file
 from tests.config import test_assets
 
 
 def test_fetch_http_file(tmp_path):
     # Test that fetch_file downloads a file
-    url = "https://storage.googleapis.com/genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi"
+    url = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/raw/ERR250683-tiny_1.fastq.gz"
     outpath = fetch_file(url, tmp_path)
-    print(outpath)
     assert outpath.exists()
     assert open(outpath, "rb").read(), "File {outpath} is empty"
-    assert outpath.name == "Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi"
-
+    assert outpath.name == "ERR250683-tiny_1.fastq.gz"
+    assert cmp(outpath, Path(test_assets["raw_read"]))
 
 def test_fetch_ftp_file(tmp_path):
     # Test that fetch_file downloads a file

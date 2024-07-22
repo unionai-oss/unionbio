@@ -7,7 +7,7 @@ def run_pytest_in_docker(fqn: str, test_prefix: str):
 
     try:
         # Run the Docker container
-        print("\nRunning pytest in Docker container...")
+        print("Running pytest in Docker container...")
         con_name = f"unionbio-test-container"
         container = client.containers.run(
             name=con_name,

@@ -5,6 +5,7 @@ test_dir = proj_rt.joinpath("tests")
 
 test_assets = {
     "raw_seq_dir": f"{test_dir}/assets/sequences/raw",
+    "raw_read": f"{test_dir}/assets/sequences/raw/ERR250683-tiny_1.fastq.gz",
     "filt_seq_dir": f"{test_dir}/assets/sequences/filtered",
     "folding_seq_dir": f"{test_dir}/assets/sequences/folding",
     "bt2_sam_dir": f"{test_dir}/assets/alignments/bt2",
