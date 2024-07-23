@@ -15,6 +15,7 @@ test_assets = {
     "sort_dir": f"{test_dir}/assets/alignments/sorted",
     "dedup_dir": f"{test_dir}/assets/alignments/deduped",
     "ref_path": f"{test_dir}/assets/references/GRCh38_short.fasta",
+    "ref_idx_path": f"{test_dir}/assets/references/GRCh38_short.fasta.fai",
     "ref_dir": f"{test_dir}/assets/references/",
     "ref_fn": "GRCh38_short.fasta",
     "sites_path": f"{test_dir}/assets/sites/known_indels_trunc.hg38.vcf.gz",

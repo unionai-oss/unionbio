@@ -1,3 +1,4 @@
+import os
 import shutil
 from pathlib import Path
 from flytekit import kwtypes, task, Resources, current_context, TaskMetadata
@@ -25,11 +26,13 @@ def bwa_index(ref_obj: Reference) -> Reference:
         Reference: The updated reference object with associated index and metadata.
     """
     ref_obj.ref_dir.download()
-    sam_idx = ["samtools", "faidx", str(ref_obj.get_ref_path())]
-    sam_result = subproc_execute(sam_idx, cwd=ref_obj.ref_dir.path)
+
+    if f"{ref_obj.ref_name}.fai" not in os.listdir(ref_obj.ref_dir.path):
+        sam_idx = ["samtools", "faidx", str(ref_obj.get_ref_path())]
+        subproc_execute(sam_idx, cwd=ref_obj.ref_dir.path)
 
     bwa_idx = ["bwa", "index", str(ref_obj.get_ref_path())]
-    bwa_result = subproc_execute(bwa_idx, cwd=ref_obj.ref_dir.path)
+    subproc_execute(bwa_idx, cwd=ref_obj.ref_dir.path)
 
     ref_obj.index_name = ref_obj.ref_name
     ref_obj.indexed_with = "bwa"
