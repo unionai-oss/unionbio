@@ -13,6 +13,7 @@ docker = "<7.0.0"
 requests = "2.31.0"
 flytekitplugins-envd = "^1.12.3"
 unionai = "0.1.42"
+streamlit = "^1.36.0"
 
 [tool.poetry.scripts]
 image-builder = "images:build"
