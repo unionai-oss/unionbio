@@ -1,5 +1,5 @@
 import docker
-from .config import proj_rt, main_img_test_fqn
+from config import proj_rt, main_img_test_fqn
 
 
 def run_pytest_in_docker(fqn: str, test_prefix: str):
@@ -23,7 +23,7 @@ def run_pytest_in_docker(fqn: str, test_prefix: str):
                     "mode": "rw",
                 },
             },
-            command=f"pytest /root/tests/{test_prefix}",
+            command=f"pytest -rP /root/tests/{test_prefix}",
             stdout=True,
             stderr=True,
         )
