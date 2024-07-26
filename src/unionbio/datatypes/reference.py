@@ -1,7 +1,9 @@
 import os
+import shutil
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.directory import FlyteDirectory
+from flytekit import current_context
 from pathlib import Path
 from unionbio.tasks.helpers import gunzip_file, fetch_file
 
@@ -35,6 +37,28 @@ class Reference(DataClassJSONMixin):
             return unzipped
         else:
             return fp
+        
+    def aggregate(self, target: Path = None) -> Path:
+        """
+        Explicitly aggregate the contents of the reference directory into
+        another given directory. If None is provided, the current working
+        is used.
+
+        Args:
+            target (Path): The target directory to move the reference files to.
+
+        Returns:
+            Path: The target directory containing the reference files.
+        """
+        target = target or Path(current_context().working_directory)
+        self.ref_dir.download()
+        os.makedirs(target, exist_ok=True)
+        for f in os.listdir(self.ref_dir.path):
+            fo = Path(self.ref_dir.path).joinpath(f)
+            fd = Path(target).joinpath(f)
+            shutil.move(fo, fd)
+        self.ref_dir.path = target
+        return target
     
     @classmethod
     def from_remote(cls, url: str):

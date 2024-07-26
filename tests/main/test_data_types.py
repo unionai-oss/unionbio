@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from tests.config import test_assets
+from tests.utils import copy_dir_conts
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from unionbio.datatypes.alignment import Alignment
@@ -69,6 +70,14 @@ def test_remote_reference():
     assert isinstance(ref, Reference)
     assert ref.ref_name == "GRCh38_short.fasta"
     assert Path(ref.ref_dir.path).exists()
+
+def test_reference_aggregate(tmp_path):
+    copy_dir_conts(test_assets["ref_dir"], tmp_path)
+    ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=tmp_path))
+    target = ref.aggregate(target=Path("/tmp/some/other/dir"))
+    assert Path(target).exists()
+    assert ref.ref_dir.path == target
+    assert ref.ref_name in os.listdir(target)
 
 def test_vcf():
     vcf = VCF(
