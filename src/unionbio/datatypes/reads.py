@@ -1,6 +1,9 @@
+import os
+import shutil
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
+from flytekit import current_context
 from pathlib import Path
 from unionbio.config import logger
 
@@ -37,6 +40,32 @@ class Reads(DataClassJSONMixin):
 
     def get_report_fname(self):
         return f"{self.sample}_fastq-filter-report.json"
+    
+    def aggregate(self, target: Path = None) -> Path:
+        """
+        Explicitly aggregate Reads files into another given directory. 
+        If None is provided, the current working is used.
+
+        Args:
+            target (Path): The target directory to move the reference files to.
+
+        Returns:
+            Path: The target directory containing the reference files.
+        """
+        target = target or Path(current_context().working_directory)
+        os.makedirs(target, exist_ok=True)
+        if self.uread:
+            self.uread.download()
+            shutil.move(self.uread.path, target)
+            self.uread.path = target.joinpath(Path(self.uread.path).name)
+        else:
+            self.read1.download()
+            shutil.move(self.read1.path, target)
+            self.read1.path = target.joinpath(Path(self.read1.path).name)
+            self.read2.download()
+            shutil.move(self.read2.path, target)
+            self.read2.path = target.joinpath(Path(self.read2.path).name)
+        return target
 
     @classmethod
     def make_all(cls, dir: Path):

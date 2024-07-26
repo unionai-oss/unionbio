@@ -42,6 +42,15 @@ def test_filt_sample_make_all():
     assert "ERR250683-tiny_fastq-filter-report.json" in filt_samps[0].filt_report.path
 
 
+def test_reads_aggregate(tmp_path):
+    copy_dir_conts(test_assets["raw_seq_dir"], tmp_path)
+    samp = Reads.make_all(Path(tmp_path))[0]
+    target = samp.aggregate(target=Path("/tmp/some/other/dir"))
+    assert Path(target).exists()
+    assert samp.read2.path == Path(target).joinpath("ERR250683-tiny_2.fastq.gz")
+    assert samp.read1.path == Path(target).joinpath("ERR250683-tiny_1.fastq.gz")
+
+
 def test_alignment_file_fname():
     al = Alignment("test", "bowtie2", "sam").get_alignment_fname()
     assert al == "test_bowtie2_aligned.sam"
