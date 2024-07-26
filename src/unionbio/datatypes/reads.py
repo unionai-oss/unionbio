@@ -56,15 +56,20 @@ class Reads(DataClassJSONMixin):
         os.makedirs(target, exist_ok=True)
         if self.uread:
             self.uread.download()
-            shutil.move(self.uread.path, target)
-            self.uread.path = target.joinpath(Path(self.uread.path).name)
+            np = target.joinpath(Path(self.uread.path).name)
+            if not np.exists():
+                shutil.move(self.uread.path, target)
+                self.uread.path = np
         else:
             self.read1.download()
-            shutil.move(self.read1.path, target)
-            self.read1.path = target.joinpath(Path(self.read1.path).name)
             self.read2.download()
-            shutil.move(self.read2.path, target)
-            self.read2.path = target.joinpath(Path(self.read2.path).name)
+            np1 = target.joinpath(Path(self.read1.path).name)
+            np2 = target.joinpath(Path(self.read2.path).name)
+            if not np1.exists() or not np2.exists():
+                shutil.move(self.read1.path, target)
+                shutil.move(self.read2.path, target)
+                self.read1.path = np1
+                self.read2.path = np2
         return target
 
     @classmethod

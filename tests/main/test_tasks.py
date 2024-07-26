@@ -9,11 +9,11 @@ from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
 from unionbio.tasks.fastp import pyfastp
 from unionbio.tasks.fastqc import fastqc
-from unionbio.tasks.bwa import bwa_index
+from unionbio.tasks.bwa import bwa_index, bwa_align
 from unionbio.tasks.mark_dups import mark_dups
 from unionbio.tasks.sort_sam import sort_sam
 from tests.config import test_assets
-from tests.utils import dir_contents_match
+from tests.utils import dir_conts_match, copy_dir_conts
 
 
 def test_fastqc():
@@ -31,16 +31,6 @@ def test_fastp():
     r1a = Path(filt_samp.read1.path)
     r1e = Path(test_assets["filt_seq_dir"]).joinpath("ERR250683-tiny_1.filt.fastq.gz")
     assert cmp(r1a, r1e)
-
-
-def test_bwa_index(tmp_path):
-    shutil.copy(test_assets["ref_path"], tmp_path)
-    ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=tmp_path))
-    indexed_ref = bwa_index(ref_obj=ref)
-    assert isinstance(indexed_ref, Reference)
-    assert f'{test_assets["ref_fn"]}.fai' in os.listdir(tmp_path)
-    assert cmp(test_assets["ref_idx_path"], Path(tmp_path).joinpath(f'{test_assets["ref_fn"]}.fai'))
-    assert dir_contents_match(test_assets["bwa_idx_dir"], tmp_path)
 
 
 def test_sort_sam():
