@@ -53,6 +53,7 @@ class Reads(DataClassJSONMixin):
             Path: The target directory containing the reference files.
         """
         target = target or Path(current_context().working_directory)
+        logger.info(f"Aggregating Reads files to {target}")
         os.makedirs(target, exist_ok=True)
         if self.uread:
             self.uread.download()
@@ -65,11 +66,12 @@ class Reads(DataClassJSONMixin):
             self.read2.download()
             np1 = target.joinpath(Path(self.read1.path).name)
             np2 = target.joinpath(Path(self.read2.path).name)
-            if not np1.exists() or not np2.exists():
-                shutil.move(self.read1.path, target)
-                shutil.move(self.read2.path, target)
+            if np1.exists() and np2.exists():
                 self.read1.path = np1
                 self.read2.path = np2
+            else:
+                shutil.move(self.read1.path, np1)
+                shutil.move(self.read2.path, np2)
         return target
 
     @classmethod

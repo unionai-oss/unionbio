@@ -1,6 +1,7 @@
 import os
 import shutil
 import filecmp
+from unionbio.config import logger
 
 
 def dir_conts_match(dir1, dir2):
@@ -19,7 +20,7 @@ def dir_conts_match(dir1, dir2):
     for common_dir in common_dirs:
         subdir1 = os.path.join(dir1, common_dir)
         subdir2 = os.path.join(dir2, common_dir)
-        dir_contents_match(subdir1, subdir2)
+        dir_conts_match(subdir1, subdir2)
 
     return True
 
@@ -39,3 +40,13 @@ def copy_dir_conts(src_dir, dest_dir):
             shutil.copytree(src_path, dest_path, dirs_exist_ok=True)
         else:
             shutil.copy2(src_path, dest_path)
+
+def comp_files(file1, file2):
+    with open(file1, 'r') as f1, open(file2, 'r') as f2:
+        for line1, line2 in zip(f1, f2):
+            if line1 != line2:
+                logger.error(f"Lines do not match:")
+                logger.error(line1)
+                logger.error(line2)
+                return False
+        return True

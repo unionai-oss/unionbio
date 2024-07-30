@@ -6,6 +6,7 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit import current_context
 from pathlib import Path
 from unionbio.tasks.helpers import gunzip_file, fetch_file
+from unionbio.config import logger
 
 
 @dataclass
@@ -51,6 +52,7 @@ class Reference(DataClassJSONMixin):
             Path: The target directory containing the reference files.
         """
         target = target or Path(current_context().working_directory)
+        logger.info(f"Aggregating reference files to {target}")
         self.ref_dir.download()
         os.makedirs(target, exist_ok=True)
         for f in os.listdir(self.ref_dir.path):

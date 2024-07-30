@@ -10,6 +10,7 @@ test_assets = {
     "folding_seq_dir": f"{test_dir}/assets/sequences/folding",
     "bt2_sam_dir": f"{test_dir}/assets/alignments/bt2",
     "hs2_sam_dir": f"{test_dir}/assets/alignments/hs2",
+    "bwa_sam_path": f"{test_dir}/assets/alignments/bwa/ERR250683-tiny_bwa_aligned.sam",
     "pb_fq2bam_dir": f"{test_dir}/assets/alignments/pb_fq2bam",
     "pb_haplocall_dir": f"{test_dir}/assets/alignments/pb_haplocall",
     "sort_dir": f"{test_dir}/assets/alignments/sorted",
@@ -35,6 +36,6 @@ test_assets = {
 # Image tags
 # While tasks can reference imageSpec directly, using the tag allows registering tasks
 # from a containerized environment. These also contain the actual unionbio package.
-main_img_test_fqn = "docker.io/unionbio/main:vpYJ9uAzyUlqo3BO4_VoLA-test"
-folding_img_test_fqn = "docker.io/unionbio/folding:cHtEowX2F_skDPfJb4dvaA-test"
-parabricks_img_test_fqn = "docker.io/unionbio/parabricks:Y6cllYwwhvHQgZOn7zClQw-test"
+main_img_test_fqn = "docker.io/unionbio/main:4wKChuc4z1UC5Y5CljlzTg-test"
+folding_img_test_fqn = "docker.io/unionbio/folding:ZzkXAQAcVudjddDAymIBgg-test"
+parabricks_img_test_fqn = "docker.io/unionbio/parabricks:PvCm4VJqXalHgP5_aII0kw-test"

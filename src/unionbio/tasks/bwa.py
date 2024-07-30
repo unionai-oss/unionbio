@@ -1,12 +1,13 @@
 import os
 import shutil
+import subprocess
 from pathlib import Path
 from flytekit import kwtypes, task, Resources, current_context, TaskMetadata
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from unionbio.config import ref_hash, main_img_fqn
+from unionbio.config import ref_hash, main_img_fqn, logger
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.alignment import Alignment
@@ -56,14 +57,8 @@ def bwa_align(ref: Reference, reads: Reads) -> Alignment:
     Returns:
         Alignment: The alignment object containing the aligned reads.
     """
-    print("IN TASK PRE-DOWNLOAD:")
-    print(ref.ref_dir.path)
-    print(reads.read1.path)
     ref.aggregate()
     reads.aggregate()
-    print("IN TASK POST-DOWNLOAD:")
-    print(ref.ref_dir.path)
-    print(reads.read1.path)
 
     al_out = Alignment(
         sample=reads.sample,
@@ -77,12 +72,15 @@ def bwa_align(ref: Reference, reads: Reads) -> Alignment:
         "bwa",
         "mem",
         str(ref.get_ref_path()),
-        reads.read1.path,
-        reads.read2.path,
+        str(reads.read1.path),
+        str(reads.read2.path),
         ">",
         sam_out,
     ]
-    # print(bwa_align)
-    # subproc_execute(bwa_align, shell=True)
-    # al_out.alignment = FlyteFile(sam_out)
+    cmd_str = " ".join(bwa_align)
+    logger.info(f"Running BWA alignment with: {cmd_str}")
+    subproc_execute(cmd_str, shell=True)
+    sp = Path(sam_out)
+    logger.debug(f"Alignment exists ({sp.exists()}) at {sp.resolve()}")
+    al_out.alignment = FlyteFile(path=sam_out)
     return al_out

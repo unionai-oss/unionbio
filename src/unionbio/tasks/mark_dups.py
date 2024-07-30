@@ -57,3 +57,4 @@ def mark_dups_samples(sams: List[Alignment]) -> List[Alignment]:
                 oafn=i.get_alignment_fname(), omfn=i.get_metrics_fname(), al=i.sam
             )
         )
+    return deduped

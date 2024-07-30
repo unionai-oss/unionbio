@@ -9,8 +9,9 @@ from unionbio.tasks.bwa import bwa_index, bwa_align
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
+from unionbio.config import logger
 from tests.config import test_assets
-from tests.utils import dir_conts_match, copy_dir_conts
+from tests.utils import dir_conts_match, copy_dir_conts, comp_files
 
 
 def test_hisat2_index():
@@ -82,18 +83,14 @@ def test_bwa_index(tmp_path):
     assert dir_conts_match(test_assets["bwa_idx_dir"], tmp_path)
 
 
-def test_bwa_align(tmp_path):
+def test_bwa_align():#tmp_path):
+    tmp_path = Path("/tmp/bwa_align_test2/")
     copy_dir_conts(test_assets["filt_seq_dir"], tmp_path)
     reads = Reads.make_all(tmp_path)[0]
     shutil.copy(test_assets["ref_path"], tmp_path)
     copy_dir_conts(test_assets["bwa_idx_dir"], tmp_path)
     ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=tmp_path), test_assets["ref_fn"], "bwa")
-    print("IN TEST:")
-    print(ref.ref_dir.path)
-    print(reads.read1.path)
     alignment = bwa_align(ref=ref, reads=reads)
-    # assert isinstance(alignment, Alignment)
-    # assert cmp(
-    #     Path(alignment.get_alignment_fname()),
-    #     Path(test_assets["bwa_sam_dir"]).joinpath("ERR250683-tiny_bwa_aligned.sam"),
-    # )
+    ap = Path(alignment.alignment.path)
+    assert isinstance(alignment, Alignment)
+    assert ap.exists()

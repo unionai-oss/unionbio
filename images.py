@@ -10,8 +10,8 @@ prod_rt = test_rt.joinpath("src")
 main_img = ImageSpec(
     name="main",
     platform="linux/amd64",
-    python_version="3.11",
-    packages=["unionai==0.1.42"],
+    python_version="3.12",
+    packages=["flytekit==1.13.1", "union==0.1.57"],
     source_root=prod_rt,
     conda_channels=["bioconda"],
     conda_packages=[
@@ -33,8 +33,8 @@ main_img = ImageSpec(
 folding_img = ImageSpec(
     name="folding",
     platform="linux/amd64",
-    python_version="3.11",
-    packages=["transformers", "torch", "unionai==0.1.42"],
+    python_version="3.12",
+    packages=["transformers", "torch", "flytekit==1.13.1", "union==0.1.57"],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
@@ -52,8 +52,8 @@ parabricks_img = ImageSpec(
     name="parabricks",
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
     platform="linux/amd64",
-    python_version="3.10",
-    packages=["unionai==0.1.42"],
+    python_version="3.12",
+    packages=["flytekit==1.13.1", "union==0.1.57"],
     source_root=prod_rt,
     builder="fast-builder",
     registry=current_registry,
@@ -64,7 +64,6 @@ build_scope = [
     "folding_img",
     "parabricks_img",
 ]
-
 
 def update_img_config(config_path: Path, fqns: dict[str, str]):
     with open(config_path, "r") as f:
