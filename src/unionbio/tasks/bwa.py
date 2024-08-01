@@ -79,7 +79,7 @@ def bwa_align(ref: Reference, reads: Reads) -> Alignment:
     ]
     cmd_str = " ".join(bwa_align)
     logger.info(f"Running BWA alignment with: {cmd_str}")
-    subproc_execute(bwa_align, shell=True)
+    subproc_execute(cmd_str, shell=True)
     sp = Path(sam_out)
     logger.debug(f"Alignment exists ({sp.exists()}) at {sp.resolve()}")
     al_out.alignment = FlyteFile(path=sam_out)

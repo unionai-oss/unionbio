@@ -66,12 +66,11 @@ class Reads(DataClassJSONMixin):
             self.read2.download()
             np1 = target.joinpath(Path(self.read1.path).name)
             np2 = target.joinpath(Path(self.read2.path).name)
-            if np1.exists() and np2.exists():
-                self.read1.path = np1
-                self.read2.path = np2
-            else:
+            if not all([np1.exists(), np2.exists()]):
                 shutil.move(self.read1.path, np1)
                 shutil.move(self.read2.path, np2)
+            self.read1.path = np1
+            self.read2.path = np2
         return target
 
     @classmethod
