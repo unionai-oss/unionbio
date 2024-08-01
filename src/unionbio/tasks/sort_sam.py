@@ -1,48 +1,46 @@
 from typing import List
 
-from flytekit import TaskMetadata, dynamic, kwtypes
-from flytekit.extras.tasks.shell import OutputLocation, ShellTask
+from flytekit import TaskMetadata, dynamic, task
+from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 
 from unionbio.datatypes.alignment import Alignment
-from unionbio.config import main_img_fqn
+from unionbio.config import main_img_fqn, logger
 
-"""
-Sort SAM file based on coordinate.
+@task(container_image=main_img_fqn)
+def sort_sam(al: Alignment) -> Alignment:
+    """
+    Sort an alignment file using GATK's SortSam tool.
 
-Args:
-    out_fname (str): The name of the output sorted SAM file.
-    sam (FlyteFile): An alignment file in SAM format.
+    Args:
+        al (Alignment): An alignment object.
 
-Returns:
-    o (FlyteFile): A sorted alignment file in SAM format.
-"""
-sort_sam = ShellTask(
-    name="sort_sam",
-    debug=True,
-    metadata=TaskMetadata(retries=3, cache=True, cache_version="1"),
-    script="""
-    mkdir /tmp/sort_sam
-    "gatk" \
-    "SortSam" \
-    -I {inputs.sam} \
-    -O {outputs.o} \
-    --SORT_ORDER coordinate \
-    """,
-    inputs=kwtypes(out_fname=str, sam=FlyteFile),
-    output_locs=[
-        OutputLocation(
-            var="o", var_type=FlyteFile, location="/tmp/sort_sam/{inputs.out_fname}"
-        )
-    ],
-    container_image=main_img_fqn,
-)
+    Returns:
+        Alignment: An alignment object with the sorted alignment file.
+    """
+    logger.info(f"Sorting: {al}")
+    al.alignment.download()
+    al.sorted = True
+    al_out = al.get_alignment_fname()
+
+    cmd = [
+        "gatk",
+        "SortSam",
+        "-I",
+        al.alignment.path,
+        "-O",
+        al_out,
+        "-SO",
+        "coordinate",
+    ]
+    logger.debug(f"Running command: {cmd}")
+    subproc_execute(cmd)
+
+    al.alignment = FlyteFile(path=al_out)
+    logger.info(f"Returning: {al}")
+    return al
 
 
 @dynamic
 def sort_samples(sams: List[Alignment]) -> List[Alignment]:
-    sorted = []
-    for i in sams:
-        i.sorted = True
-        fname, rep = i.make_filenames()
-        sorted.append(sort_sam(out_fname=fname, sam=i.sam))
+    return [sort_sam(al=al) for al in sams]
