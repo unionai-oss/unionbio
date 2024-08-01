@@ -198,9 +198,8 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     Returns:
         VCF: Intersected and zipped VCF object.
     """
-    wd = Path(current_context().working_directory)
-    vcf1.dl_all(workdir=wd)
-    vcf2.dl_all(workdir=wd)
+    vcf1.aggregate()
+    vcf2.aggregate()
     isec_out = VCF(sample=vcf1.sample, caller=f"{vcf1.caller}_{vcf2.caller}_isec")
     fname_out = isec_out.get_vcf_fname()
 
@@ -213,8 +212,8 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
             "z",
             "-w",
             "1",
-            vcf1.vcf.path,
-            vcf2.vcf.path,
+            str(vcf1.vcf.path),
+            str(vcf2.vcf.path),
             "-o",
             fname_out,
         ]

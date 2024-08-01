@@ -1,6 +1,9 @@
+import os
+import shutil
 from pathlib import Path
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
+from flytekit import current_context
 from flytekit.types.file import FlyteFile
 from unionbio.config import logger
 
@@ -36,17 +39,29 @@ class VCF(DataClassJSONMixin):
     def get_vcf_idx_fname(self):
         return f"{self._get_state_str()}.vcf.gz.tbi"
 
-    def dl_all(self, workdir: Path):
-        v_loc = Path(self.vcf.download())
-        i_loc = Path(self.vcf_idx.download())
-        v_name = v_loc.name
-        i_name = i_loc.name
-        v_new = workdir.joinpath(v_name)
-        i_new = workdir.joinpath(i_name)
-        v_loc.rename(v_new)
-        i_loc.rename(i_new)
-        self.vcf = FlyteFile(path=str(v_new))
-        self.vcf_idx = FlyteFile(path=str(i_new))
+    def aggregate(self, target: Path = None) -> Path:
+        """
+        Explicitly aggregate VCF and index into another given directory. 
+        If None is provided, the current working is used.
+
+        Args:
+            target (Path): The target directory to move the VCF and index files to.
+
+        Returns:
+            Path: The target directory containing the VCF and index files.
+        """
+        target = target or Path(current_context().working_directory)
+        logger.info(f"Aggregating VCF and index to {target}")
+        os.makedirs(target, exist_ok=True)
+        self.vcf.download()
+        self.vcf_idx.download()
+        np1 = target.joinpath(Path(self.vcf.path).name)
+        np2 = target.joinpath(Path(self.vcf_idx.path).name)
+        if not all([np1.exists(), np2.exists()]):
+            shutil.move(self.vcf.path, np1)
+            shutil.move(self.vcf_idx.path, np2)
+        self.vcf.path = np1
+        self.vcf_idx.path = np2
 
     @classmethod
     def make_all(cls, dir: Path):

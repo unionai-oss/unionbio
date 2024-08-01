@@ -5,6 +5,7 @@ from unionbio.datatypes.variants import VCF
 from unionbio.tasks.utils import intersect_vcfs
 from unionbio.tasks.helpers import gunzip_file, fetch_file
 from tests.config import test_assets
+from tests.utils import copy_dir_conts
 
 
 def test_fetch_http_file(tmp_path):
@@ -25,11 +26,10 @@ def test_fetch_ftp_file(tmp_path):
     assert outpath.name == "tech-report.txt"
 
 
-def test_intersect_vcfs():
-    vcfs = VCF.make_all(Path(test_assets["vcf_dir"]))
-    # vcf2 = VCF.make_all(Path(test_assets["vcf_dir"]))[0]
+def test_intersect_vcfs(tmp_path):
+    copy_dir_conts(test_assets["vcf_dir"], tmp_path)
+    vcfs = VCF.make_all(tmp_path)
     out = intersect_vcfs(vcf1=vcfs[0], vcf2=vcfs[1])
-    print(out)
     assert isinstance(out, VCF)
 
 
