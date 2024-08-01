@@ -7,24 +7,21 @@ from flytekit.types.file import FlyteFile
 from unionbio.datatypes.alignment import Alignment
 from unionbio.config import main_img_fqn, logger
 
-"""
-Identify and remove duplicates from an alignment file using GATK's MarkDuplicates tool.
-
-This function takes in an alignment file, removes the duplicates and writes out
-a deduped alignment file.
-
-Args:
-    oafn (str): The name of the output deduped alignment file.
-    omfn (str): The name of the output deduping metrics file.
-    al (FlyteFile): An alignment file containing duplicate reads.
-
-Returns:
-    dal (FlyteFile): A deduped alignment file.
-    m (FlyteFile): A deduping metrics file.
-"""
 
 @task(container_image=main_img_fqn)
 def mark_dups(al: Alignment) -> Alignment:
+    """
+    Identify and remove duplicates from an alignment file using GATK's MarkDuplicates tool.
+
+    This function takes in an alignment file, removes the duplicates and writes out
+    a deduped alignment file.
+
+    Args:
+        al (Alignment): An alignment object.
+
+    Returns:
+        Alignment: An alignment object with the deduped alignment file and deduplication metrics.
+    """
     logger.info(f"Marking duplicates for {al}")
     al.alignment.download()
     al.deduped = True
@@ -52,12 +49,4 @@ def mark_dups(al: Alignment) -> Alignment:
 
 @dynamic
 def mark_dups_samples(sams: List[Alignment]) -> List[Alignment]:
-    deduped = []
-    for i in sams:
-        i.deduped = True
-        deduped.append(
-            mark_dups(
-                oafn=i.get_alignment_fname(), omfn=i.get_metrics_fname(), al=i.sam
-            )
-        )
-    return deduped
+    return [mark_dups(al=al) for al in sams]
