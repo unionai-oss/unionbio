@@ -33,6 +33,7 @@ class Alignment(DataClassJSONMixin):
     alignment_report: FlyteFile | None = None
     sorted: bool | None = None
     deduped: bool | None = None
+    dedup_metrics: FlyteFile | None = None
     bqsr_report: FlyteFile | None = None
 
     def _get_state_str(self):

@@ -13,7 +13,7 @@ from unionbio.tasks.bwa import bwa_index, bwa_align
 from unionbio.tasks.mark_dups import mark_dups
 from unionbio.tasks.sort_sam import sort_sam
 from tests.config import test_assets
-from tests.utils import dir_conts_match, copy_dir_conts
+from tests.utils import dir_conts_match, copy_dir_conts, comp_files
 
 
 def test_fastqc():
@@ -49,18 +49,8 @@ def test_sort_sam():
 
 def test_mark_dups():
     alignment = Alignment.make_all(Path(test_assets["sort_dir"]))[0]
-    alignment.deduped = True
     print(alignment)
-    deduped, metrics = mark_dups(
-        oafn=alignment.get_alignment_fname(),
-        omfn=alignment.get_metrics_fname(),
-        al=alignment.alignment,
-    )
-    assert isinstance(deduped, FlyteFile)
-    assert all(
-        cmp(*i)
-        for i in [
-            (Path(test_assets["dedup_dir"]).joinpath(x), Path("/tmp/dedup").joinpath(x))
-            for x in [deduped.path, metrics.path]
-        ]
-    )
+    dd_al = mark_dups(al=alignment)
+    assert isinstance(dd_al, Alignment)
+    assert dd_al.deduped
+    assert Path(dd_al.alignment.path).exists()

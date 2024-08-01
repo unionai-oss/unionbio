@@ -1,11 +1,11 @@
 from typing import List
 
-from flytekit import TaskMetadata, dynamic, kwtypes
-from flytekit.extras.tasks.shell import OutputLocation, ShellTask
+from flytekit import TaskMetadata, dynamic, task
+from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 
 from unionbio.datatypes.alignment import Alignment
-from unionbio.config import main_img_fqn
+from unionbio.config import main_img_fqn, logger
 
 """
 Identify and remove duplicates from an alignment file using GATK's MarkDuplicates tool.
@@ -22,29 +22,32 @@ Returns:
     dal (FlyteFile): A deduped alignment file.
     m (FlyteFile): A deduping metrics file.
 """
-mark_dups = ShellTask(
-    name="mark_dups",
-    debug=True,
-    metadata=TaskMetadata(retries=3, cache=True, cache_version="1"),
-    script="""
-    mkdir /tmp/dedup
-    "gatk" \
-    "MarkDuplicates" \
-    -I {inputs.al} \
-    -O {outputs.dal} \
-    -M {outputs.m} \
-    """,
-    inputs=kwtypes(oafn=str, omfn=str, al=FlyteFile),
-    output_locs=[
-        OutputLocation(
-            var="dal", var_type=FlyteFile, location="/tmp/dedup/{inputs.oafn}"
-        ),
-        OutputLocation(
-            var="m", var_type=FlyteFile, location="/tmp/dedup/{inputs.omfn}"
-        ),
-    ],
-    container_image=main_img_fqn,
-)
+
+@task(container_image=main_img_fqn)
+def mark_dups(al: Alignment) -> Alignment:
+    logger.info(f"Marking duplicates for {al}")
+    al.alignment.download()
+    al.deduped = True
+    mets = al.get_metrics_fname()
+    al_out = al.get_alignment_fname()
+
+    cmd = [
+        "gatk",
+        "MarkDuplicates",
+        "-I",
+        al.alignment.path,
+        "-O",
+        al_out,
+        "-M",
+        mets,
+    ]
+    logger.debug(f"Running command: {cmd}")
+    subproc_execute(cmd)
+
+    al.alignment = FlyteFile(path=al_out)
+    al.dedup_metrics = FlyteFile(path=mets)
+    logger.info(f"Returning: {al}")
+    return al
 
 
 @dynamic
