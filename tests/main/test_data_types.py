@@ -66,6 +66,17 @@ def test_alignment_file_make_all():
     assert "ERR250683-tiny_bowtie2_aligned_report.txt" in sams[0].alignment_report.path
 
 
+def test_alignment_aggregate(tmp_path):
+    copy_dir_conts(test_assets["bt2_sam_dir"], tmp_path)
+    al = Alignment.make_all(Path(tmp_path))[0]
+    target = al.aggregate(target=Path("/tmp/some/other/dir"))
+    assert Path(target).exists()
+    assert al.alignment.path == Path(target).joinpath("ERR250683-tiny_bowtie2_aligned.sam")
+    assert al.alignment_report.path == Path(target).joinpath(
+        "ERR250683-tiny_bowtie2_aligned_report.txt"
+    )
+
+
 def test_reference():
     ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=test_assets["ref_dir"]))
     assert isinstance(ref.ref_dir, FlyteDirectory)

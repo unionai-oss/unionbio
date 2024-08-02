@@ -1,5 +1,8 @@
+import os
+import shutil
 from mashumaro.mixins.json import DataClassJSONMixin
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
+from flytekit import current_context
 from flytekit.types.file import FlyteFile
 from pathlib import Path
 from unionbio.config import logger
@@ -58,6 +61,30 @@ class Alignment(DataClassJSONMixin):
 
     def get_metrics_fname(self):
         return f"{self._get_state_str()}_metrics.txt"
+    
+    def aggregate(self, target: Path = None) -> Path:
+        """
+        Explicitly aggregate alignment and supporting files into another given directory. 
+        If None is provided, the current working is used.
+
+        Args:
+            target (Path): The target directory to move the VCF and index files to.
+
+        Returns:
+            Path: The target directory containing the VCF and index files.
+        """
+        target = target or Path(current_context().working_directory)
+        logger.info(f"Aggregating alignment files to {target}")
+        os.makedirs(target, exist_ok=True)
+        for field in fields(self):
+            at = getattr(self, field.name)
+            if type(at) == FlyteFile:
+                at.download()
+                np = target.joinpath(Path(at.path).name)
+                if not np.exists():
+                    shutil.move(at.path, np)
+                setattr(self, field.name, FlyteFile(path=np))
+        return target
 
     @classmethod
     def make_all(cls, dir: Path):

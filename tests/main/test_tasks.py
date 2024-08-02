@@ -37,12 +37,6 @@ def test_sort_sam():
     alignment = Alignment.make_all(Path(test_assets["bt2_sam_dir"]))[0]
     sorted_alignment = sort_sam(al=alignment)
     assert isinstance(sorted_alignment, Alignment)
-    # assert cmp(
-    #     Path(sorted_alignment.path),
-    #     Path(test_assets["sort_dir"]).joinpath(
-    #         "ERR250683-tiny_bowtie2_sorted_aligned.sam"
-    #     ),
-    # )
 
 
 def test_mark_dups():
