@@ -1,5 +1,6 @@
 import os
 import shutil
+from itertools import chain
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass, fields
 from flytekit import current_context
@@ -36,6 +37,7 @@ class Alignment(DataClassJSONMixin):
     alignment_report: FlyteFile | None = None
     sorted: bool | None = None
     deduped: bool | None = None
+    recalibrated: bool | None = None
     dedup_metrics: FlyteFile | None = None
     bqsr_report: FlyteFile | None = None
 
@@ -45,6 +47,8 @@ class Alignment(DataClassJSONMixin):
             state += "_sorted"
         if self.deduped:
             state += "_deduped"
+        if self.recalibrated:
+            state += "_recal"
         return state
 
     def get_alignment_fname(self):
@@ -89,10 +93,10 @@ class Alignment(DataClassJSONMixin):
     @classmethod
     def make_all(cls, dir: Path):
         samples = {}
-        pattern = "*aligned*"
-        dir_contents = list(dir.rglob(pattern))
+        patterns = ["*.bam*", "*.sam", "*report*"]
+        dir_contents = list(chain.from_iterable([dir.rglob(p) for p in patterns]))
         logger.info(
-            f"Found following alignment files in {dir} matching {pattern}: {dir_contents}"
+            f"Found following alignment files in {dir} matching {patterns}: {dir_contents}"
         )
         for fp in dir_contents:
             sample, aligner = fp.stem.split("_")[0:2]

@@ -78,7 +78,7 @@ class VCF(DataClassJSONMixin):
             if sample not in samples:
                 samples[sample] = cls(sample=sample, caller=caller)
 
-            if "tbi" in fp.name:
+            if "tbi" in fp.name or "idx" in fp.name:
                 samples[sample].vcf_idx = FlyteFile(path=str(fp))
             if "vcf" in fp.name and "tbi" not in fp.name:
                 samples[sample].vcf = FlyteFile(path=str(fp))
