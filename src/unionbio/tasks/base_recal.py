@@ -2,7 +2,7 @@ from flytekit import task
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 
-from unionbio.config import main_img_fqn
+from unionbio.config import main_img_fqn, logger
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.variants import VCF
@@ -31,14 +31,16 @@ def recalibrate_bases(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
         "gatk",
         "BaseRecalibrator",
         "-I",
-        al.alignment.path,
+        str(al.alignment.path),
         "-R",
-        ref.get_ref_path(),
+        str(ref.get_ref_path()),
         "--known-sites",
-        sites.vcf.path,
+        str(sites.vcf.path),
         "-O",
-        recal_fn
+        str(recal_fn),
     ]
+    logger.debug("Running GATK BaseRecalibrator with command:")
+    logger.debug(" ".join(gen_table_cmd))
     subproc_execute(command=gen_table_cmd)
 
     al.recalibrated = True

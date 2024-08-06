@@ -80,7 +80,7 @@ class VCF(DataClassJSONMixin):
 
             if "tbi" in fp.name or "idx" in fp.name:
                 samples[sample].vcf_idx = FlyteFile(path=str(fp))
-            if "vcf" in fp.name and "tbi" not in fp.name:
+            if "vcf" in fp.name and "tbi" not in fp.name and "idx" not in fp.name:
                 samples[sample].vcf = FlyteFile(path=str(fp))
 
         logger.info(f"Created following VCF objects from {dir}: {samples}")
