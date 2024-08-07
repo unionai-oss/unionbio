@@ -110,8 +110,8 @@ def test_vcf():
     assert vcf.caller == "test-caller"
     assert vcf.vcf.path == test_assets["vcf_path"]
     assert vcf.vcf_idx.path == test_assets["vcf_idx_path"]
-    assert vcf.get_vcf_fname() == "test-sample_test-caller.vcf.gz"
-    assert vcf.get_vcf_idx_fname() == "test-sample_test-caller.vcf.gz.tbi"
+    assert vcf.get_vcf_fname() == "test-sample_test-caller.g.vcf.gz"
+    assert vcf.get_vcf_idx_fname() == "test-sample_test-caller.g.vcf.gz.tbi"
 
 
 def test_vcf_make_all():
@@ -122,8 +122,8 @@ def test_vcf_make_all():
     assert vcfs[0].caller == "test-caller"
     assert vcfs[0].vcf.path == test_assets["vcf_path"]
     assert vcfs[0].vcf_idx.path == test_assets["vcf_idx_path"]
-    assert vcfs[0].get_vcf_fname() == "test-sample-1_test-caller.vcf.gz"
-    assert vcfs[0].get_vcf_idx_fname() == "test-sample-1_test-caller.vcf.gz.tbi"
+    assert vcfs[0].get_vcf_fname() == "test-sample-1_test-caller.g.vcf.gz"
+    assert vcfs[0].get_vcf_idx_fname() == "test-sample-1_test-caller.g.vcf.gz.tbi"
 
 
 def test_protein():

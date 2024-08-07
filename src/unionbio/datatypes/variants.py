@@ -34,10 +34,10 @@ class VCF(DataClassJSONMixin):
         return state
 
     def get_vcf_fname(self):
-        return f"{self._get_state_str()}.vcf.gz"
+        return f"{self._get_state_str()}.g.vcf.gz"
 
     def get_vcf_idx_fname(self):
-        return f"{self._get_state_str()}.vcf.gz.tbi"
+        return f"{self._get_state_str()}.g.vcf.gz.tbi"
 
     def aggregate(self, target: Path = None) -> Path:
         """

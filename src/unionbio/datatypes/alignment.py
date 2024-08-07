@@ -114,9 +114,11 @@ class Alignment(DataClassJSONMixin):
             else:
                 samples[sample].deduped = False
 
-            if "bam" in fp.name:
+            if fp.name.endswith("bam"):
                 samples[sample].format = "bam"
                 samples[sample].alignment = FlyteFile(path=str(fp))
+            elif fp.name.endswith("bam.bai"):
+                samples[sample].alignment_idx = FlyteFile(path=str(fp))
             elif "sam" in fp.name:
                 samples[sample].format = "sam"
                 samples[sample].alignment = FlyteFile(path=str(fp))

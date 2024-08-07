@@ -1,4 +1,5 @@
 from flytekit import task
+from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.reference import Reference
@@ -22,16 +23,27 @@ def hc_call_variants(ref: Reference, al: Alignment) -> VCF:
     logger.info(f"Alignment: {al}")
     ref.aggregate()
     al.aggregate()
+    vcf_out = VCF(
+        sample=al.sample,
+        caller="gatk-hc",
+    )
+    vcf_fn = vcf_out.get_vcf_fname()
+    vcf_idx_fn = vcf_out.get_vcf_idx_fname()
     hc_cmd = [
         "gatk",
         "HaplotypeCaller",
         "-R",
-        ref.get_ref_path(),
+        str(ref.get_ref_path()),
         "-I",
-        al.get_alignment_fname(),
+        str(al.alignment.path),
         "-O",
-        "test.vcf",
+        str(vcf_fn),
+        "-ERC",
+        "GVCF",
     ]
-    logger.info(f"Running command: {hc_cmd}")
+    logger.debug("Running command:")
+    logger.debug(" ".join(hc_cmd))
     subproc_execute(hc_cmd)
-    return VCF("test.vcf")
+    vcf_out.vcf = FlyteFile(path=vcf_fn)
+    vcf_out.vcf_idx = FlyteFile(path=vcf_idx_fn)
+    return vcf_out

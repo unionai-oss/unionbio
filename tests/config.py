@@ -14,6 +14,7 @@ test_assets = {
     "pb_fq2bam_dir": f"{test_dir}/assets/alignments/pb_fq2bam",
     "pb_haplocall_dir": f"{test_dir}/assets/alignments/pb_haplocall",
     "sort_dir": f"{test_dir}/assets/alignments/sorted",
+    "bam_dir": f"{test_dir}/assets/alignments/recal/bam",
     "dedup_dir": f"{test_dir}/assets/alignments/deduped",
     "recal_in": f"{test_dir}/assets/alignments/deduped/chr21",
     "recal_out": f"{test_dir}/assets/alignments/recal/SRR812824-chr21_bowtie2_sorted_deduped_recal.sam",
