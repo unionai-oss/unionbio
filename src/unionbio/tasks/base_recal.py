@@ -1,4 +1,4 @@
-from flytekit import task
+from flytekit import task, dynamic
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 
@@ -9,7 +9,7 @@ from unionbio.datatypes.variants import VCF
 
 
 @task(container_image=main_img_fqn)
-def recalibrate_bases(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
+def base_recalibrator(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
     """
     Recalibrate base quality scores using GATK's BaseRecalibrator.
 
@@ -62,3 +62,7 @@ def recalibrate_bases(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
     al.alignment = FlyteFile(path=al_out_fname)
 
     return al
+
+@dynamic
+def recalibrate_samples(als: list[Alignment], sites: VCF, ref: Reference) -> list[Alignment]:
+    return [base_recalibrator(ref=ref, sites=sites, al=al) for al in als]

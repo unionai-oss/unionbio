@@ -4,15 +4,22 @@ from flytekit.types.file import FlyteFile
 from flytekit import map_task
 
 from unionbio.config import ref_loc, seq_dir_pth
+from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.reference import Reference
+from unionbio.datatypes.variants import VCF
 from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.fastp import pyfastp
-from unionbio.tasks.utils import prepare_raw_samples
+from unionbio.tasks.utils import prepare_raw_samples, reformat_alignments
 from unionbio.tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
 from unionbio.tasks.multiqc import render_multiqc
+from unionbio.tasks.base_recal import recalibrate_samples
+from unionbio.tasks.mark_dups import mark_dups_samples
+from unionbio.tasks.sort_sam import sort_samples
+from unionbio.tasks.haplotype_caller import hc_call_variants
 
 
 @workflow
-def simple_alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
+def simple_alignment_wf(seq_dir: FlyteDirectory, ref_path: FlyteFile) -> FlyteFile:
     """
     Run an alignment workflow on FastQ files contained in the configured seq_dir.
 
@@ -34,12 +41,23 @@ def simple_alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     # Map out filtering across all samples and generate indices
     filtered_samples = map_task(pyfastp)(rs=samples)
 
+    # Explicitly define task dependencies
     fqc_out >> filtered_samples
 
-    bowtie2_idx = bowtie2_index(ref=ref_loc)
+    # Generate a bowtie2 index or load it from cache
+    bowtie2_idx = bowtie2_index(ref=ref_path)
 
-    # Compare alignment results using two different aligners in a dynamic task
+    # Generate alignments using bowtie2
     sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
 
+    # Recalibrate & Reformat
+    # deduped = mark_dups_samples(als=sams)
+    # sorted = sort_samples(als=deduped)
+    # recal_sams = recalibrate_samples(als=sams, sites=sites, ref=ref)
+    # bams = reformat_alignments(als=recal_sams, to_format='bam')
+
+    # Call Variants
+    vcfs = hc_call_variants(ref=ref_path, als=sams)
+
     # Generate final multiqc report with stats from all steps
-    return render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams)
+    return render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams, vcfs=vcfs)

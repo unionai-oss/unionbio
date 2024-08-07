@@ -13,6 +13,7 @@ from unionbio.config import main_img_fqn, logger, parabricks_img_fqn
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.variants import VCF
+from unionbio.datatypes.alignment import Alignment
 from unionbio.tasks.helpers import fetch_file
 
 
@@ -223,3 +224,43 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     isec_out.vcf = FlyteFile(path=fname_out)
 
     return isec_out
+
+@task(container_image=main_img_fqn) #TODO: generalize
+def reformat_alignments(als: List[Alignment], to_format: str) -> List[Alignment]:
+    """
+    Reformat alignment files to ensure they are in the correct format.
+
+    Args:
+        als (List[Alignment]): A list of Alignment objects containing the aligned reads.
+
+    Returns:
+        List[Alignment]: A list of Alignment objects with the reformatted alignment files.
+    """
+    als_out = []
+    for al in als:
+        al.aggregate()
+        if to_format == "bam":
+            al_out = Alignment(
+                sample=al.sample,
+                aligner=al.aligner,
+                format="bam",
+            )
+            al_out_fname = al_out.get_alignment_fname()
+            convert_cmd = [
+                "samtools",
+                "view",
+                "-S",
+                "-b",
+                str(al.alignment.path),
+                "-o",
+                al_out_fname,
+            ]
+            subproc_execute(convert_cmd)
+            al_out.alignment = FlyteFile(path=al_out_fname)
+
+            idx_cmd = ["samtools", "index", al_out_fname]
+            subproc_execute(idx_cmd)
+            al_out.alignment_idx = FlyteFile(path=al_out.get_alignment_idx_fname())
+        als_out.append(al_out)
+        
+    return als_out

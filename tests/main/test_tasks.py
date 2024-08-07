@@ -13,7 +13,7 @@ from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.bwa import bwa_index, bwa_align
 from unionbio.tasks.mark_dups import mark_dups
 from unionbio.tasks.sort_sam import sort_sam
-from unionbio.tasks.base_recal import recalibrate_bases
+from unionbio.tasks.base_recal import base_recalibrator
 from tests.config import test_assets
 from tests.utils import dir_conts_match, copy_dir_conts, comp_files
 
@@ -55,6 +55,6 @@ def test_base_recal(tmp_path):
     alignment = Alignment.make_all(tmp_path)[0]
     ref = Reference("GRCh38_chr21.fasta", FlyteDirectory(path=tmp_path))
     sites = VCF.make_all(tmp_path)[0]
-    recal_out = recalibrate_bases(al=alignment, ref=ref, sites=sites)
+    recal_out = base_recalibrator(al=alignment, ref=ref, sites=sites)
     assert isinstance(recal_out, Alignment)
     assert recal_out.recalibrated

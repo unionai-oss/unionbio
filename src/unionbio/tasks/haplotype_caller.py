@@ -1,4 +1,5 @@
-from flytekit import task
+from typing import List
+from flytekit import task, dynamic
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from unionbio.datatypes.alignment import Alignment
@@ -7,7 +8,7 @@ from unionbio.datatypes.variants import VCF
 from unionbio.config import logger, main_img_fqn
 
 @task(container_image=main_img_fqn)
-def hc_call_variants(ref: Reference, al: Alignment) -> VCF:
+def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
     """
     Call variants using HaplotypeCaller from GATK.
 
@@ -47,3 +48,7 @@ def hc_call_variants(ref: Reference, al: Alignment) -> VCF:
     vcf_out.vcf = FlyteFile(path=vcf_fn)
     vcf_out.vcf_idx = FlyteFile(path=vcf_idx_fn)
     return vcf_out
+
+@dynamic
+def hc_call_variants(ref: Reference, als: List[Alignment]) -> List[VCF]:
+    return [haplotype_caller(ref=ref, al=al) for al in als]
