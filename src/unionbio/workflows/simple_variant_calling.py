@@ -1,25 +1,44 @@
-from flytekit import workflow
+from flytekit import workflow, LaunchPlan
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from flytekit import map_task
-
-from unionbio.config import ref_loc, seq_dir_pth
+from flytekit import map_task, task, dynamic
+from typing import List
+from unionbio.config import ref_loc, seq_dir_pth, main_img_fqn
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.variants import VCF
+from unionbio.datatypes.alignment import Alignment
 from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.fastp import pyfastp
-from unionbio.tasks.utils import prepare_raw_samples, reformat_alignments
+from unionbio.tasks.utils import prepare_raw_samples#, reformat_alignments
 from unionbio.tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
 from unionbio.tasks.multiqc import render_multiqc
-from unionbio.tasks.base_recal import recalibrate_samples
-from unionbio.tasks.mark_dups import mark_dups_samples
-from unionbio.tasks.sort_sam import sort_samples
-from unionbio.tasks.haplotype_caller import hc_call_variants
+# from unionbio.tasks.base_recal import recalibrate_samples
+# from unionbio.tasks.mark_dups import mark_dups_samples
+# from unionbio.tasks.sort_sam import sort_samples
+# from unionbio.tasks.haplotype_caller import hc_call_variants
 
+@task(container_image=main_img_fqn)
+def haplotype_caller(ref: FlyteFile, al: Alignment) -> str:
+    import time
+    import random
+    # Generate a random float between 15 and 30
+    random_wait_time = random.uniform(15, 30)
+
+    # Wait for the generated amount of time
+    time.sleep(random_wait_time)
+
+    return f"Slept for {random_wait_time:.2f} seconds."
+
+@dynamic(container_image=main_img_fqn)
+def hc_call_samples(ref: FlyteFile, als: List[Alignment]) -> List[str]:
+    return [haplotype_caller(ref=ref, al=al) for al in als]
 
 @workflow
-def simple_alignment_wf(seq_dir: FlyteDirectory, ref_path: FlyteFile) -> FlyteFile:
+def calling_wf(
+    seq_dir: FlyteDirectory="s3://my-s3-bucket/my-data/sequences",
+    ref_path: FlyteFile="s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta",
+) -> FlyteFile:
     """
     Run an alignment workflow on FastQ files contained in the configured seq_dir.
 
@@ -57,7 +76,12 @@ def simple_alignment_wf(seq_dir: FlyteDirectory, ref_path: FlyteFile) -> FlyteFi
     # bams = reformat_alignments(als=recal_sams, to_format='bam')
 
     # Call Variants
-    vcfs = hc_call_variants(ref=ref_path, als=sams)
+    vcfs = hc_call_samples(ref=ref_path, als=sams)
 
     # Generate final multiqc report with stats from all steps
-    return render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams, vcfs=vcfs)
+    rep = render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams)#, vcfs=vcfs)
+    vcfs >> rep
+
+    return rep
+
+call_lp = LaunchPlan.get_or_create(calling_wf, name="calling_wf_exp", default_inputs={"seq_dir": "s3://my-s3-bucket/my-data/sequences", "ref_path": "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"})

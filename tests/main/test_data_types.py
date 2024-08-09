@@ -92,9 +92,11 @@ def test_remote_reference():
     assert Path(ref.ref_dir.path).exists()
 
 def test_reference_aggregate(tmp_path):
-    copy_dir_conts(test_assets["ref_dir"], tmp_path)
-    ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=tmp_path))
-    target = ref.aggregate(target=Path("/tmp/some/other/dir"))
+    tp1 = Path(tmp_path).joinpath("d1")
+    tp2 = Path(tmp_path).joinpath("d2")
+    copy_dir_conts(test_assets["ref_dir"], tp1)
+    ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=tp1))
+    target = ref.aggregate(target=tp2)
     assert Path(target).exists()
     assert ref.ref_dir.path == target
     assert ref.ref_name in os.listdir(target)

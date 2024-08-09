@@ -59,7 +59,7 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     logger.debug(f"Index downloaded to {idx.path}")
     ldir = Path(current_context().working_directory)
 
-    alignment = Alignment(fs.sample, "bowtie2", "sam")
+    alignment = Alignment(fs.sample, "bowtie2", "sam", sorted=False, deduped=False)
     al = ldir.joinpath(alignment.get_alignment_fname())
     rep = ldir.joinpath(alignment.get_report_fname())
     logger.debug(f"Writing alignment to {al} and report to {rep}")
@@ -84,9 +84,6 @@ def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
 
     alignment.alignment = FlyteFile(path=str(al))
     alignment.alignment_report = FlyteFile(path=str(rep))
-    alignment.sorted = False
-    alignment.deduped = False
-
     return alignment
 
 
