@@ -8,6 +8,7 @@ test_assets = {
     "raw_read": f"{test_dir}/assets/sequences/raw/ERR250683-tiny_1.fastq.gz",
     "filt_seq_dir": f"{test_dir}/assets/sequences/filtered",
     "folding_seq_dir": f"{test_dir}/assets/sequences/folding",
+    "al_dir": f"{test_dir}/assets/alignments",
     "bt2_sam_dir": f"{test_dir}/assets/alignments/bt2",
     "hs2_sam_dir": f"{test_dir}/assets/alignments/hs2",
     "bwa_sam_path": f"{test_dir}/assets/alignments/bwa/ERR250683-tiny_bwa_aligned.sam",

@@ -240,12 +240,8 @@ def reformat_alignments(als: List[Alignment], to_format: str) -> List[Alignment]
     for al in als:
         al.aggregate()
         if to_format == "bam":
-            al_out = Alignment(
-                sample=al.sample,
-                aligner=al.aligner,
-                format="bam",
-            )
-            al_out_fname = al_out.get_alignment_fname()
+            al.format = "bam"
+            al_out_fname = al.get_alignment_fname()
             convert_cmd = [
                 "samtools",
                 "view",
@@ -256,11 +252,18 @@ def reformat_alignments(als: List[Alignment], to_format: str) -> List[Alignment]
                 al_out_fname,
             ]
             subproc_execute(convert_cmd)
-            al_out.alignment = FlyteFile(path=al_out_fname)
-
-            idx_cmd = ["samtools", "index", al_out_fname]
+            logger.debug("Running reformat cmd:")
+            logger.debug(' '.join(convert_cmd))
+            al.alignment = FlyteFile(path=al_out_fname)
+            logger.debug(f"Reformatted alignment file {al_out_fname} exists: {os.path.exists(al_out_fname)}")
+            
+            idx_fn = al.get_alignment_idx_fname()
+            idx_cmd = ["samtools", "index", al_out_fname, '-o', idx_fn]
+            logger.debug("Running index cmd:")
+            logger.debug(' '.join(idx_cmd))
             subproc_execute(idx_cmd)
-            al_out.alignment_idx = FlyteFile(path=al_out.get_alignment_idx_fname())
-        als_out.append(al_out)
+            logger.debug(f"Index file {idx_fn} exists: {os.path.exists(idx_fn)}")
+            al.alignment_idx = FlyteFile(path=idx_fn)
+        als_out.append(al)
         
     return als_out

@@ -52,13 +52,13 @@ class Alignment(DataClassJSONMixin):
         return state
 
     def get_alignment_fname(self):
-        return f"{self._get_state_str()}_aligned.{self.format}"
+        return f"{self._get_state_str()}.{self.format}"
 
     def get_alignment_idx_fname(self):
-        return f"{self._get_state_str()}_aligned.bam.BAI"
+        return f"{self._get_state_str()}.bam.bai"
 
     def get_report_fname(self):
-        return f"{self._get_state_str()}_aligned_report.txt"
+        return f"{self._get_state_str()}_report.txt"
 
     def get_bqsr_fname(self):
         return f"{self._get_state_str()}_bqsr.table"
@@ -113,6 +113,11 @@ class Alignment(DataClassJSONMixin):
                 samples[sample].deduped = True
             else:
                 samples[sample].deduped = False
+            
+            if "recal" in fp.name:
+                samples[sample].recalibrated = True
+            else:
+                samples[sample].recalibrated = False
 
             if fp.name.endswith("bam"):
                 samples[sample].format = "bam"
