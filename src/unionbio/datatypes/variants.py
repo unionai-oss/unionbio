@@ -54,14 +54,17 @@ class VCF(DataClassJSONMixin):
         logger.info(f"Aggregating VCF and index to {target}")
         os.makedirs(target, exist_ok=True)
         self.vcf.download()
-        self.vcf_idx.download()
         np1 = target.joinpath(Path(self.vcf.path).name)
-        np2 = target.joinpath(Path(self.vcf_idx.path).name)
-        if not all([np1.exists(), np2.exists()]):
+        if not np1.exists():
             shutil.move(self.vcf.path, np1)
-            shutil.move(self.vcf_idx.path, np2)
         self.vcf.path = np1
-        self.vcf_idx.path = np2
+        
+        if self.vcf_idx:
+            self.vcf_idx.download()
+            np2 = target.joinpath(Path(self.vcf_idx.path).name)
+            if not np2.exists():
+                shutil.move(self.vcf_idx.path, np2)
+            self.vcf_idx.path = np2
 
     @classmethod
     def make_all(cls, dir: Path):

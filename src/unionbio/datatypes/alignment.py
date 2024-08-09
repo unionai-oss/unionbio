@@ -52,13 +52,13 @@ class Alignment(DataClassJSONMixin):
         return state
 
     def get_alignment_fname(self):
-        return f"{self._get_state_str()}.{self.format}"
+        return f"{self._get_state_str()}_aligned.{self.format}"
 
     def get_alignment_idx_fname(self):
-        return f"{self._get_state_str()}.bam.bai"
+        return f"{self._get_state_str()}_aligned.bam.bai"
 
     def get_report_fname(self):
-        return f"{self._get_state_str()}_report.txt"
+        return f"{self._get_state_str()}_aligned_report.txt"
 
     def get_bqsr_fname(self):
         return f"{self._get_state_str()}_bqsr.table"

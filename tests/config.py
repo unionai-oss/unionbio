@@ -11,7 +11,7 @@ test_assets = {
     "al_dir": f"{test_dir}/assets/alignments",
     "bt2_sam_dir": f"{test_dir}/assets/alignments/bt2",
     "hs2_sam_dir": f"{test_dir}/assets/alignments/hs2",
-    "bwa_sam_path": f"{test_dir}/assets/alignments/bwa/ERR250683-tiny_bwa_aligned.sam",
+    "bwa_sam_path": f"{test_dir}/assets/alignments/bwa/ERR250683-tiny_bwa.sam",
     "pb_fq2bam_dir": f"{test_dir}/assets/alignments/pb_fq2bam",
     "pb_haplocall_dir": f"{test_dir}/assets/alignments/pb_haplocall",
     "sort_dir": f"{test_dir}/assets/alignments/sorted",
