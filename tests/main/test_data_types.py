@@ -17,7 +17,7 @@ def test_raw_sample_fname():
 
 
 def test_raw_sample_make_all():
-    samps = Reads.make_all(Path(test_assets["raw_seq_dir"]))
+    samps = Reads.make_all(test_assets["raw_seq_dir"])
     assert len(samps) == 1
     assert isinstance(samps[0], Reads)
     assert "ERR250683-tiny_1.fastq.gz" in samps[0].read1.path
@@ -25,7 +25,7 @@ def test_raw_sample_make_all():
 
 
 def test_filt_sample_fname():
-    filt_samp = Reads.make_all(Path(test_assets["filt_seq_dir"]))[0]
+    filt_samp = Reads.make_all(test_assets["filt_seq_dir"])[0]
     o1, o2 = filt_samp.get_read_fnames()
     rep = filt_samp.get_report_fname()
     assert o1 == "ERR250683-tiny_1.filt.fastq.gz"
@@ -33,7 +33,7 @@ def test_filt_sample_fname():
 
 
 def test_filt_sample_make_all():
-    filt_samps = Reads.make_all(Path(test_assets["filt_seq_dir"]))
+    filt_samps = Reads.make_all(test_assets["filt_seq_dir"])
     assert len(filt_samps) == 1
     assert isinstance(filt_samps[0], Reads)
     assert filt_samps[0].sample == "ERR250683-tiny"
@@ -57,7 +57,7 @@ def test_alignment_file_fname():
 
 
 def test_alignment_file_make_all():
-    sams = Alignment.make_all(Path(test_assets["bt2_sam_dir"]))
+    sams = Alignment.make_all(test_assets["bt2_sam_dir"])
     assert len(sams) == 1
     assert isinstance(sams[0], Alignment)
     assert sams[0].sample == "ERR250683-tiny"
@@ -81,7 +81,7 @@ def test_reference():
     ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=test_assets["ref_dir"]))
     assert isinstance(ref.ref_dir, FlyteDirectory)
     assert ref.ref_name in os.listdir(ref.ref_dir.path)
-    assert ref.get_ref_path() == Path(test_assets["ref_dir"]).joinpath(
+    assert ref.get_ref_path() == test_assets["ref_dir"].joinpath(
         test_assets["ref_fn"]
     )
 
@@ -117,13 +117,13 @@ def test_vcf():
 
 
 def test_vcf_make_all():
-    vcfs = VCF.make_all(Path(test_assets["vcf_dir"]))
-    assert len(vcfs) == 2
+    vcfs = VCF.make_all(test_assets["vcf_dir"])
+    assert len(vcfs) == 3
     assert isinstance(vcfs[0], VCF)
     assert vcfs[0].sample == "test-sample-1"
     assert vcfs[0].caller == "test-caller"
-    assert vcfs[0].vcf.path == test_assets["vcf_path"]
-    assert vcfs[0].vcf_idx.path == test_assets["vcf_idx_path"]
+    assert vcfs[0].vcf.path == str(test_assets["vcf_path"])
+    assert vcfs[0].vcf_idx.path == str(test_assets["vcf_idx_path"])
     assert vcfs[0].get_vcf_fname() == "test-sample-1_test-caller.g.vcf.gz"
     assert vcfs[0].get_vcf_idx_fname() == "test-sample-1_test-caller.g.vcf.gz.tbi"
 

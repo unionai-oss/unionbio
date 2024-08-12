@@ -76,6 +76,7 @@ class Reads(DataClassJSONMixin):
     @classmethod
     def make_all(cls, dir: Path):
         samples = {}
+        logger.debug(f"{dir} contents: {os.listdir(dir)}")
         for fp in list(dir.rglob("*fast*")):
             logger.debug(f"Processing {fp}")
             sample = fp.stem.split("_")[0]
