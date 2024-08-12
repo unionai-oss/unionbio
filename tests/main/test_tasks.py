@@ -51,9 +51,9 @@ def test_base_recal(tmp_path):
     copy_dir_conts(test_assets["dedup_dir"], tmp_path)
     copy_dir_conts(test_assets["ref_dir"], tmp_path)
     copy_dir_conts(test_assets["sites_dir"], tmp_path)
-    alignment = Alignment.make_all(tmp_path)[0]
+    alignment = Alignment.make_all(tmp_path, include=["SRR812824-chr21*"])[0]
     ref = Reference("GRCh38_chr21.fasta", FlyteDirectory(path=tmp_path))
-    sites = VCF.make_all(tmp_path)[0]
+    sites = VCF.make_all(tmp_path, include=["*gold_standard_chr21*"])[0]
     recal_out = base_recalibrator(al=alignment, ref=ref, sites=sites)
     assert isinstance(recal_out, Alignment)
     assert recal_out.recalibrated
