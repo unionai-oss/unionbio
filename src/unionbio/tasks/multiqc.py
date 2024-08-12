@@ -10,11 +10,12 @@ from pathlib import Path
 from unionbio.config import logger, main_img_fqn
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.variants import VCF
 
 
 @task(container_image=main_img_fqn, enable_deck=True)
 def render_multiqc(
-    fqc: FlyteDirectory, filt_reps: List[Reads], sams: List[Alignment]
+    fqc: FlyteDirectory, filt_reps: List[Reads], sams: List[Alignment], vcfs: List[VCF]
 ) -> FlyteFile:
     """
     Generate MultiQC report by rendering quality and alignment data.

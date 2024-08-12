@@ -10,29 +10,13 @@ from unionbio.datatypes.variants import VCF
 from unionbio.datatypes.alignment import Alignment
 from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.fastp import pyfastp
-from unionbio.tasks.utils import prepare_raw_samples#, reformat_alignments
+from unionbio.tasks.utils import prepare_raw_samples, reformat_alignments
 from unionbio.tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
 from unionbio.tasks.multiqc import render_multiqc
-# from unionbio.tasks.base_recal import recalibrate_samples
-# from unionbio.tasks.mark_dups import mark_dups_samples
-# from unionbio.tasks.sort_sam import sort_samples
-# from unionbio.tasks.haplotype_caller import hc_call_variants
-
-@task(container_image=main_img_fqn)
-def haplotype_caller(ref: FlyteFile, al: Alignment) -> str:
-    import time
-    import random
-    # Generate a random float between 15 and 30
-    random_wait_time = random.uniform(15, 30)
-
-    # Wait for the generated amount of time
-    time.sleep(random_wait_time)
-
-    return f"Slept for {random_wait_time:.2f} seconds."
-
-@dynamic(container_image=main_img_fqn)
-def hc_call_samples(ref: FlyteFile, als: List[Alignment]) -> List[str]:
-    return [haplotype_caller(ref=ref, al=al) for al in als]
+from unionbio.tasks.base_recal import recalibrate_samples
+from unionbio.tasks.mark_dups import mark_dups_samples
+from unionbio.tasks.sort_sam import sort_samples
+from unionbio.tasks.haplotype_caller import hc_call_samples
 
 @workflow
 def calling_wf(
@@ -70,17 +54,16 @@ def calling_wf(
     sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
 
     # Recalibrate & Reformat
-    # deduped = mark_dups_samples(als=sams)
-    # sorted = sort_samples(als=deduped)
-    # recal_sams = recalibrate_samples(als=sams, sites=sites, ref=ref)
-    # bams = reformat_alignments(als=recal_sams, to_format='bam')
+    deduped = mark_dups_samples(als=sams)
+    sorted = sort_samples(als=deduped)
+    recal_sams = recalibrate_samples(als=sams, sites=sites, ref=ref)
+    bams = reformat_alignments(als=recal_sams, to_format='bam')
 
     # Call Variants
     vcfs = hc_call_samples(ref=ref_path, als=sams)
 
     # Generate final multiqc report with stats from all steps
-    rep = render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams)#, vcfs=vcfs)
-    vcfs >> rep
+    rep = render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams, vcfs=vcfs)
 
     return rep
 

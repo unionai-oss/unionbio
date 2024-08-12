@@ -2,8 +2,8 @@ import re
 from pathlib import Path
 from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
+from unionbio.config import current_registry
 
-current_registry = "docker.io/unionbio"
 test_rt = Path(__file__).parent
 prod_rt = test_rt.joinpath("src")
 

@@ -1,3 +1,4 @@
+import os
 import logging
 from pathlib import Path
 
@@ -7,18 +8,19 @@ console_handler = logging.StreamHandler()
 console_handler.setFormatter(
     logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s")
 )
-# logger.addHandler(console_handler)
+logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-seq_dir_pth = "s3://my-s3-bucket/my-data/sequences/"
-ref_loc = "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"
-ref_hash = str(hash(ref_loc))[:4]
+# Default paths
+remote_ref = ''
+remote_reads = ''
+remote_sites = ''
+ref_hash = str(hash(remote_ref))[:4]
 
 # Tool config
 fastp_cpu = "3"
 
-# current_registry = "ghcr.io/unionai-oss"
-current_registry = "localhost:30000"
+current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
 src_rt = Path(__file__).parent.parent
 
 # Image tags
