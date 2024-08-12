@@ -4,6 +4,7 @@ import requests
 from pathlib import Path
 from flytekit.remote import FlyteRemote
 from flytekit.configuration import Config
+from unionbio.config import logger
 
 
 def gunzip_file(gzip_file: Path) -> Path:
@@ -95,3 +96,27 @@ def fetch_file(url: str, local_dir: str) -> Path:
             print(f"HTTP error: {e}")
             raise e
     return local_path
+
+
+def filter_dir(dir: Path, include: list[str] = ["*"], exclude: list[str] = []):
+    """
+    Filter the contents of a directory based on include and exclude patterns.
+
+    Args:
+        dir (Path): The directory whose contents you would like to filter.
+        include (list[str], optional): A list of wildcarded patterns to include 
+            by passing to rglob. Defaults to ["*"].
+        exclude (list[str], optional): A list of patterns to exclude. Defaults to [].
+
+    Returns:
+        list[Path]: A list of paths to the filtered contents of the directory.
+    """
+    logger.debug(f"Filtering {dir} with include={include} and exclude={exclude}")
+    included = [f for pattern in include for f in dir.rglob(pattern)]
+    logger.debug(f"Included: {included}")
+    for f in included:
+        if not any([f.match(p) for p in exclude]):
+            logger.debug(f"Matched {f}")
+            yield f
+        else:
+            logger.debug(f"Excluded {f}")

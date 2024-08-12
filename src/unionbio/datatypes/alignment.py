@@ -91,12 +91,12 @@ class Alignment(DataClassJSONMixin):
         return target
 
     @classmethod
-    def make_all(cls, dir: Path):
+    def make_all(cls, dir: Path, include: list[str] = ["*.bam*", "*.sam", "*report*"], exclude: list[str] = []) -> list:
         samples = {}
-        patterns = ["*.bam*", "*.sam", "*report*"]
-        dir_contents = list(chain.from_iterable([dir.rglob(p) for p in patterns]))
+        all_contents = list(chain.from_iterable([dir.rglob(p) for p in include]))
+        dir_contents = [fp for fp in all_contents if not any([fp.match(p) for p in exclude])]
         logger.info(
-            f"Found following alignment files in {dir} matching {patterns}: {dir_contents}"
+            f"Found following alignment files in {dir} matching {include}: {dir_contents}"
         )
         for fp in dir_contents:
             sample, aligner = fp.stem.split("_")[0:2]

@@ -117,7 +117,7 @@ def test_vcf():
 
 
 def test_vcf_make_all():
-    vcfs = VCF.make_all(test_assets["vcf_dir"])
+    vcfs = VCF.make_all(test_assets["vcf_dir"], exclude=["SRR81284"])
     assert len(vcfs) == 3
     assert isinstance(vcfs[0], VCF)
     assert vcfs[0].sample == "test-sample-1"

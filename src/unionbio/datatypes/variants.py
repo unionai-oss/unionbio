@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from flytekit import current_context
 from flytekit.types.file import FlyteFile
 from unionbio.config import logger
+from unionbio.tasks.helpers import filter_dir
 
 
 @dataclass
@@ -67,14 +68,9 @@ class VCF(DataClassJSONMixin):
             self.vcf_idx.path = np2
 
     @classmethod
-    def make_all(cls, dir: Path):
+    def make_all(cls, dir: Path, include: list[str] = ["*.vcf*"], exclude: list[str] = []) -> list:
         samples = {}
-        pattern = "*vcf*"
-        dir_contents = list(dir.rglob(pattern))
-        logger.info(
-            f"Found following VCF files in {dir} matching {pattern}: {dir_contents}"
-        )
-        for fp in dir_contents:
+        for fp in filter_dir(dir, include=include, exclude=exclude):
             stem = str(fp.stem).split(".")[0]
             sample, caller = stem.split("_")[0:2]
 

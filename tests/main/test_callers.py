@@ -8,7 +8,7 @@ from tests.utils import copy_dir_conts
 from tests.config import test_assets
 
 def test_call_variants(tmp_path):
-    copy_dir_conts(Path(test_assets["ref_dir"]).joinpath("chr21"), tmp_path)
+    copy_dir_conts(test_assets["ref_dir"], tmp_path)
     copy_dir_conts(test_assets["bam_dir"], tmp_path)
     ref = Reference("GRCh38_chr21.fasta", FlyteDirectory(path=tmp_path))
     al = Alignment.make_all(tmp_path)[0]

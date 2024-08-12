@@ -27,31 +27,31 @@ def test_fastqc():
 
 
 def test_fastp():
-    raw_samp = Reads.make_all(Path(test_assets["raw_seq_dir"]))[0]
+    raw_samp = Reads.make_all(test_assets["raw_seq_dir"])[0]
     filt_samp = pyfastp(rs=raw_samp)
     assert isinstance(filt_samp, Reads)
     r1a = Path(filt_samp.read1.path)
-    r1e = Path(test_assets["filt_seq_dir"]).joinpath("ERR250683-tiny_1.filt.fastq.gz")
+    r1e = test_assets["filt_seq_dir"].joinpath("ERR250683-tiny_1.filt.fastq.gz")
     assert cmp(r1a, r1e)
 
 
 def test_sort_sam():
-    alignment = Alignment.make_all(Path(test_assets["bt2_sam_dir"]))[0]
+    alignment = Alignment.make_all(test_assets["bt2_sam_dir"])[0]
     sorted_alignment = sort_sam(al=alignment)
     assert isinstance(sorted_alignment, Alignment)
 
 
 def test_mark_dups():
-    alignment = Alignment.make_all(Path(test_assets["sort_dir"]))[0]
+    alignment = Alignment.make_all(test_assets["sort_dir"])[0]
     dd_al = mark_dups(al=alignment)
     assert isinstance(dd_al, Alignment)
     assert dd_al.deduped
     assert Path(dd_al.alignment.path).exists()
 
 def test_base_recal(tmp_path):
-    copy_dir_conts(test_assets["recal_in"], tmp_path)
-    copy_dir_conts(Path(test_assets["ref_dir"]).joinpath("chr21"), tmp_path)
-    copy_dir_conts(Path(test_assets["sites_dir"]).joinpath("chr21"), tmp_path)
+    copy_dir_conts(test_assets["dedup_dir"], tmp_path)
+    copy_dir_conts(test_assets["ref_dir"].joinpath("chr21"), tmp_path)
+    copy_dir_conts(test_assets["sites_dir"].joinpath("chr21"), tmp_path)
     alignment = Alignment.make_all(tmp_path)[0]
     ref = Reference("GRCh38_chr21.fasta", FlyteDirectory(path=tmp_path))
     sites = VCF.make_all(tmp_path)[0]
