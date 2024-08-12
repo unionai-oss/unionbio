@@ -6,6 +6,7 @@ from flytekit.types.file import FlyteFile
 from flytekit import current_context
 from pathlib import Path
 from unionbio.config import logger
+from unionbio.tasks.helpers import filter_dir
 
 
 @dataclass
@@ -74,10 +75,9 @@ class Reads(DataClassJSONMixin):
         return target
 
     @classmethod
-    def make_all(cls, dir: Path):
+    def make_all(cls, dir: Path, include: list[str] = ["*fast*"], exclude: list[str] = []):
         samples = {}
-        logger.debug(f"{dir} contents: {os.listdir(dir)}")
-        for fp in list(dir.rglob("*fast*")):
+        for fp in filter_dir(dir, include=include, exclude=exclude):
             logger.debug(f"Processing {fp}")
             sample = fp.stem.split("_")[0]
             logger.debug(f"Found sample {sample}")

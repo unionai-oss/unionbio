@@ -7,6 +7,7 @@ from flytekit import current_context
 from flytekit.types.file import FlyteFile
 from pathlib import Path
 from unionbio.config import logger
+from unionbio.tasks.helpers import filter_dir
 
 
 @dataclass
@@ -93,12 +94,7 @@ class Alignment(DataClassJSONMixin):
     @classmethod
     def make_all(cls, dir: Path, include: list[str] = ["*.bam*", "*.sam", "*report*"], exclude: list[str] = []) -> list:
         samples = {}
-        all_contents = list(chain.from_iterable([dir.rglob(p) for p in include]))
-        dir_contents = [fp for fp in all_contents if not any([fp.match(p) for p in exclude])]
-        logger.info(
-            f"Found following alignment files in {dir} matching {include}: {dir_contents}"
-        )
-        for fp in dir_contents:
+        for fp in filter_dir(dir, include=include, exclude=exclude):
             sample, aligner = fp.stem.split("_")[0:2]
 
             if sample not in samples:

@@ -30,9 +30,9 @@ def test_fetch_ftp_file(tmp_path):
 def test_intersect_vcfs(tmp_path):
     copy_dir_conts(test_assets["vcf_dir"], tmp_path)
     vcfs = VCF.make_all(tmp_path, include=["test-sample*"])
-    # out = intersect_vcfs(vcf1=vcfs[0], vcf2=vcfs[1])
-    # out.aggregate(target=tmp_path)
-    # assert isinstance(out, VCF)
+    out = intersect_vcfs(vcf1=vcfs[0], vcf2=vcfs[1])
+    out.aggregate(target=tmp_path)
+    assert isinstance(out, VCF)
 
 def test_gunzip():
     gzfile = test_assets["sites_path"]
