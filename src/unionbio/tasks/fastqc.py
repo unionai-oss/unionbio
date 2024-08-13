@@ -1,31 +1,40 @@
-from flytekit import kwtypes, TaskMetadata
-from flytekit.extras.tasks.shell import OutputLocation, ShellTask
+from pathlib import Path
+from typing import List
+from flytekit import kwtypes, TaskMetadata, task, current_context
+from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
 from flytekit.types.directory import FlyteDirectory
+from unionbio.config import main_img_fqn, logger
+from unionbio.datatypes.reads import Reads
 
-from unionbio.config import main_img_fqn
+@task
+def fastqc(reads: List[Reads]) -> FlyteDirectory:
+    """
+    Perform quality control using FastQC.
 
-"""
-Perform quality control using FastQC.
+    This function takes a FlyteDirectory object containing raw sequencing data, 
+    gathers QC metrics using FastQC, and returns a FlyteDirectory object that
+    can be crawled with MultiQC to generate a report.
 
-This function takes a FlyteDirectory object containing raw sequencing data, 
-gathers QC metrics using FastQC, and returns a FlyteDirectory object that
-can be crawled with MultiQC to generate a report.
+    Args:
+        reads (List[Reads]): A list of Reads objects containing raw sequencing data.
 
-Args:
-    seq_dir (FlyteDirectory): An S3 prefix containing raw sequencing data to be processed.
-
-Returns:
-    qc (FlyteDirectory): A directory containing fastqc report output.
-"""
-fastqc = ShellTask(
-    name="fastqc",
-    debug=True,
-    metadata=TaskMetadata(retries=3, cache=True, cache_version="1"),
-    script="""
-    mkdir {outputs.qc}
-    fastqc {inputs.seq_dir}/*.fastq.gz --outdir={outputs.qc}
-    """,
-    inputs=kwtypes(seq_dir=FlyteDirectory),
-    output_locs=[OutputLocation(var="qc", var_type=FlyteDirectory, location="/tmp/qc")],
-    container_image=main_img_fqn,
-)
+    Returns:
+        qc (FlyteDirectory): A directory containing fastqc report output.
+    """
+    pwd = Path(current_context().working_directory)
+    indir = pwd.joinpath("fastqc_in")
+    outdir = pwd.joinpath("fastqc_out")
+    outdir.mkdir()
+    for r in reads:
+        r.aggregate(target=indir)
+    
+    fqc_cmd = [
+        "fastqc",
+        f"{indir}/*.fastq.gz",
+        "--outdir",
+        str(outdir),
+    ]
+    logger.info(f"Running FastQC with command: {fqc_cmd}")
+    subproc_execute(fqc_cmd)
+    
+    return FlyteDirectory(path=outdir)

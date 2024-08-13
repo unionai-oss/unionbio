@@ -17,11 +17,13 @@ from tests.config import test_assets
 from tests.utils import dir_conts_match, copy_dir_conts, comp_files
 
 
-def test_fastqc():
-    qc_samp = fastqc(seq_dir=test_assets["raw_seq_dir"])
-    assert isinstance(qc_samp, FlyteDirectory)
+def test_fastqc(tmp_path):
+    copy_dir_conts(test_assets["raw_seq_dir"], tmp_path)
+    reads = Reads.make_all(tmp_path)
+    qc_dir = fastqc(reads=reads)
+    assert isinstance(qc_dir, FlyteDirectory)
     assert all(
-        i in os.listdir(test_assets["fastqc_dir"]) for i in os.listdir(qc_samp.path)
+        i in os.listdir(test_assets["fastqc_dir"]) for i in os.listdir(qc_dir.path)
     )
 
 
