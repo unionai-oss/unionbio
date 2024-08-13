@@ -79,14 +79,20 @@ class Reads(DataClassJSONMixin):
         samples = {}
         for fp in filter_dir(dir, include=include, exclude=exclude):
             logger.debug(f"Processing {fp}")
-            sample = fp.stem.split("_")[0]
+            fn = fp.name
+            pfn = Path(fn)
+            sufs = fp.suffixes
+            while pfn.suffix:
+                pfn = pfn.with_suffix("")
+            fns = str(pfn).split("_")
+            sample = fns[0]
             logger.debug(f"Found sample {sample}")
 
             if sample not in samples:
                 samples[sample] = cls(sample=sample)
 
-            if ".fastq.gz" in fp.name or "fasta" in fp.name:
-                mate = fp.name.strip(".fastq.gz").strip(".filt").split("_")[-1]
+            if any(s in sufs for s in [".fastq", ".fasta", ".fq"]):
+                mate = fns[-1]
                 logger.debug(f"Found mate {mate} for {sample}")
                 if "1" in mate:
                     samples[sample].read1 = FlyteFile(path=str(fp))
@@ -94,7 +100,7 @@ class Reads(DataClassJSONMixin):
                     samples[sample].read2 = FlyteFile(path=str(fp))
                 else:
                     samples[sample].uread = FlyteFile(path=str(fp))
-            elif "filter-report" in fp.name:
+            elif "filter-report" in fn and ".json" in sufs:
                 logger.debug(f"Found filter report for {sample}")
                 samples[sample].filtered = True
                 samples[sample].filt_report = FlyteFile(path=str(fp))

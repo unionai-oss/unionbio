@@ -44,15 +44,14 @@ def calling_wf(
     """
     # Fetch remote inputs
     ref = fetch_remote_reference(url=ref_url)
-    reads = fetch_remote_reads(urls=reads_urls)
+    rem_reads = fetch_remote_reads(urls=reads_urls)
     sites = fetch_remote_sites(sites=sites_vcf_url, idx=sites_idx_url)
 
-    # # Generate FastQC reports and check for failures
-    # fqc_out = fastqc(seq_dir=seq_dir)
-    # samples = prepare_raw_samples(seq_dir=seq_dir)
+    # Generate FastQC reports and check for failures
+    fqc_out = fastqc(reads=rem_reads)
 
     # # Map out filtering across all samples and generate indices
-    # filtered_samples = map_task(pyfastp)(rs=samples)
+    # filtered_samples = map_task(pyfastp)(rs=reads)
 
     # # Explicitly define task dependencies
     # fqc_out >> filtered_samples

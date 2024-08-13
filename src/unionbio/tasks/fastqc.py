@@ -6,7 +6,7 @@ from flytekit.types.directory import FlyteDirectory
 from unionbio.config import main_img_fqn, logger
 from unionbio.datatypes.reads import Reads
 
-@task
+@task(container_image=main_img_fqn)
 def fastqc(reads: List[Reads]) -> FlyteDirectory:
     """
     Perform quality control using FastQC.

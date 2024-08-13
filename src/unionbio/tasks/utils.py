@@ -45,7 +45,7 @@ def fetch_remote_reference(url: str) -> Reference:
 
 
 @task(container_image=main_img_fqn, cache=True, cache_version="1.0")
-def fetch_remote_reads(urls: List[str]) -> Reads:
+def fetch_remote_reads(urls: List[str]) -> List[Reads]:
     """
     Fetches remote reads from a list of URLs and returns a list of Reads objects.
 
@@ -57,7 +57,7 @@ def fetch_remote_reads(urls: List[str]) -> Reads:
     workdir = current_context().working_directory
     for url in urls:
         fetch_file(url, workdir)
-    return Reads.make_all(Path(workdir))[0]
+    return Reads.make_all(Path(workdir))
 
 
 @task(container_image=main_img_fqn, cache=True, cache_version="1.0")
