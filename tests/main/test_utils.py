@@ -4,11 +4,10 @@ from pathlib import Path
 from filecmp import cmp
 from unionbio.datatypes.variants import VCF
 from unionbio.datatypes.alignment import Alignment
-from unionbio.tasks.utils import intersect_vcfs, reformat_alignments
+from unionbio.tasks.utils import intersect_vcfs, reformat_alignments, fetch_remote_sites
 from unionbio.tasks.helpers import gunzip_file, fetch_file, filter_dir
 from tests.config import test_assets
 from tests.utils import copy_dir_conts
-
 
 def test_fetch_http_file(tmp_path):
     # Test that fetch_file downloads a file
@@ -50,6 +49,15 @@ def test_alignment_reformat(tmp_path):
     assert isinstance(al_out, Alignment)
     assert ap.exists()
     assert ep.name == ap.name
+
+def test_fetch_remote_sites():
+    sites = fetch_remote_sites(
+        sites="https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf", 
+        idx="https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf.idx"
+        )
+    assert isinstance(sites, VCF)
+    assert Path(sites.vcf.path).exists()
+    assert sites.sample == "Mills_and_1000G_gold_standard_chr21"
 
 def test_filter_dir():
     out = [i for i in filter_dir(test_assets["vcf_dir"], include=["test-sample*"], exclude=["test-sample-2*"])]

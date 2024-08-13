@@ -3,14 +3,14 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit import map_task, task, dynamic
 from typing import List
-from unionbio.config import ref_loc, seq_dir_pth, main_img_fqn
+from unionbio.config import main_img_fqn
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.variants import VCF
 from unionbio.datatypes.alignment import Alignment
 from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.fastp import pyfastp
-from unionbio.tasks.utils import prepare_raw_samples, reformat_alignments
+from unionbio.tasks.utils import prepare_raw_samples, reformat_alignments, fetch_remote_reads, fetch_remote_reference, fetch_remote_sites
 from unionbio.tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
 from unionbio.tasks.multiqc import render_multiqc
 from unionbio.tasks.base_recal import recalibrate_samples
@@ -20,9 +20,14 @@ from unionbio.tasks.haplotype_caller import hc_call_samples
 
 @workflow
 def calling_wf(
-    seq_dir: FlyteDirectory="s3://my-s3-bucket/my-data/sequences",
-    ref_path: FlyteFile="s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta",
-) -> FlyteFile:
+    ref_url: str = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/references/GRCh38_chr21.fasta",
+    reads_urls: List[str] = [
+        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824_1_subsample.fastq",
+        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824_2_subsample.fastq",
+    ],
+    sites_vcf_url: str = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf",
+    sites_idx_url: str = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf.idx",
+):# -> FlyteFile:
     """
     Run an alignment workflow on FastQ files contained in the configured seq_dir.
 
@@ -37,34 +42,39 @@ def calling_wf(
     Returns:
         FlyteFile: A FlyteFile object representing the output of the alignment workflow.
     """
-    # Generate FastQC reports and check for failures
-    fqc_out = fastqc(seq_dir=seq_dir)
-    samples = prepare_raw_samples(seq_dir=seq_dir)
+    # Fetch remote inputs
+    ref = fetch_remote_reference(url=ref_url)
+    reads = fetch_remote_reads(urls=reads_urls)
+    sites = fetch_remote_sites(sites=sites_vcf_url, idx=sites_idx_url)
 
-    # Map out filtering across all samples and generate indices
-    filtered_samples = map_task(pyfastp)(rs=samples)
+    # # Generate FastQC reports and check for failures
+    # fqc_out = fastqc(seq_dir=seq_dir)
+    # samples = prepare_raw_samples(seq_dir=seq_dir)
 
-    # Explicitly define task dependencies
-    fqc_out >> filtered_samples
+    # # Map out filtering across all samples and generate indices
+    # filtered_samples = map_task(pyfastp)(rs=samples)
 
-    # Generate a bowtie2 index or load it from cache
-    bowtie2_idx = bowtie2_index(ref=ref_path)
+    # # Explicitly define task dependencies
+    # fqc_out >> filtered_samples
 
-    # Generate alignments using bowtie2
-    sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
+    # # Generate a bowtie2 index or load it from cache
+    # bowtie2_idx = bowtie2_index(ref=ref_path)
 
-    # Recalibrate & Reformat
-    deduped = mark_dups_samples(als=sams)
-    sorted = sort_samples(als=deduped)
-    recal_sams = recalibrate_samples(als=sams, sites=sites, ref=ref)
-    bams = reformat_alignments(als=recal_sams, to_format='bam')
+    # # Generate alignments using bowtie2
+    # sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
 
-    # Call Variants
-    vcfs = hc_call_samples(ref=ref_path, als=sams)
+    # # Recalibrate & Reformat
+    # deduped = mark_dups_samples(als=sams)
+    # sorted = sort_samples(als=deduped)
+    # recal_sams = recalibrate_samples(als=sams, sites=sites, ref=ref)
+    # bams = reformat_alignments(als=recal_sams, to_format='bam')
 
-    # Generate final multiqc report with stats from all steps
-    rep = render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams, vcfs=vcfs)
+    # # Call Variants
+    # vcfs = hc_call_samples(ref=ref_path, als=sams)
 
-    return rep
+    # # Generate final multiqc report with stats from all steps
+    # rep = render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams, vcfs=vcfs)
 
-call_lp = LaunchPlan.get_or_create(calling_wf, name="calling_wf_exp", default_inputs={"seq_dir": "s3://my-s3-bucket/my-data/sequences", "ref_path": "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"})
+    # return rep
+
+# call_lp = LaunchPlan.get_or_create(calling_wf, name="calling_wf_exp", default_inputs={"seq_dir": "s3://my-s3-bucket/my-data/sequences", "ref_path": "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"})

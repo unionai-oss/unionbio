@@ -37,14 +37,14 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     return Reads.make_all(Path(seq_dir))
 
 
-@task(cache=True, cache_version="1.0")
+@task(container_image=main_img_fqn, cache=True, cache_version="1.0")
 def fetch_remote_reference(url: str) -> Reference:
     workdir = current_context().working_directory
     ref_path = fetch_file(url, workdir)
     return Reference(ref_name=str(ref_path.name), ref_dir=FlyteDirectory(path=workdir))
 
 
-@task(cache=True, cache_version="1.0")
+@task(container_image=main_img_fqn, cache=True, cache_version="1.0")
 def fetch_remote_reads(urls: List[str]) -> Reads:
     """
     Fetches remote reads from a list of URLs and returns a list of Reads objects.
@@ -60,7 +60,7 @@ def fetch_remote_reads(urls: List[str]) -> Reads:
     return Reads.make_all(Path(workdir))[0]
 
 
-@task(cache=True, cache_version="1.0")
+@task(container_image=main_img_fqn, cache=True, cache_version="1.0")
 def fetch_remote_sites(sites: str, idx: str) -> VCF:
     """
     Fetches remote known sites from a URL and returns a Sites object.
@@ -73,7 +73,10 @@ def fetch_remote_sites(sites: str, idx: str) -> VCF:
     workdir = current_context().working_directory
     sites_path = fetch_file(sites, workdir)
     idx_path = fetch_file(idx, workdir)
-    return VCF(sites=FlyteFile(path=sites_path), idx=FlyteFile(path=idx_path))
+    sample_name = Path(sites_path.stem)
+    while sample_name.suffix:
+        sample_name = sample_name.with_suffix("")
+    return VCF(sample=str(sample_name), caller='NA', vcf=FlyteFile(path=str(sites_path)), vcf_idx=FlyteFile(path=str(idx_path)))
 
 
 @task

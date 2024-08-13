@@ -728,13 +728,13 @@ files = [
 
 [[package]]
 name = "flyteidl"
-version = "1.12.0"
+version = "1.13.1"
 description = "IDL for Flyte Platform"
 optional = false
 python-versions = "<3.13,>=3.8"
 files = [
-    {file = "flyteidl-1.12.0-py3-none-any.whl", hash = "sha256:700904d9bbb3d0fedd3d2eec096acad30587806a86a52d38ff834ca74f4fb4e8"},
-    {file = "flyteidl-1.12.0.tar.gz", hash = "sha256:1651e67b54b26879ec0ab84f320ec45315fcfec6a9811d2cb9f465505a57e6b8"},
+    {file = "flyteidl-1.13.1-py3-none-any.whl", hash = "sha256:3513ea129eaabc492ba56656a3817c2b62f67bd170aa8d58ff44e9673c0a947b"},
+    {file = "flyteidl-1.13.1.tar.gz", hash = "sha256:8983475d059839a1987824b2218a131d8076d38c841c630d0a144ba860e2c667"},
 ]
 
 [package.dependencies]
@@ -744,33 +744,31 @@ protoc-gen-openapiv2 = "*"
 
 [[package]]
 name = "flytekit"
-version = "1.12.3"
+version = "1.13.3"
 description = "Flyte SDK for Python"
 optional = false
 python-versions = "<3.13,>=3.8"
 files = [
-    {file = "flytekit-1.12.3-py3-none-any.whl", hash = "sha256:c0fc969a1ee9c4f7841d58f2dfa3e230f322ae46e1e6a03b3d744ee456b614aa"},
-    {file = "flytekit-1.12.3.tar.gz", hash = "sha256:9c9bb5f7cf3b37fc345cb59c846edc51a8fa099550174e64bd693927c0f95af0"},
+    {file = "flytekit-1.13.3-py3-none-any.whl", hash = "sha256:fa3ceaf528256900e99238c15f27eb301d57d869396bcffec0fdb422eb999e8b"},
+    {file = "flytekit-1.13.3.tar.gz", hash = "sha256:c25ccf7494efa10cf5eb65a709b514de839ffdb355f18f9682ff04adf62a02a4"},
 ]
 
 [package.dependencies]
 adlfs = ">=2023.3.0"
-click = ">=6.6,<9.0"
+click = ">=6.6"
 cloudpickle = ">=2.0.0"
-croniter = ">=0.3.20,<4.0.0"
+croniter = ">=0.3.20"
 dataclasses-json = ">=0.5.2,<0.5.12"
 diskcache = ">=5.2.1"
-docker = ">=4.0.0,<7.0.0"
+docker = ">=4.0.0"
 docstring-parser = ">=0.9.0"
-flyteidl = ">=1.12.0"
+flyteidl = ">=1.13.1"
 fsspec = ">=2023.3.0"
 gcsfs = ">=2023.3.0"
 googleapis-common-protos = ">=1.57"
 grpcio = "*"
 grpcio-status = "*"
 importlib-metadata = "*"
-isodate = "*"
-jinja2 = "*"
 joblib = "*"
 jsonlines = "*"
 jsonpickle = "*"
@@ -779,20 +777,18 @@ markdown-it-py = "*"
 marshmallow-enum = "*"
 marshmallow-jsonschema = ">=0.12.0"
 mashumaro = ">=3.11"
-numpy = "<2"
 protobuf = "!=4.25.0"
-pyarrow = "*"
 pygments = "*"
 python-json-logger = ">=2.0.0"
-pytimeparse = ">=1.1.8,<2.0.0"
+pytimeparse = ">=1.1.8"
 pyyaml = "<5.4.0 || >5.4.0,<5.4.1 || >5.4.1,<6.0.0 || >6.0.0"
-requests = ">=2.18.4,<2.32.0 || >2.32.0,<2.32.1 || >2.32.1,<2.32.2 || >2.32.2,<2.32.3 || >2.32.3,<3.0.0"
+requests = ">=2.18.4"
 rich = "*"
 rich-click = "*"
 s3fs = ">=2023.3.0,<2024.3.1 || >2024.3.1"
-statsd = ">=3.0.0,<4.0.0"
+statsd = ">=3.0.0"
 typing-extensions = "*"
-urllib3 = ">=1.22,<3.0.0"
+urllib3 = ">=1.22"
 
 [[package]]
 name = "flytekitplugins-envd"
@@ -2711,13 +2707,13 @@ jeepney = ">=0.6"
 
 [[package]]
 name = "sentry-sdk"
-version = "2.7.1"
+version = "2.13.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "sentry_sdk-2.7.1-py2.py3-none-any.whl", hash = "sha256:ef1b3d54eb715825657cd4bb3cb42bb4dc85087bac14c56b0fd8c21abd968c9a"},
-    {file = "sentry_sdk-2.7.1.tar.gz", hash = "sha256:25006c7e68b75aaa5e6b9c6a420ece22e8d7daec4b7a906ffd3a8607b67c037b"},
+    {file = "sentry_sdk-2.13.0-py2.py3-none-any.whl", hash = "sha256:6beede8fc2ab4043da7f69d95534e320944690680dd9a963178a49de71d726c6"},
+    {file = "sentry_sdk-2.13.0.tar.gz", hash = "sha256:8d4a576f7a98eb2fdb40e13106e41f330e5c79d72a68be1316e7852cf4995260"},
 ]
 
 [package.dependencies]
@@ -2744,10 +2740,11 @@ httpx = ["httpx (>=0.16.0)"]
 huey = ["huey (>=2)"]
 huggingface-hub = ["huggingface-hub (>=0.22)"]
 langchain = ["langchain (>=0.0.210)"]
+litestar = ["litestar (>=2.0.0)"]
 loguru = ["loguru (>=0.5)"]
 openai = ["openai (>=1.0.0)", "tiktoken (>=0.3.0)"]
 opentelemetry = ["opentelemetry-distro (>=0.35b0)"]
-opentelemetry-experimental = ["opentelemetry-instrumentation-aio-pika (==0.46b0)", "opentelemetry-instrumentation-aiohttp-client (==0.46b0)", "opentelemetry-instrumentation-aiopg (==0.46b0)", "opentelemetry-instrumentation-asgi (==0.46b0)", "opentelemetry-instrumentation-asyncio (==0.46b0)", "opentelemetry-instrumentation-asyncpg (==0.46b0)", "opentelemetry-instrumentation-aws-lambda (==0.46b0)", "opentelemetry-instrumentation-boto (==0.46b0)", "opentelemetry-instrumentation-boto3sqs (==0.46b0)", "opentelemetry-instrumentation-botocore (==0.46b0)", "opentelemetry-instrumentation-cassandra (==0.46b0)", "opentelemetry-instrumentation-celery (==0.46b0)", "opentelemetry-instrumentation-confluent-kafka (==0.46b0)", "opentelemetry-instrumentation-dbapi (==0.46b0)", "opentelemetry-instrumentation-django (==0.46b0)", "opentelemetry-instrumentation-elasticsearch (==0.46b0)", "opentelemetry-instrumentation-falcon (==0.46b0)", "opentelemetry-instrumentation-fastapi (==0.46b0)", "opentelemetry-instrumentation-flask (==0.46b0)", "opentelemetry-instrumentation-grpc (==0.46b0)", "opentelemetry-instrumentation-httpx (==0.46b0)", "opentelemetry-instrumentation-jinja2 (==0.46b0)", "opentelemetry-instrumentation-kafka-python (==0.46b0)", "opentelemetry-instrumentation-logging (==0.46b0)", "opentelemetry-instrumentation-mysql (==0.46b0)", "opentelemetry-instrumentation-mysqlclient (==0.46b0)", "opentelemetry-instrumentation-pika (==0.46b0)", "opentelemetry-instrumentation-psycopg (==0.46b0)", "opentelemetry-instrumentation-psycopg2 (==0.46b0)", "opentelemetry-instrumentation-pymemcache (==0.46b0)", "opentelemetry-instrumentation-pymongo (==0.46b0)", "opentelemetry-instrumentation-pymysql (==0.46b0)", "opentelemetry-instrumentation-pyramid (==0.46b0)", "opentelemetry-instrumentation-redis (==0.46b0)", "opentelemetry-instrumentation-remoulade (==0.46b0)", "opentelemetry-instrumentation-requests (==0.46b0)", "opentelemetry-instrumentation-sklearn (==0.46b0)", "opentelemetry-instrumentation-sqlalchemy (==0.46b0)", "opentelemetry-instrumentation-sqlite3 (==0.46b0)", "opentelemetry-instrumentation-starlette (==0.46b0)", "opentelemetry-instrumentation-system-metrics (==0.46b0)", "opentelemetry-instrumentation-threading (==0.46b0)", "opentelemetry-instrumentation-tornado (==0.46b0)", "opentelemetry-instrumentation-tortoiseorm (==0.46b0)", "opentelemetry-instrumentation-urllib (==0.46b0)", "opentelemetry-instrumentation-urllib3 (==0.46b0)", "opentelemetry-instrumentation-wsgi (==0.46b0)"]
+opentelemetry-experimental = ["opentelemetry-distro"]
 pure-eval = ["asttokens", "executing", "pure-eval"]
 pymongo = ["pymongo (>=3.1)"]
 pyspark = ["pyspark (>=2.4.4)"]
@@ -2922,44 +2919,58 @@ files = [
 ]
 
 [[package]]
-name = "unionai"
-version = "0.1.42"
+name = "union"
+version = "0.1.66"
 description = "Adds Union specific functionality to Flytekit"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "unionai-0.1.42-py3-none-any.whl", hash = "sha256:d81a8175c2f5c73c07e82072837dd022ca979027fe428aca8aca1a19280ba0e2"},
-    {file = "unionai-0.1.42.tar.gz", hash = "sha256:7f6136bd91217ca9b39b18bc8d4b24bbcea0e2b14eaaa487a83091db1d2347cf"},
+    {file = "union-0.1.66-py3-none-any.whl", hash = "sha256:302f5b6b618677c3ff18ac4f61ff7608c4ee9e2fd6e52f7d6515d2775176ef0b"},
+    {file = "union-0.1.66.tar.gz", hash = "sha256:0b768138deeeb5b92fb9e980f2b6e06913f5be458ffc3c86e439a7a133838ff3"},
 ]
 
 [package.dependencies]
 aiofiles = ">=23.2.1"
 click = "*"
-flyteidl = ">=1.12.0"
-flytekit = ">=1.12.2"
+flyteidl = ">=1.13.1"
+flytekit = ">=1.13.3"
 fsspec = ">=2023.3.0"
 googleapis-common-protos = ">=1.57"
 grpcio = "*"
 grpcio-status = "*"
 importlib-metadata = "*"
 jinja2 = "*"
+keyring = "*"
 mashumaro = "*"
+pyyaml = "*"
 rich = "*"
 rich-click = "*"
 sentry-sdk = ">=2.0.0"
-unionai-actor = {version = "*", markers = "platform_system == \"Linux\" and platform_machine == \"x86_64\""}
+unionai-actor = {version = ">=0.1.1", markers = "platform_system == \"Linux\" and platform_machine == \"x86_64\""}
+unionmeta-byoc = {version = "*", optional = true, markers = "extra == \"byoc\""}
 
 [package.extras]
 byoc = ["unionmeta-byoc"]
 
 [[package]]
 name = "unionai-actor"
-version = "0.1.0"
+version = "0.1.1"
 description = "Enables Union.ai actors"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "unionai_actor-0.1.0-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:15acc1e23b7f73259bcf623315e4eb8683fb0112d56dce0de5da8f22d62e62ca"},
+    {file = "unionai_actor-0.1.1-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9166437826e7e2dfc6f9595f64325a248383289c74c4ae87ab8b0167498e2600"},
+]
+
+[[package]]
+name = "unionmeta-byoc"
+version = "0.1.0"
+description = "Adds Union meta library for the Union.ai SDK"
+optional = false
+python-versions = "*"
+files = [
+    {file = "unionmeta_byoc-0.1.0-py3-none-any.whl", hash = "sha256:3c3c683b741604d8f599c359caa8203a0ea7bcd25d7fb481fd19e861ed26ab98"},
+    {file = "unionmeta_byoc-0.1.0.tar.gz", hash = "sha256:16f28e55b8e90b57c8b2eb2a8d9062d449943673d21807695c93c2132557ba35"},
 ]
 
 [[package]]
@@ -3239,4 +3250,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "cb502aaa5fc2bb06b04f407eae78b25270369b871644c22b5c2d192baacbc666"
+content-hash = "949293b5ee2d1d23e446524f9a6c30c84e09a0a55b22a409d3bbc9aec815b2d3"
