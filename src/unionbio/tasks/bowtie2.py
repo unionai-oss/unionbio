@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List
 from flytekit import kwtypes, task, Resources, current_context, TaskMetadata, dynamic
@@ -8,32 +9,23 @@ from flytekit.types.directory import FlyteDirectory
 from unionbio.config import ref_hash, main_img_fqn, logger
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.reads import Reads
+from unionbio.datatypes.reference import Reference
 
 
-"""
-Generate Bowtie2 index files from a reference genome.
-
-Args:
-    ref (FlyteFile): A FlyteFile object representing the input reference file.
-
-Returns:
-    FlyteDirectory: A FlyteDirectory object containing the index files.
-"""
-bowtie2_index = ShellTask(
-    name="bowtie2-index",
-    debug=True,
-    requests=Resources(cpu="4", mem="10Gi"),
-    metadata=TaskMetadata(retries=3, cache=True, cache_version=ref_hash),
+@task(
     container_image=main_img_fqn,
-    script="""
-    mkdir {outputs.idx}
-    bowtie2-build {inputs.ref} {outputs.idx}/bt2_idx
-    """,
-    inputs=kwtypes(ref=FlyteFile),
-    output_locs=[
-        OutputLocation(var="idx", var_type=FlyteDirectory, location="/tmp/bt2_idx")
-    ],
+    requests=Resources(cpu="4", mem="10Gi"),
 )
+def bowtie2_index(ref: Reference) -> Reference:
+    ref.index_name = "bt2_idx"
+    ref.indexed_with = "bowtie2"
+    idx_cmd = [
+        "bowtie2-build",
+        ref.ref_name,
+        ref.index_name
+    ]
+    subproc_execute(idx_cmd, cwd=ref.ref_dir.path)
+    return ref
 
 
 @task(

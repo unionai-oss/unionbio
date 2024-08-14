@@ -57,10 +57,10 @@ def calling_wf(
     fqc_out >> filtered_samples
 
     # # Generate a bowtie2 index or load it from cache
-    bowtie2_idx = bowtie2_index(ref=ref_path)
+    bowtie2_idx = bowtie2_index(ref=ref)
 
     # # Generate alignments using bowtie2
-    # sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
+    # sams = bowtie2_align_samples(idx=bowtie2_i    dx, samples=filtered_samples)
 
     # # Recalibrate & Reformat
     # deduped = mark_dups_samples(als=sams)

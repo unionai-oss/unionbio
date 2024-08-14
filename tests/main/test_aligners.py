@@ -43,23 +43,12 @@ def test_hisat2_align():
     )
 
 
-def test_bowtie2_index():
-    idx_dir = bowtie2_index(ref=Path(test_assets["ref_path"]))
-    assert isinstance(idx_dir, FlyteDirectory)
-    print(os.listdir(idx_dir.path))
-    assert all(
-        x in os.listdir(test_assets["bt2_idx_dir"]) for x in os.listdir(idx_dir.path)
-    )
-    assert all(
-        cmp(*i)
-        for i in [
-            (
-                Path(test_assets["bt2_idx_dir"]).joinpath(x),
-                Path(idx_dir.path).joinpath(x),
-            )
-            for x in os.listdir(idx_dir.path)
-        ]
-    )
+def test_bowtie2_index(tmp_path):
+    copy_dir_conts(test_assets["ref_dir"], tmp_path)
+    ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=tmp_path))
+    idx = bowtie2_index(ref=ref)
+    assert isinstance(idx, Reference)
+    assert dir_conts_match(test_assets["bwa_idx_dir"], idx.ref_dir.path)
 
 
 def test_bowtie2_align():
