@@ -37,14 +37,14 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     return Reads.make_all(Path(seq_dir))
 
 
-@task(container_image=main_img_fqn, cache=True, cache_version="1.0")
+@task(container_image=main_img_fqn)
 def fetch_remote_reference(url: str) -> Reference:
     workdir = current_context().working_directory
     ref_path = fetch_file(url, workdir)
     return Reference(ref_name=str(ref_path.name), ref_dir=FlyteDirectory(path=workdir))
 
 
-@task(container_image=main_img_fqn, cache=True, cache_version="1.0")
+@task(container_image=main_img_fqn)
 def fetch_remote_reads(urls: List[str]) -> List[Reads]:
     """
     Fetches remote reads from a list of URLs and returns a list of Reads objects.
@@ -60,7 +60,7 @@ def fetch_remote_reads(urls: List[str]) -> List[Reads]:
     return Reads.make_all(Path(workdir))
 
 
-@task(container_image=main_img_fqn, cache=True, cache_version="1.0")
+@task(container_image=main_img_fqn)
 def fetch_remote_sites(sites: str, idx: str) -> VCF:
     """
     Fetches remote known sites from a URL and returns a Sites object.

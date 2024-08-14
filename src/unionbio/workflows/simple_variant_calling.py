@@ -22,8 +22,8 @@ from unionbio.tasks.haplotype_caller import hc_call_samples
 def calling_wf(
     ref_url: str = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/references/GRCh38_chr21.fasta",
     reads_urls: List[str] = [
-        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824_1_subsample.fastq",
-        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824_2_subsample.fastq",
+        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824-sub_1.fastq",
+        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824-sub_2.fastq",
     ],
     sites_vcf_url: str = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf",
     sites_idx_url: str = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf.idx",
@@ -44,20 +44,20 @@ def calling_wf(
     """
     # Fetch remote inputs
     ref = fetch_remote_reference(url=ref_url)
-    rem_reads = fetch_remote_reads(urls=reads_urls)
+    reads = fetch_remote_reads(urls=reads_urls)
     sites = fetch_remote_sites(sites=sites_vcf_url, idx=sites_idx_url)
 
     # Generate FastQC reports and check for failures
-    fqc_out = fastqc(reads=rem_reads)
+    fqc_out = fastqc(reads=reads)
 
     # # Map out filtering across all samples and generate indices
-    # filtered_samples = map_task(pyfastp)(rs=reads)
+    filtered_samples = map_task(pyfastp)(rs=reads)
 
     # # Explicitly define task dependencies
-    # fqc_out >> filtered_samples
+    fqc_out >> filtered_samples
 
     # # Generate a bowtie2 index or load it from cache
-    # bowtie2_idx = bowtie2_index(ref=ref_path)
+    bowtie2_idx = bowtie2_index(ref=ref_path)
 
     # # Generate alignments using bowtie2
     # sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
