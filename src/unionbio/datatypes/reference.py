@@ -59,6 +59,7 @@ class Reference(DataClassJSONMixin):
             fo = Path(self.ref_dir.path).joinpath(f)
             fd = Path(target).joinpath(f)
             shutil.move(fo, fd)
+            logger.debug(f"Moved {fo} to {fd}")
         self.ref_dir.path = target
         return target
     

@@ -32,45 +32,44 @@ def bowtie2_index(ref: Reference) -> Reference:
     container_image=main_img_fqn,
     requests=Resources(cpu="4", mem="10Gi"),
 )
-def bowtie2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
+def bowtie2_align_paired_reads(idx: Reference, fs: Reads) -> Alignment:
     """
     Perform paired-end alignment using Bowtie 2 on a filtered sample.
 
-    This function takes a FlyteDirectory object representing the Bowtie 2 index and a
+    This function takes a Reference object containing the Bowtie 2 index and a
     FiltSample object containing filtered sample data. It performs paired-end alignment
     using Bowtie 2 and returns a Alignment object representing the resulting alignment.
 
     Args:
-        idx (FlyteDirectory): A FlyteDirectory object representing the Bowtie 2 index.
+        idx (Reference): A Reference object containing the Bowtie 2 index.
         fs (Reads): A filtered sample Reads object containing filtered sample data to be aligned.
 
     Returns:
         Alignment: An Alignment object representing the alignment result.
     """
-    idx.download()
-    logger.debug(f"Index downloaded to {idx.path}")
-    ldir = Path(current_context().working_directory)
-
+    idx.aggregate()
+    fs.aggregate()
+    logger.debug(f"Index downloaded to {idx.ref_dir.path}")
     alignment = Alignment(fs.sample, "bowtie2", "sam", sorted=False, deduped=False)
-    al = ldir.joinpath(alignment.get_alignment_fname())
-    rep = ldir.joinpath(alignment.get_report_fname())
+    al = Path(alignment.get_alignment_fname()).resolve()
+    rep = Path(alignment.get_report_fname()).resolve()
     logger.debug(f"Writing alignment to {al} and report to {rep}")
 
     cmd = [
         "bowtie2",
         "-x",
-        f"{idx.path}/bt2_idx",
+        idx.index_name,
         "-1",
-        fs.read1,
+        str(fs.read1.path),
         "-2",
-        fs.read2,
+        str(fs.read2.path),
         "-S",
-        al,
+        str(al),
     ]
+
     logger.debug(f"Running command: {cmd}")
-
-    result = subproc_execute(cmd)
-
+    result = subproc_execute(cmd, cwd=idx.ref_dir.path)
+    logger.debug(f"Alignment produced: {al.exists()}")
     with open(rep, "w") as f:
         f.write(result.error)
 

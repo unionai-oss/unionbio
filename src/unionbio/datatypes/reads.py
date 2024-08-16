@@ -62,7 +62,7 @@ class Reads(DataClassJSONMixin):
             if not np.exists():
                 shutil.move(self.uread.path, target)
                 self.uread.path = np
-        else:
+        elif self.read1 and self.read2:
             self.read1.download()
             self.read2.download()
             np1 = target.joinpath(Path(self.read1.path).name)
@@ -72,6 +72,8 @@ class Reads(DataClassJSONMixin):
                 shutil.move(self.read2.path, np2)
             self.read1.path = np1
             self.read2.path = np2
+        else:
+            logger.error("No read files found to aggregate!")
         return target
 
     @classmethod
