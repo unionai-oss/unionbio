@@ -6,7 +6,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execu
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from unionbio.config import ref_hash, main_img_fqn, logger
+from unionbio.config import main_img_fqn, logger
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
@@ -17,6 +17,7 @@ from unionbio.datatypes.reference import Reference
     requests=Resources(cpu="4", mem="10Gi"),
 )
 def bowtie2_index(ref: Reference) -> Reference:
+    ref.aggregate()
     ref.index_name = "bt2_idx"
     ref.indexed_with = "bowtie2"
     idx_cmd = [
@@ -79,7 +80,7 @@ def bowtie2_align_paired_reads(idx: Reference, fs: Reads) -> Alignment:
 
 
 @dynamic(container_image=main_img_fqn)
-def bowtie2_align_samples(idx: FlyteDirectory, samples: List[Reads]) -> List[Alignment]:
+def bowtie2_align_samples(idx: Reference, samples: List[Reads]) -> List[Alignment]:
     """
     Process samples through bowtie2.
 

@@ -9,12 +9,12 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 
-from unionbio.config import main_img_fqn, logger, parabricks_img_fqn
+from unionbio.config import main_img_fqn, logger, parabricks_img_fqn, remote_reads, remote_ref, remote_sites_vcf, remote_sites_idx
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.variants import VCF
 from unionbio.datatypes.alignment import Alignment
-from unionbio.tasks.helpers import fetch_file
+from unionbio.tasks.helpers import fetch_file, cache_hash
 
 
 @task(
@@ -37,15 +37,15 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     return Reads.make_all(Path(seq_dir))
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img_fqn, cache=True, cache_version=cache_hash(remote_ref))
 def fetch_remote_reference(url: str) -> Reference:
     workdir = current_context().working_directory
     ref_path = fetch_file(url, workdir)
     return Reference(ref_name=str(ref_path.name), ref_dir=FlyteDirectory(path=workdir))
 
 
-@task(container_image=main_img_fqn)
-def fetch_remote_reads(urls: List[str]) -> List[Reads]:
+@task(container_image=main_img_fqn, cache=True, cache_version=cache_hash(remote_reads))
+def fetch_remote_reads(urls: List[str] = remote_reads) -> List[Reads]:
     """
     Fetches remote reads from a list of URLs and returns a list of Reads objects.
 
@@ -60,7 +60,7 @@ def fetch_remote_reads(urls: List[str]) -> List[Reads]:
     return Reads.make_all(Path(workdir))
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img_fqn, cache=True, cache_version=cache_hash([remote_sites_vcf, remote_sites_idx]))
 def fetch_remote_sites(sites: str, idx: str) -> VCF:
     """
     Fetches remote known sites from a URL and returns a Sites object.

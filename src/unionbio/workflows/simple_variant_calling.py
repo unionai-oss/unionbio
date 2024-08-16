@@ -3,7 +3,7 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit import map_task, task, dynamic
 from typing import List
-from unionbio.config import main_img_fqn
+from unionbio.config import main_img_fqn, remote_reads, remote_ref, remote_sites_vcf, remote_sites_idx
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.variants import VCF
@@ -20,13 +20,10 @@ from unionbio.tasks.haplotype_caller import hc_call_samples
 
 @workflow
 def calling_wf(
-    ref_url: str = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/references/GRCh38_chr21.fasta",
-    reads_urls: List[str] = [
-        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824-sub_1.fastq",
-        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824-sub_2.fastq",
-    ],
-    sites_vcf_url: str = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf",
-    sites_idx_url: str = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf.idx",
+    ref_url: str = remote_ref,
+    reads_urls: List[str] = remote_reads,
+    remote_sites_vcf: str = remote_sites_vcf,
+    remote_sites_idx: str = remote_sites_idx,
 ):# -> FlyteFile:
     """
     Run an alignment workflow on FastQ files contained in the configured seq_dir.
@@ -45,7 +42,7 @@ def calling_wf(
     # Fetch remote inputs
     ref = fetch_remote_reference(url=ref_url)
     reads = fetch_remote_reads(urls=reads_urls)
-    sites = fetch_remote_sites(sites=sites_vcf_url, idx=sites_idx_url)
+    sites = fetch_remote_sites(sites=remote_sites_vcf, idx=remote_sites_idx)
 
     # Generate FastQC reports and check for failures
     fqc_out = fastqc(reads=reads)

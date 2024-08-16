@@ -12,10 +12,13 @@ logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
 # Default paths
-remote_ref = ''
-remote_reads = ''
-remote_sites = ''
-ref_hash = str(hash(remote_ref))[:4]
+remote_ref = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/references/GRCh38_chr21.fasta"
+remote_reads = [
+        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824-sub_1.fastq",
+        "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824-sub_2.fastq",
+    ]
+remote_sites_vcf = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf.idx"
+remote_sites_idx = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf"
 
 # Tool config
 fastp_cpu = "3"

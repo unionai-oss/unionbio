@@ -7,7 +7,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execu
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from unionbio.config import ref_hash, main_img_fqn, logger
+from unionbio.config import remote_ref, main_img_fqn, logger
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.reads import Reads
 from unionbio.datatypes.alignment import Alignment
@@ -17,7 +17,7 @@ from unionbio.datatypes.alignment import Alignment
     container_image=main_img_fqn,
     requests=Resources(cpu="4", mem="10Gi"),
     cache=True,
-    cache_version=ref_hash,
+    cache_version=remote_ref,
 )
 def bwa_index(ref_obj: Reference) -> Reference:
     """Indexes a reference genome using BWA.

@@ -6,7 +6,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execu
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-from unionbio.config import ref_hash, main_img_fqn, logger
+from unionbio.config import remote_ref, main_img_fqn, logger
 from unionbio.datatypes.alignment import Alignment
 from unionbio.datatypes.reads import Reads
 
@@ -22,7 +22,7 @@ Returns:
 hisat2_index = ShellTask(
     name="hisat2-index",
     debug=True,
-    metadata=TaskMetadata(retries=3, cache=True, cache_version=ref_hash),
+    metadata=TaskMetadata(retries=3, cache=True, cache_version=remote_ref),
     requests=Resources(cpu="4", mem="10Gi"),
     container_image=main_img_fqn,
     script="""

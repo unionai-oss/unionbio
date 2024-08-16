@@ -2,10 +2,24 @@ import gzip
 import ftplib
 import requests
 from pathlib import Path
+from typing import List
 from flytekit.remote import FlyteRemote
 from flytekit.configuration import Config
 from unionbio.config import logger
 
+def cache_hash(input: str | List[str]) -> str:
+    """
+    Generate a hash from a URI to use as a cache key.
+
+    Args:
+        url (str | List[str]): The URI or list of URIs to hash.
+
+    Returns:
+        str: The first 6 characters of the hash of the URI(s).
+    """
+    if type(input) == list:
+        input = "".join(input)
+    return str(hash(input))[:6]
 
 def gunzip_file(gzip_file: Path) -> Path:
     # Ensure the input file exists
