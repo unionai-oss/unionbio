@@ -12,6 +12,7 @@ from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.fastp import pyfastp
 from unionbio.tasks.utils import prepare_raw_samples, reformat_alignments, fetch_remote_reads, fetch_remote_reference, fetch_remote_sites
 from unionbio.tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
+from unionbio.tasks.bwa import bwa_align_samples, bwa_index
 from unionbio.tasks.multiqc import render_multiqc
 from unionbio.tasks.base_recal import recalibrate_samples
 from unionbio.tasks.mark_dups import mark_dups_samples
@@ -54,15 +55,15 @@ def calling_wf(
     fqc_out >> filtered_samples
 
     # # Generate a bowtie2 index or load it from cache
-    bowtie2_idx = bowtie2_index(ref=ref)
+    idx = bwa_index(ref=ref)
 
     # # Generate alignments using bowtie2
-    sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
+    sams = bwa_align_samples(idx=idx, samples=filtered_samples)
 
     # # Recalibrate & Reformat
     sorted = sort_samples(als=sams)
     deduped = mark_dups_samples(als=sorted)
-    recal_sams = recalibrate_samples(als=deduped, sites=sites, ref=bowtie2_idx)
+    recal_sams = recalibrate_samples(als=deduped, sites=sites, ref=idx)
     bams = reformat_alignments(als=recal_sams, to_format='bam')
 
     # # Call Variants

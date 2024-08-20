@@ -20,28 +20,34 @@ from unionbio.datatypes.alignment import Alignment
     cache=True,
     cache_version=remote_ref,
 )
-def bwa_index(ref_obj: Reference) -> Reference:
+def bwa_index(ref: Reference) -> Reference:
     """Indexes a reference genome using BWA.
 
     Args:
-        ref_obj (Reference): The reference object containing the reference genome.
+        ref (Reference): The reference object containing the reference genome.
 
     Returns:
         Reference: The updated reference object with associated index and metadata.
     """
-    ref_obj.ref_dir.download()
+    ref.aggregate()
 
-    if f"{ref_obj.ref_name}.fai" not in os.listdir(ref_obj.ref_dir.path):
-        sam_idx = ["samtools", "faidx", str(ref_obj.get_ref_path())]
-        subproc_execute(sam_idx, cwd=ref_obj.ref_dir.path)
+    if f"{ref.ref_name}.fai" not in os.listdir(ref.ref_dir.path):
+        sam_idx = ["samtools", "faidx", str(ref.get_ref_path())]
+        subproc_execute(sam_idx, cwd=ref.ref_dir.path)
+    ref_dict = Path(ref.ref_dir.path).joinpath(ref.get_ref_dict_fn())
+    if ref_dict not in os.listdir(ref.ref_dir.path):
+        logger.debug(f"Generating sequence dictionary {ref_dict} for {ref.ref_name}")
+        res = subproc_execute(["samtools", "dict", ref.ref_name, "-o", ref_dict], cwd=ref.ref_dir.path)
+        logger.debug(f"Reference dict exists: {ref_dict.exists()}")
+    bwa_idx = ["bwa", "index", str(ref.get_ref_path())]
+    subproc_execute(bwa_idx, cwd=ref.ref_dir.path)
+    logger.debug(f"Indexing complete for {ref.ref_name}")
+    logger.debug(f"Reference dir contents: {os.listdir(ref.ref_dir.path)}")
+    ref.index_name = ref.ref_name
+    ref.indexed_with = "bwa"
+    ref.ref_dir = FlyteDirectory(path=ref.ref_dir.path)
 
-    bwa_idx = ["bwa", "index", str(ref_obj.get_ref_path())]
-    subproc_execute(bwa_idx, cwd=ref_obj.ref_dir.path)
-
-    ref_obj.index_name = ref_obj.ref_name
-    ref_obj.indexed_with = "bwa"
-
-    return ref_obj
+    return ref
 
 
 @task(
@@ -68,7 +74,8 @@ def bwa_align(ref: Reference, reads: Reads) -> Alignment:
         sorted=False,
         deduped=False,
     )
-    sam_out = al_out.get_alignment_fname()
+    con_dir = current_context().working_directory
+    sam_out = Path(con_dir).joinpath(al_out.get_alignment_fname())
     bwa_align = [
         "bwa",
         "mem",
@@ -76,11 +83,12 @@ def bwa_align(ref: Reference, reads: Reads) -> Alignment:
         str(reads.read1.path),
         str(reads.read2.path),
         ">",
-        sam_out,
+        str(sam_out),
     ]
     cmd_str = " ".join(bwa_align)
     logger.info(f"Running BWA alignment with: {cmd_str}")
-    subproc_execute(cmd_str, shell=True)
+    logger.debug(f"Running in {con_dir} with contents: {os.listdir(con_dir)}")
+    subproc_execute(cmd_str, shell=True, cwd=con_dir)
     sp = Path(sam_out)
     logger.debug(f"Alignment exists ({sp.exists()}) at {sp.resolve()}")
     al_out.alignment = FlyteFile(path=sam_out)
