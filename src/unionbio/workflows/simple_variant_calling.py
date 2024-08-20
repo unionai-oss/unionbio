@@ -67,11 +67,11 @@ def calling_wf(
     bams = reformat_alignments(als=recal_sams, to_format='bam')
 
     # # Call Variants
-    # vcfs = hc_call_samples(ref=ref_path, als=sams)
+    vcfs = hc_call_samples(ref=idx, als=bams)
 
     # # Generate final multiqc report with stats from all steps
-    # rep = render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams, vcfs=vcfs)
+    rep = render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams, vcfs=vcfs)
 
-    # return rep
+    return rep
 
 # call_lp = LaunchPlan.get_or_create(calling_wf, name="calling_wf_exp", default_inputs={"seq_dir": "s3://my-s3-bucket/my-data/sequences", "ref_path": "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"})

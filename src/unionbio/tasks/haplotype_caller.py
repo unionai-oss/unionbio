@@ -1,5 +1,7 @@
+import os
+from pathlib import Path
 from typing import List
-from flytekit import task, dynamic
+from flytekit import task, dynamic, current_context, Resources
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from unionbio.datatypes.alignment import Alignment
@@ -7,7 +9,7 @@ from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.variants import VCF
 from unionbio.config import logger, main_img_fqn
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img_fqn, requests=Resources(cpu="4", mem="10Gi"))
 def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
     """
     Call variants using HaplotypeCaller from GATK.
@@ -23,13 +25,15 @@ def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
     logger.info(f"Reference: {ref}")
     logger.info(f"Alignment: {al}")
     ref.aggregate()
+    logger.debug(f"Reference dir contents: {os.listdir(ref.ref_dir.path)}")
     al.aggregate()
+    con_dir = Path(current_context().working_directory)
     vcf_out = VCF(
         sample=al.sample,
         caller="gatk-hc",
     )
-    vcf_fn = vcf_out.get_vcf_fname()
-    vcf_idx_fn = vcf_out.get_vcf_idx_fname()
+    vcf_fn = con_dir.joinpath(vcf_out.get_vcf_fname())
+    vcf_idx_fn = con_dir.joinpath(vcf_out.get_vcf_idx_fname())
     hc_cmd = [
         "gatk",
         "HaplotypeCaller",
@@ -44,7 +48,8 @@ def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
     ]
     logger.debug("Running command:")
     logger.debug(" ".join(hc_cmd))
-    subproc_execute(hc_cmd)
+    logger.debug(f"Running in dir {con_dir} with contents: {os.listdir(con_dir)}")
+    subproc_execute(hc_cmd, cwd=con_dir)
     vcf_out.vcf = FlyteFile(path=vcf_fn)
     vcf_out.vcf_idx = FlyteFile(path=vcf_idx_fn)
     return vcf_out
