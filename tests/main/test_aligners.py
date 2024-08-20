@@ -65,14 +65,14 @@ def test_bowtie2_align(tmp_path):
 def test_bwa_index(tmp_path):
     copy_dir_conts(test_assets["ref_dir"], tmp_path)
     ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=tmp_path))
-    indexed_ref = bwa_index(ref_obj=ref)
+    indexed_ref = bwa_index(ref=ref)
     assert isinstance(indexed_ref, Reference)
-    assert f'{test_assets["ref_fn"]}.fai' in os.listdir(tmp_path)
-    assert cmp(test_assets["ref_idx_path"], Path(tmp_path).joinpath(f'{test_assets["ref_fn"]}.fai'))
-    assert dir_conts_match(test_assets["bwa_idx_dir"], tmp_path)
+    assert f'{test_assets["ref_fn"]}.fai' in os.listdir(indexed_ref.ref_dir.path)
+    assert cmp(test_assets["ref_idx_path"], Path(indexed_ref.ref_dir.path).joinpath(f'{test_assets["ref_fn"]}.fai'))
+    assert dir_conts_match(test_assets["bwa_idx_dir"], indexed_ref.ref_dir.path)
 
 
-def test_bwa_align():#tmp_path):
+def test_bwa_align(tmp_path):
     tmp_path = Path("/tmp/bwa_align_test2/")
     copy_dir_conts(test_assets["filt_seq_dir"], tmp_path)
     reads = Reads.make_all(tmp_path)[0]

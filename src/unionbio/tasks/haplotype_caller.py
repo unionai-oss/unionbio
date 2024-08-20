@@ -50,8 +50,8 @@ def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
     logger.debug(" ".join(hc_cmd))
     logger.debug(f"Running in dir {con_dir} with contents: {os.listdir(con_dir)}")
     subproc_execute(hc_cmd, cwd=con_dir)
-    vcf_out.vcf = FlyteFile(path=vcf_fn)
-    vcf_out.vcf_idx = FlyteFile(path=vcf_idx_fn)
+    vcf_out.vcf = FlyteFile(path=str(vcf_fn))
+    vcf_out.vcf_idx = FlyteFile(path=str(vcf_idx_fn))
     return vcf_out
 
 @dynamic

@@ -15,7 +15,10 @@ from unionbio.datatypes.variants import VCF
 
 @task(container_image=main_img_fqn, enable_deck=True)
 def render_multiqc(
-    fqc: FlyteDirectory, filt_reps: List[Reads], sams: List[Alignment], vcfs: List[VCF]
+    fqc: FlyteDirectory, 
+    filt_reps: List[Reads] | None, 
+    sams: List[Alignment] | None,
+    vcfs: List[VCF] | None,
 ) -> FlyteFile:
     """
     Generate MultiQC report by rendering quality and alignment data.
@@ -43,15 +46,17 @@ def render_multiqc(
         shutil.move(src, dest)
     logger.debug(f"FastQC reports downloaded to {ldir}")
 
-    for filt_rep in filt_reps:
-        filt_rep.filt_report.download()
-        shutil.move(filt_rep.filt_report.path, ldir)
-    logger.debug(f"FastP reports downloaded to {ldir}")
+    if filt_reps:
+        for filt_rep in filt_reps:
+            filt_rep.filt_report.download()
+            shutil.move(filt_rep.filt_report.path, ldir)
+        logger.debug(f"FastP reports downloaded to {ldir}")
 
-    for sam in sams:
-        sam.alignment_report.download()
-        shutil.move(sam.alignment_report.path, ldir)
-    logger.debug(f"Alignment reports for {sams} downloaded to {ldir}")
+    if sams:
+        for sam in sams:
+            sam.alignment_report.download()
+            shutil.move(sam.alignment_report.path, ldir)
+        logger.debug(f"Alignment reports for {sams} downloaded to {ldir}")
 
     final_report = ldir.joinpath("multiqc_report.html")
     mqc_cmd = ["multiqc", str(ldir), "-n", str(final_report)]

@@ -35,8 +35,11 @@ def fastqc(reads: List[Reads]) -> FlyteDirectory:
         "--outdir",
         str(outdir),
     ]
-    logger.info(f"Running FastQC with command: {fqc_cmd}")
-    subproc_execute(fqc_cmd, cwd=indir)
+    fqc_cmd_str = " ".join(fqc_cmd)
+    logger.debug(f"Running FastQC with command:")
+    logger.debug(fqc_cmd_str)
+    res = subproc_execute(fqc_cmd_str, shell=True)
+    logger.debug(f"FastQC command returned: {res}")
     logger.debug(f"FastQC reports generated at {outdir} with contents: {list(outdir.iterdir())}")
     
     return FlyteDirectory(path=outdir)

@@ -54,7 +54,7 @@ def bwa_index(ref: Reference) -> Reference:
     container_image=main_img_fqn,
     requests=Resources(cpu="4", mem="10Gi"),
 )
-def bwa_align(ref: Reference, reads: Reads, rgtag: str | None) -> Alignment:
+def bwa_align(ref: Reference, reads: Reads, rgtag: str = "") -> Alignment:
     """Aligns reads to a reference genome using BWA.
 
     Args:
@@ -96,7 +96,7 @@ def bwa_align(ref: Reference, reads: Reads, rgtag: str | None) -> Alignment:
     subproc_execute(cmd_str, shell=True, cwd=con_dir)
     sp = Path(sam_out)
     logger.debug(f"Alignment exists ({sp.exists()}) at {sp.resolve()}")
-    al_out.alignment = FlyteFile(path=sam_out)
+    al_out.alignment = FlyteFile(path=str(sam_out))
     return al_out
 
 @dynamic(container_image=main_img_fqn)

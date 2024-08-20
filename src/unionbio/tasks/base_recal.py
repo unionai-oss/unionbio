@@ -62,7 +62,7 @@ def base_recalibrator(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
     ]
     subproc_execute(command=apply_recal_cmd, cwd=con_dir)
 
-    al.alignment = FlyteFile(path=al_out_fname)
+    al.alignment = FlyteFile(path=str(al_out_fname))
 
     return al
 
