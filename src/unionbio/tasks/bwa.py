@@ -54,7 +54,7 @@ def bwa_index(ref: Reference) -> Reference:
     container_image=main_img_fqn,
     requests=Resources(cpu="4", mem="10Gi"),
 )
-def bwa_align(ref: Reference, reads: Reads) -> Alignment:
+def bwa_align(ref: Reference, reads: Reads, rgtag: str | None) -> Alignment:
     """Aligns reads to a reference genome using BWA.
 
     Args:
@@ -66,7 +66,10 @@ def bwa_align(ref: Reference, reads: Reads) -> Alignment:
     """
     ref.aggregate()
     reads.aggregate()
-
+    if rgtag:
+        rgtag = repr(f'{rgtag}')
+    else:
+        rgtag = repr('@RG\tID:default\tSM:sample\tPL:illumina\tLB:lib1\tPU:unit1')
     al_out = Alignment(
         sample=reads.sample,
         aligner="bwa",
@@ -79,6 +82,8 @@ def bwa_align(ref: Reference, reads: Reads) -> Alignment:
     bwa_align = [
         "bwa",
         "mem",
+        "-R",
+        rgtag,
         str(ref.get_ref_path()),
         str(reads.read1.path),
         str(reads.read2.path),
