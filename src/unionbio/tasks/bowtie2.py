@@ -18,6 +18,14 @@ from unionbio.datatypes.reference import Reference
 )
 def bowtie2_index(ref: Reference) -> Reference:
     ref.aggregate()
+    if f"{ref.ref_name}.fai" not in os.listdir(ref.ref_dir.path):
+        logger.debug(f"Samtools indexing {ref.ref_name}")
+        subproc_execute(["samtools", "faidx", ref.ref_name], cwd=ref.ref_dir.path)
+    ref_dict = ref.get_ref_dict_fn()
+    if ref_dict not in os.listdir(ref.ref_dir.path):
+        logger.debug(f"Generating sequence dictionary {ref_dict} for {ref.ref_name}")
+        res = subproc_execute(["samtools", "dict", ref.ref_name, "-o", ref_dict], cwd=ref.ref_dir.path)
+        logger.debug(f"Reference dict exists: {ref_dict.exists()}")
     ref.index_name = "bt2_idx"
     ref.indexed_with = "bowtie2"
     idx_cmd = [
@@ -25,7 +33,10 @@ def bowtie2_index(ref: Reference) -> Reference:
         ref.ref_name,
         ref.index_name
     ]
+    logger.debug(f"Running command: {idx_cmd}")
     subproc_execute(idx_cmd, cwd=ref.ref_dir.path)
+    logger.debug(f"Index created at {ref.ref_dir.path} with contents {os.listdir(ref.ref_dir.path)}")
+    ref.ref_dir = FlyteDirectory(path=ref.ref_dir.path)
     return ref
 
 

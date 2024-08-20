@@ -60,10 +60,10 @@ def calling_wf(
     sams = bowtie2_align_samples(idx=bowtie2_idx, samples=filtered_samples)
 
     # # Recalibrate & Reformat
-    # deduped = mark_dups_samples(als=sams)
-    # sorted = sort_samples(als=deduped)
-    # recal_sams = recalibrate_samples(als=sams, sites=sites, ref=ref)
-    # bams = reformat_alignments(als=recal_sams, to_format='bam')
+    sorted = sort_samples(als=sams)
+    deduped = mark_dups_samples(als=sorted)
+    recal_sams = recalibrate_samples(als=deduped, sites=sites, ref=bowtie2_idx)
+    bams = reformat_alignments(als=recal_sams, to_format='bam')
 
     # # Call Variants
     # vcfs = hc_call_samples(ref=ref_path, als=sams)

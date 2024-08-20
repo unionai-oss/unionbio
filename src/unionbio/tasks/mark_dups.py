@@ -48,5 +48,5 @@ def mark_dups(al: Alignment) -> Alignment:
 
 
 @dynamic
-def mark_dups_samples(sams: List[Alignment]) -> List[Alignment]:
-    return [mark_dups(al=al) for al in sams]
+def mark_dups_samples(als: List[Alignment]) -> List[Alignment]:
+    return [mark_dups(al=al) for al in als]

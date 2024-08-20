@@ -17,9 +17,7 @@ from unionbio.datatypes.alignment import Alignment
 from unionbio.tasks.helpers import fetch_file, cache_hash
 
 
-@task(
-    container_image=main_img_fqn,
-)
+@task(container_image=main_img_fqn)
 def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
     """
     Prepare and process raw sequencing data to create a list of RawSample objects.

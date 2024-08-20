@@ -1,7 +1,7 @@
-from flytekit import task, dynamic
+import os
+from flytekit import task, dynamic, current_context
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
-
 from unionbio.config import main_img_fqn, logger
 from unionbio.datatypes.reference import Reference
 from unionbio.datatypes.alignment import Alignment
@@ -24,7 +24,7 @@ def base_recalibrator(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
     ref.aggregate()
     sites.aggregate()
     al.aggregate()
-
+    logger.debug(f"Sites obj:\n{sites.sample}\n{sites.caller}\n{sites.vcf.path}\n{sites.vcf_idx.path}")
     recal_fn = al.get_bqsr_fname()
 
     gen_table_cmd = [
@@ -41,7 +41,9 @@ def base_recalibrator(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
     ]
     logger.debug("Running GATK BaseRecalibrator with command:")
     logger.debug(" ".join(gen_table_cmd))
-    subproc_execute(command=gen_table_cmd)
+    con_dir = current_context().working_directory
+    logger.debug(f"Files present in context: {os.listdir(con_dir)}")
+    subproc_execute(command=gen_table_cmd, cwd=con_dir)
 
     al.recalibrated = True
     al_out_fname = al.get_alignment_fname()

@@ -42,5 +42,5 @@ def sort_sam(al: Alignment) -> Alignment:
 
 
 @dynamic
-def sort_samples(sams: List[Alignment]) -> List[Alignment]:
-    return [sort_sam(al=al) for al in sams]
+def sort_samples(als: List[Alignment]) -> List[Alignment]:
+    return [sort_sam(al=al) for al in als]

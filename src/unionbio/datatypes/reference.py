@@ -30,6 +30,9 @@ class Reference(DataClassJSONMixin):
     index_name: str | None = None
     indexed_with: str | None = None
 
+    def get_ref_dict_fn(self):
+        return Path(self.ref_name).with_suffix(".dict")
+
     def get_ref_path(self, unzip=True):
         fp = Path(self.ref_dir.path).joinpath(self.ref_name)
         if ".gz" in self.ref_name and unzip:
