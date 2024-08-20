@@ -45,33 +45,33 @@ def calling_wf(
     reads = fetch_remote_reads(urls=reads_urls)
     sites = fetch_remote_sites(sites=remote_sites_vcf, idx=remote_sites_idx)
 
-    # Generate FastQC reports and check for failures
-    fqc_out = fastqc(reads=reads)
+    # # Generate FastQC reports and check for failures
+    # fqc_out = fastqc(reads=reads)
 
     # # Map out filtering across all samples and generate indices
-    filtered_samples = map_task(pyfastp)(rs=reads)
+    # filtered_samples = map_task(pyfastp)(rs=reads)
 
     # # Explicitly define task dependencies
-    fqc_out >> filtered_samples
+    # fqc_out >> filtered_samples
 
     # # Generate a bowtie2 index or load it from cache
-    idx = bwa_index(ref=ref)
+    # idx = bwa_index(ref=ref)
 
     # # Generate alignments using bowtie2
-    sams = bwa_align_samples(idx=idx, samples=filtered_samples)
+    # sams = bwa_align_samples(idx=idx, samples=filtered_samples)
 
     # # Recalibrate & Reformat
-    sorted = sort_samples(als=sams)
-    deduped = mark_dups_samples(als=sorted)
-    recal_sams = recalibrate_samples(als=deduped, sites=sites, ref=idx)
-    bams = reformat_alignments(als=recal_sams, to_format='bam')
+    # sorted = sort_samples(als=sams)
+    # deduped = mark_dups_samples(als=sorted)
+    # recal_sams = recalibrate_samples(als=deduped, sites=sites, ref=idx)
+    # bams = reformat_alignments(als=recal_sams, to_format='bam')
 
-    # # Call Variants
-    vcfs = hc_call_samples(ref=idx, als=bams)
+    # # # Call Variants
+    # vcfs = hc_call_samples(ref=idx, als=bams)
 
-    # # Generate final multiqc report with stats from all steps
-    rep = render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=sams, vcfs=vcfs)
+    # # # Generate final multiqc report with stats from all steps
+    # rep = render_multiqc(fqc=fqc_out, filt_reps=filtered_samples, sams=bams, vcfs=vcfs)
 
-    return rep
+    # return rep
 
 # call_lp = LaunchPlan.get_or_create(calling_wf, name="calling_wf_exp", default_inputs={"seq_dir": "s3://my-s3-bucket/my-data/sequences", "ref_path": "s3://my-s3-bucket/my-data/refs/GRCh38_short.fasta"})

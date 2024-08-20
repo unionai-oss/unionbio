@@ -1,3 +1,4 @@
+from time import sleep
 from pathlib import Path
 from typing import List
 from flytekit import kwtypes, TaskMetadata, task, current_context
@@ -27,14 +28,15 @@ def fastqc(reads: List[Reads]) -> FlyteDirectory:
     outdir.mkdir()
     for r in reads:
         r.aggregate(target=indir)
-    
+    logger.debug(f"Aggregated reads to {indir} with contents: {list(indir.iterdir())}")
     fqc_cmd = [
         "fastqc",
-        f"{indir}/*.fastq.gz",
+        f"{indir}/*.fastq*",
         "--outdir",
         str(outdir),
     ]
     logger.info(f"Running FastQC with command: {fqc_cmd}")
-    subproc_execute(fqc_cmd)
+    subproc_execute(fqc_cmd, cwd=indir)
+    logger.debug(f"FastQC reports generated at {outdir} with contents: {list(outdir.iterdir())}")
     
     return FlyteDirectory(path=outdir)
