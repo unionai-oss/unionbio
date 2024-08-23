@@ -4,11 +4,7 @@ from tests.config import test_assets
 from tests.utils import copy_dir_conts
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.reference import Reference
-from unionbio.datatypes.variants import VCF
-from unionbio.datatypes.protein import Protein
+from unionbio.types import Alignment, Reads, Reference, VCF, Protein
 
 
 def test_raw_sample_fname():
