@@ -6,12 +6,11 @@ from flytekit.types.directory import FlyteDirectory
 from unionbio.tasks.hisat2 import hisat2_index, hisat2_align_paired_reads
 from unionbio.tasks.bowtie2 import bowtie2_index, bowtie2_align_paired_reads
 from unionbio.tasks.bwa import bwa_index, bwa_align
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.reference import Reference
 from unionbio.config import logger
 from tests.config import test_assets
 from tests.utils import dir_conts_match, copy_dir_conts, comp_files
+from unionbio.types import Alignment, Reads, Reference
+
 
 
 def test_hisat2_index():

@@ -7,11 +7,10 @@ from flytekit import kwtypes, task, Resources, current_context, TaskMetadata, dy
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
-
 from unionbio.config import remote_ref, main_img_fqn, logger
-from unionbio.datatypes.reference import Reference
-from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.alignment import Alignment
+from unionbio.types import Reference, Reads, Alignment
+
+
 
 
 @task(

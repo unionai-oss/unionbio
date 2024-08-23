@@ -8,13 +8,11 @@ from flytekit import task, current_context
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
-
 from unionbio.config import main_img_fqn, logger, parabricks_img_fqn, remote_reads, remote_ref, remote_sites_vcf, remote_sites_idx
-from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.reference import Reference
-from unionbio.datatypes.variants import VCF
-from unionbio.datatypes.alignment import Alignment
 from unionbio.tasks.helpers import fetch_file, cache_hash
+from unionbio.types import Reads, Reference, VCF, Alignment
+
+
 
 
 @task(container_image=main_img_fqn)

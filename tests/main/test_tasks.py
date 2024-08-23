@@ -3,10 +3,6 @@ from filecmp import cmp
 from pathlib import Path
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.reference import Reference
-from unionbio.datatypes.variants import VCF
 from unionbio.tasks.fastp import pyfastp
 from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.bwa import bwa_index, bwa_align
@@ -15,6 +11,8 @@ from unionbio.tasks.sort_sam import sort_sam
 from unionbio.tasks.base_recal import base_recalibrator
 from tests.config import test_assets
 from tests.utils import dir_conts_match, copy_dir_conts, comp_files
+from unionbio.types import Alignment, Reads, Reference, VCF
+
 
 
 def test_fastqc(tmp_path):

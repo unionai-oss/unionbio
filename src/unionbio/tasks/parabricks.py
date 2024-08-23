@@ -4,12 +4,10 @@ from flytekit import task, Resources
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.reference import Reference
-from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.variants import VCF
 from unionbio.config import parabricks_img_fqn
+from unionbio.types import Alignment, Reference, Reads, VCF
+
+
 
 
 @task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img_fqn)

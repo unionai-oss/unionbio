@@ -2,13 +2,13 @@ import string
 import shutil
 from pathlib import Path
 from filecmp import cmp
-from unionbio.datatypes.variants import VCF
-from unionbio.datatypes.alignment import Alignment
 from unionbio.tasks.utils import intersect_vcfs, reformat_alignments, fetch_remote_sites
 from unionbio.tasks.helpers import gunzip_file, fetch_file, filter_dir
 from unionbio.config import remote_reads, remote_ref, remote_sites_vcf, remote_sites_idx
 from tests.config import test_assets
 from tests.utils import copy_dir_conts
+from unionbio.types import VCF, Alignment
+
 
 def test_fetch_http_file(tmp_path):
     # Test that fetch_file downloads a file

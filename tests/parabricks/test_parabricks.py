@@ -1,9 +1,7 @@
 from unionbio.tasks.parabricks import pb_fq2bam, pb_deepvar, pb_haplocall
-from unionbio.datatypes.reference import Reference
-from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.variants import VCF
 from tests.config import test_assets
+from unionbio.types import Reference, Reads, Alignment, VCF
+
 
 ref_obj = Reference(ref_name=test_assets["ref_fn"], ref_dir=test_assets["ref_dir"])
 sites_obj = VCF(vcf=test_assets["sites_path"], vcf_idx=test_assets["sites_idx_path"])

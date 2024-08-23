@@ -1,10 +1,8 @@
 from datetime import timedelta
 from typing import List
-
 from flytekit import approve, conditional, dynamic, map_task, workflow
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-
 from unionbio.config import ref_loc, seq_dir_pth
 from unionbio.tasks.bowtie2 import bowtie2_align_paired_reads, bowtie2_index
 from unionbio.tasks.fastp import pyfastp
@@ -13,6 +11,8 @@ from unionbio.tasks.hisat2 import hisat2_align_paired_reads, hisat2_index
 from unionbio.tasks.multiqc import render_multiqc
 from unionbio.tasks.sample_types import FiltSample, Alignment
 from unionbio.tasks.utils import check_fastqc_reports, prepare_raw_samples
+
+
 
 
 @dynamic

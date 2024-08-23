@@ -1,4 +1,3 @@
-# Ok, we are ready to begin and import all tools we will use in this colab:
 import biotite.structure.io as bsio
 import torch
 from Bio import SeqIO
@@ -6,9 +5,10 @@ from flytekit import Resources, task
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 from transformers import AutoTokenizer, EsmForProteinFolding
-from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.protein import Protein
 from unionbio.config import logger, folding_img_fqn
+from unionbio.types import Reads, Protein
+
+# Ok, we are ready to begin and import all tools we will use in this colab:
 
 
 @task(container_image=folding_img_fqn)

@@ -5,10 +5,10 @@ from flytekit import kwtypes, task, Resources, current_context, TaskMetadata
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
-
 from unionbio.config import remote_ref, main_img_fqn, logger
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.reads import Reads
+from unionbio.types import Alignment, Reads
+
+
 
 """
 Generate Hisat2 index files from a reference genome.

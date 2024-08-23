@@ -4,9 +4,8 @@ from flytekit import task, dynamic, current_context
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 from unionbio.config import main_img_fqn, logger
-from unionbio.datatypes.reference import Reference
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.variants import VCF
+from unionbio.types import Reference, Alignment, VCF
+
 
 
 @task(container_image=main_img_fqn)

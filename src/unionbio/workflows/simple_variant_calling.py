@@ -4,7 +4,6 @@ from flytekit.types.file import FlyteFile
 from flytekit import map_task, task, dynamic
 from typing import List
 from unionbio.config import main_img_fqn, remote_reads, remote_ref, remote_sites_vcf, remote_sites_idx
-from unionbio.datatypes.variants import VCF
 from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.fastp import pyfastp
 from unionbio.tasks.utils import prepare_raw_samples, reformat_alignments, fetch_remote_reads, fetch_remote_reference, fetch_remote_sites
@@ -15,6 +14,8 @@ from unionbio.tasks.base_recal import recalibrate_samples
 from unionbio.tasks.mark_dups import mark_dups_samples
 from unionbio.tasks.sort_sam import sort_samples
 from unionbio.tasks.haplotype_caller import hc_call_samples
+from unionbio.types import VCF
+
 
 @workflow
 def calling_wf(

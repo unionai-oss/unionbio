@@ -5,7 +5,8 @@ from flytekit import kwtypes, TaskMetadata, task, current_context
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
 from flytekit.types.directory import FlyteDirectory
 from unionbio.config import main_img_fqn, logger
-from unionbio.datatypes.reads import Reads
+from unionbio.types import Reads
+
 
 @task(container_image=main_img_fqn)
 def fastqc(reads: List[Reads]) -> FlyteDirectory:

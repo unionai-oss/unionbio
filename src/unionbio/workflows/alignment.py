@@ -3,13 +3,13 @@ from flytekit import workflow, approve, conditional
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit import map_task
-
 from unionbio.config import ref_loc, seq_dir_pth
 from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.fastp import pyfastp
 from unionbio.tasks.utils import prepare_raw_samples, check_fastqc_reports
 from unionbio.tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
 from unionbio.tasks.multiqc import render_multiqc
+
 
 
 @workflow

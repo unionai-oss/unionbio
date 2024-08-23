@@ -6,11 +6,10 @@ from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from typing import List
 from pathlib import Path
-
 from unionbio.config import logger, main_img_fqn
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.reads import Reads
-from unionbio.datatypes.variants import VCF
+from unionbio.types import Alignment, Reads, VCF
+
+
 
 
 @task(container_image=main_img_fqn, enable_deck=True)

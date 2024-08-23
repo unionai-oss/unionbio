@@ -1,11 +1,12 @@
 from typing import List
-
 from flytekit import TaskMetadata, dynamic, task
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
-
-from unionbio.datatypes.alignment import Alignment
 from unionbio.config import main_img_fqn, logger
+from unionbio.types import Alignment
+
+
+
 
 
 @task(container_image=main_img_fqn)

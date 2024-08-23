@@ -1,15 +1,15 @@
-#####################################################
-# PYTHONPATH=. streamlit run alignment_dashboard.py #
-#####################################################
 import time
-
 import streamlit as st
 import streamlit.components.v1 as components
 from streamlit import session_state as session
 from flytekit.configuration import Config
 from flytekit.remote import FlyteRemote
-
 from unionbio.workflows.compare_aligners import alignment_wf
+#####################################################
+# PYTHONPATH=. streamlit run alignment_dashboard.py #
+#####################################################
+
+
 
 st.set_page_config(
     page_title="fastq alignment",

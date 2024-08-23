@@ -3,7 +3,8 @@ from flytekit import task, Resources, current_context
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from unionbio.config import main_img_fqn, logger, fastp_cpu
-from unionbio.datatypes.reads import Reads
+from unionbio.types import Reads
+
 
 
 @task(

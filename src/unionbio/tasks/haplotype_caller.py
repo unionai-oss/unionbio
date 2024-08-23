@@ -4,10 +4,9 @@ from typing import List
 from flytekit import task, dynamic, current_context, Resources
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
-from unionbio.datatypes.alignment import Alignment
-from unionbio.datatypes.reference import Reference
-from unionbio.datatypes.variants import VCF
 from unionbio.config import logger, main_img_fqn
+from unionbio.types import Alignment, Reference, VCF
+
 
 @task(container_image=main_img_fqn, requests=Resources(cpu="4", mem="10Gi"))
 def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
