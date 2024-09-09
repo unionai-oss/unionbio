@@ -1,7 +1,18 @@
 # 🧬 Bioinformatics on Flyte
 ---
 
-This repo contains tasks, workflows, image definitions, and datatypes used to standardize the orchestration of common bioinformatics tasks using Flyte. 
+This repo contains tasks, workflows, image definitions, and datatypes used to standardize the orchestration of common bioinformatics tasks using Flyte.
+
+# Quickstart
+
+1. Spin up the local development [sandbox](https://docs.flyte.org/en/latest/user_guide/environment_setup.html#create-a-local-demo-flyte-cluster)
+2. `pip install union`
+3. `git clone https://github.com/unionai-oss/unionbio.git && cd unionbio`
+4. `union --config ~/.flyte/config-sandbox.yaml run --remote src/unionbio/workflows/simple_variant_calling.py calling_wf`
+
+    Navigate to the local URL that's produced and watch your workflow run!
+
+# Highlights
 
 ## 🐳 Container Images
 ✨**Adding custom dependencies alongside Flytekit**
