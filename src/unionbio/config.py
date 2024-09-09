@@ -30,6 +30,6 @@ src_rt = Path(__file__).parent.parent
 # Image tags
 # While tasks can reference imageSpec directly, using the tag allows registering tasks
 # from a containerized environment. These also contain the actual unionbio package.
-main_img_fqn = "docker.io/unionbio/main:zdMmGXdk91m7F2y3bL4efA"
-folding_img_fqn = "docker.io/unionbio/folding:J1l8eplvIcUApQmqY63Ayw"
-parabricks_img_fqn = "docker.io/unionbio/parabricks:XZPCiUI86IhLf74DD8S0Mg"
+main_img_fqn = "docker.io/unionbio/main:xqiK1JDwMpuBWnRy4COD4A"
+folding_img_fqn = "docker.io/unionbio/folding:P0VHG8pidSc7qQCXQ9ChHg"
+parabricks_img_fqn = "docker.io/unionbio/parabricks:poSQ0vCfj9DYDclPS4TXkQ"
