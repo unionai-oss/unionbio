@@ -8,7 +8,7 @@ def run_pytest_in_docker(fqn: str, test_prefix: str):
     try:
         # Run the Docker container
         print("Running pytest in Docker container...")
-        con_name = f"unionbio-test-container"
+        con_name = "unionbio-test-container"
         container = client.containers.run(
             name=con_name,
             image=fqn,
@@ -45,6 +45,7 @@ def run_pytest_in_docker(fqn: str, test_prefix: str):
         if con is not None:
             con.remove(force=True)
             print(f"Container {con.id} removed")
+
 
 def test_main():
     run_pytest_in_docker(main_img_test_fqn, "main")

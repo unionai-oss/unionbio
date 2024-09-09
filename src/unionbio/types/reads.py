@@ -21,6 +21,7 @@ class Reads(DataClassJSONMixin):
         sample (str): The name or identifier of the raw sequencing sample.
         filtered (bool): A boolean value indicating whether the reads have been filtered.
         filt_report (FlyteFile): A FlyteFile object representing the path to the filter report.
+        uread (FlyteFile): A FlyteFile object representing the path to the unpaired read file.
         read1 (FlyteFile): A FlyteFile object representing the path to the raw R1 read file.
         read2 (FlyteFile): A FlyteFile object representing the path to the raw R2 read file.
     """
@@ -41,10 +42,10 @@ class Reads(DataClassJSONMixin):
 
     def get_report_fname(self):
         return f"{self.sample}_fastq-filter-report.json"
-    
+
     def aggregate(self, target: Path = None) -> Path:
         """
-        Explicitly aggregate Reads files into another given directory. 
+        Explicitly aggregate Reads files into another given directory.
         If None is provided, the current working is used.
 
         Args:
@@ -77,7 +78,9 @@ class Reads(DataClassJSONMixin):
         return target
 
     @classmethod
-    def make_all(cls, dir: Path, include: list[str] = ["*fast*"], exclude: list[str] = []):
+    def make_all(
+        cls, dir: Path, include: list[str] = ["*fast*"], exclude: list[str] = []
+    ):
         samples = {}
         for fp in filter_dir(dir, include=include, exclude=exclude):
             logger.debug(f"Processing {fp}")

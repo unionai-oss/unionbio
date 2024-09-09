@@ -67,7 +67,9 @@ def test_alignment_aggregate(tmp_path):
     al = Alignment.make_all(Path(tmp_path))[0]
     target = al.aggregate(target=Path("/tmp/some/other/dir"))
     assert Path(target).exists()
-    assert al.alignment.path == Path(target).joinpath("ERR250683-tiny_bowtie2_aligned.sam")
+    assert al.alignment.path == Path(target).joinpath(
+        "ERR250683-tiny_bowtie2_aligned.sam"
+    )
     assert al.alignment_report.path == Path(target).joinpath(
         "ERR250683-tiny_bowtie2_aligned_report.txt"
     )
@@ -77,15 +79,17 @@ def test_reference():
     ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=test_assets["ref_dir"]))
     assert isinstance(ref.ref_dir, FlyteDirectory)
     assert ref.ref_name in os.listdir(ref.ref_dir.path)
-    assert ref.get_ref_path() == test_assets["ref_dir"].joinpath(
-        test_assets["ref_fn"]
-    )
+    assert ref.get_ref_path() == test_assets["ref_dir"].joinpath(test_assets["ref_fn"])
+
 
 def test_remote_reference():
-    ref = Reference.from_remote(url="https://raw.githubusercontent.com/unionai-oss/unionbio/main/tests/assets/references/GRCh38_short.fasta")
+    ref = Reference.from_remote(
+        url="https://raw.githubusercontent.com/unionai-oss/unionbio/main/tests/assets/references/GRCh38_short.fasta"
+    )
     assert isinstance(ref, Reference)
     assert ref.ref_name == "GRCh38_short.fasta"
     assert Path(ref.ref_dir.path).exists()
+
 
 def test_reference_aggregate(tmp_path):
     tp1 = Path(tmp_path).joinpath("d1")
@@ -96,6 +100,7 @@ def test_reference_aggregate(tmp_path):
     assert Path(target).exists()
     assert ref.ref_dir.path == target
     assert ref.ref_name in os.listdir(target)
+
 
 def test_vcf():
     vcf = VCF(

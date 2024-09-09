@@ -1,14 +1,12 @@
 import os
 from pathlib import Path
 from typing import List
-from flytekit import kwtypes, task, Resources, current_context, TaskMetadata, dynamic
-from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
+from flytekit import task, Resources, dynamic
+from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from unionbio.config import main_img_fqn, logger
 from unionbio.types import Alignment, Reads, Reference
-
-
 
 
 @task(
@@ -16,6 +14,15 @@ from unionbio.types import Alignment, Reads, Reference
     requests=Resources(cpu="4", mem="10Gi"),
 )
 def bowtie2_index(ref: Reference) -> Reference:
+    """
+    Generate a Bowtie 2 index for a reference genome.
+
+    Args:
+        ref (Reference): A Reference object containing the reference genome to be indexed.
+
+    Returns:
+        Reference: A Reference object with the Bowtie 2 index added in.
+    """
     ref.aggregate()
     if f"{ref.ref_name}.fai" not in os.listdir(ref.ref_dir.path):
         logger.debug(f"Samtools indexing {ref.ref_name}")
@@ -23,18 +30,18 @@ def bowtie2_index(ref: Reference) -> Reference:
     ref_dict = ref.get_ref_dict_fn()
     if ref_dict not in os.listdir(ref.ref_dir.path):
         logger.debug(f"Generating sequence dictionary {ref_dict} for {ref.ref_name}")
-        res = subproc_execute(["samtools", "dict", ref.ref_name, "-o", ref_dict], cwd=ref.ref_dir.path)
+        subproc_execute(
+            ["samtools", "dict", ref.ref_name, "-o", ref_dict], cwd=ref.ref_dir.path
+        )
         logger.debug(f"Reference dict exists: {ref_dict.exists()}")
     ref.index_name = "bt2_idx"
     ref.indexed_with = "bowtie2"
-    idx_cmd = [
-        "bowtie2-build",
-        ref.ref_name,
-        ref.index_name
-    ]
+    idx_cmd = ["bowtie2-build", ref.ref_name, ref.index_name]
     logger.debug(f"Running command: {idx_cmd}")
     subproc_execute(idx_cmd, cwd=ref.ref_dir.path)
-    logger.debug(f"Index created at {ref.ref_dir.path} with contents {os.listdir(ref.ref_dir.path)}")
+    logger.debug(
+        f"Index created at {ref.ref_dir.path} with contents {os.listdir(ref.ref_dir.path)}"
+    )
     ref.ref_dir = FlyteDirectory(path=ref.ref_dir.path)
     return ref
 

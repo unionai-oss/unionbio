@@ -5,7 +5,6 @@ from tests.config import test_assets
 from unionbio.types import Reads, Protein
 
 
-
 def test_prodigal_predict():
     reads = Reads.make_all(Path(test_assets["folding_seq_dir"]))[0]
     prot = prodigal_predict(in_seq=reads)

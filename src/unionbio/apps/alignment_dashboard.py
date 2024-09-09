@@ -10,7 +10,6 @@ from unionbio.workflows.compare_aligners import alignment_wf
 #####################################################
 
 
-
 st.set_page_config(
     page_title="fastq alignment",
     page_icon="https://docs.flyte.org/en/latest/_static/flyte_circle_gradient_1_4x4.png",

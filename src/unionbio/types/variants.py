@@ -42,7 +42,7 @@ class VCF(DataClassJSONMixin):
 
     def aggregate(self, target: Path = None) -> Path:
         """
-        Explicitly aggregate VCF and index into another given directory. 
+        Explicitly aggregate VCF and index into another given directory.
         If None is provided, the current working is used.
 
         Args:
@@ -59,7 +59,7 @@ class VCF(DataClassJSONMixin):
         if not np1.exists():
             shutil.move(self.vcf.path, np1)
         self.vcf.path = np1
-        
+
         if self.vcf_idx:
             self.vcf_idx.download()
             np2 = target.joinpath(Path(self.vcf_idx.path).name)
@@ -68,7 +68,9 @@ class VCF(DataClassJSONMixin):
             self.vcf_idx.path = np2
 
     @classmethod
-    def make_all(cls, dir: Path, include: list[str] = ["*.vcf*"], exclude: list[str] = []) -> list:
+    def make_all(
+        cls, dir: Path, include: list[str] = ["*.vcf*"], exclude: list[str] = []
+    ) -> list:
         samples = {}
         for fp in filter_dir(dir, include=include, exclude=exclude):
             stem = str(fp.stem).split(".")[0]

@@ -8,9 +8,10 @@ from unionbio.config import parabricks_img_fqn
 from unionbio.types import Alignment, Reference, Reads, VCF
 
 
-
-
-@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img_fqn)
+@task(
+    requests=Resources(gpu="1", mem="32Gi", cpu="32"),
+    container_image=parabricks_img_fqn,
+)
 def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
     """
     Takes an input directory containing paired-end FASTQ files and an indexed reference genome and
@@ -63,8 +64,11 @@ def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
     return FlyteFile(path=bam_out), FlyteFile(path=recal_out)
 
 
-@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img_fqn)
-def basic_align(indir: FlyteDirectory) -> Tuple[FlyteFile, str]:
+@task(
+    requests=Resources(gpu="1", mem="32Gi", cpu="32"),
+    container_image=parabricks_img_fqn,
+)
+def basic_align(indir: FlyteDirectory) -> FlyteFile:
     """
     Aligns paired-end sequencing reads using BWA-MEM and GATK tools, and returns the path to the processed BAM file
     and the elapsed time for the alignment process.
@@ -151,15 +155,21 @@ def basic_align(indir: FlyteDirectory) -> Tuple[FlyteFile, str]:
     return FlyteFile(path=dup_bam)
 
 
-@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img_fqn)
+@task(
+    requests=Resources(gpu="1", mem="32Gi", cpu="32"),
+    container_image=parabricks_img_fqn,
+)
 def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
     """
     Takes an input directory containing BAM files and an indexed reference genome and
     performs variant calling using Parabricks' deepvariant tool.
 
     Args:
+        Alignment: The input Alignment object containing the BAM file.
+        Reference: The indexed reference genome.
 
     Returns:
+        VCF: The resulting VCF object.
 
     """
     ref.ref_dir.download()
@@ -170,7 +180,7 @@ def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
     vcf_fname = vcf_out.get_vcf_fname()
     vcf_idx_fname = vcf_out.get_vcf_idx_fname()
 
-    deepvar_result = subproc_execute(
+    subproc_execute(
         [
             "pbrun",
             "deepvariant",
@@ -190,15 +200,21 @@ def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
     return deepvar_dir
 
 
-@task(requests=Resources(gpu="1", mem="32Gi", cpu="32"), container_image=parabricks_img_fqn)
+@task(
+    requests=Resources(gpu="1", mem="32Gi", cpu="32"),
+    container_image=parabricks_img_fqn,
+)
 def pb_haplocall(al: Alignment, ref: Reference) -> VCF:
     """
     Takes an input directory containing BAM files and an indexed reference genome and
     performs variant calling using Parabricks' accelerated version of GATK's HaplotypeCaller.
 
     Args:
+        Alignment: The input Alignment object containing the BAM file.
+        Reference: The indexed reference genome.
 
     Returns:
+        VCF: The resulting VCF object.
 
     """
     ref.ref_dir.download()
@@ -228,5 +244,4 @@ def pb_haplocall(al: Alignment, ref: Reference) -> VCF:
     vcf_out.vcf = FlyteFile(path=vcf_fname)
     vcf_out.vcf_idx = FlyteFile(path=vcf_idx_fname)
 
-    deepvar_dir = FlyteDirectory(path="/tmp")
-    return deepvar_dir
+    return vcf_out

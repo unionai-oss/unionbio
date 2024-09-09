@@ -1,13 +1,20 @@
-from flytekit import workflow, LaunchPlan
-from flytekit.types.directory import FlyteDirectory
-from flytekit.types.file import FlyteFile
-from flytekit import map_task, task, dynamic
+from flytekit import workflow
+from flytekit import map_task
 from typing import List
-from unionbio.config import main_img_fqn, remote_reads, remote_ref, remote_sites_vcf, remote_sites_idx
+from unionbio.config import (
+    remote_reads,
+    remote_ref,
+    remote_sites_vcf,
+    remote_sites_idx,
+)
 from unionbio.tasks.fastqc import fastqc
 from unionbio.tasks.fastp import pyfastp
-from unionbio.tasks.utils import prepare_raw_samples, reformat_alignments, fetch_remote_reads, fetch_remote_reference, fetch_remote_sites
-from unionbio.tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
+from unionbio.tasks.utils import (
+    reformat_alignments,
+    fetch_remote_reads,
+    fetch_remote_reference,
+    fetch_remote_sites,
+)
 from unionbio.tasks.bwa import bwa_align_samples, bwa_index
 from unionbio.tasks.multiqc import render_multiqc
 from unionbio.tasks.base_recal import recalibrate_samples
@@ -64,7 +71,7 @@ def calling_wf(
     sorted = sort_samples(als=sams)
     deduped = mark_dups_samples(als=sorted)
     recal_sams = recalibrate_samples(als=deduped, sites=sites, ref=idx)
-    bams = reformat_alignments(als=recal_sams, to_format='bam')
+    bams = reformat_alignments(als=recal_sams, to_format="bam")
 
     # Call Variants
     vcfs = hc_call_samples(ref=idx, als=bams)

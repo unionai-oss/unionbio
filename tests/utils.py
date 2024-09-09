@@ -24,6 +24,7 @@ def dir_conts_match(dir1, dir2):
 
     return True
 
+
 def copy_dir_conts(src_dir, dest_dir):
     # Ensure the destination directory exists
     os.makedirs(dest_dir, exist_ok=True)
@@ -34,18 +35,19 @@ def copy_dir_conts(src_dir, dest_dir):
     for item in items:
         src_path = os.path.join(src_dir, item)
         dest_path = os.path.join(dest_dir, item)
-        
+
         # If the item is a directory, use copytree
         if os.path.isdir(src_path):
             shutil.copytree(src_path, dest_path, dirs_exist_ok=True)
         else:
             shutil.copy2(src_path, dest_path)
 
+
 def comp_files(file1, file2):
-    with open(file1, 'r') as f1, open(file2, 'r') as f2:
+    with open(file1, "r") as f1, open(file2, "r") as f2:
         for line1, line2 in zip(f1, f2):
             if line1 != line2:
-                logger.error(f"Lines do not match:")
+                logger.error("Lines do not match:")
                 logger.error(line1)
                 logger.error(line2)
                 return False

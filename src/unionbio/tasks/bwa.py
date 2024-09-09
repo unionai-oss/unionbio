@@ -1,16 +1,12 @@
 import os
-import shutil
-import subprocess
 from pathlib import Path
 from typing import List
-from flytekit import kwtypes, task, Resources, current_context, TaskMetadata, dynamic
-from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
+from flytekit import task, Resources, current_context, dynamic
+from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from unionbio.config import remote_ref, main_img_fqn, logger
 from unionbio.types import Reference, Reads, Alignment
-
-
 
 
 @task(
@@ -36,7 +32,9 @@ def bwa_index(ref: Reference) -> Reference:
     ref_dict = Path(ref.ref_dir.path).joinpath(ref.get_ref_dict_fn())
     if ref_dict not in os.listdir(ref.ref_dir.path):
         logger.debug(f"Generating sequence dictionary {ref_dict} for {ref.ref_name}")
-        res = subproc_execute(["samtools", "dict", ref.ref_name, "-o", ref_dict], cwd=ref.ref_dir.path)
+        subproc_execute(
+            ["samtools", "dict", ref.ref_name, "-o", ref_dict], cwd=ref.ref_dir.path
+        )
         logger.debug(f"Reference dict exists: {ref_dict.exists()}")
     bwa_idx = ["bwa", "index", str(ref.get_ref_path())]
     subproc_execute(bwa_idx, cwd=ref.ref_dir.path)
@@ -59,6 +57,7 @@ def bwa_align(ref: Reference, reads: Reads, rgtag: str = "") -> Alignment:
     Args:
         ref (Reference): The reference object containing the reference genome and index.
         reads (Reads): The reads object containing the reads to align.
+        rgtag (str): The read group tag to include in the alignment header.
 
     Returns:
         Alignment: The alignment object containing the aligned reads.
@@ -66,9 +65,9 @@ def bwa_align(ref: Reference, reads: Reads, rgtag: str = "") -> Alignment:
     ref.aggregate()
     reads.aggregate()
     if rgtag:
-        rgtag = repr(f'{rgtag}')
+        rgtag = repr(f"{rgtag}")
     else:
-        rgtag = repr('@RG\tID:default\tSM:sample\tPL:illumina\tLB:lib1\tPU:unit1')
+        rgtag = repr("@RG\tID:default\tSM:sample\tPL:illumina\tLB:lib1\tPU:unit1")
     al_out = Alignment(
         sample=reads.sample,
         aligner="bwa",
@@ -98,6 +97,7 @@ def bwa_align(ref: Reference, reads: Reads, rgtag: str = "") -> Alignment:
     al_out.alignment = FlyteFile(path=str(sam_out))
     return al_out
 
+
 @dynamic(container_image=main_img_fqn)
 def bwa_align_samples(idx: Reference, samples: List[Reads]) -> List[Alignment]:
     """
@@ -108,7 +108,7 @@ def bwa_align_samples(idx: Reference, samples: List[Reads]) -> List[Alignment]:
     using bwa. It then returns a list of Alignment objects representing the alignment results.
 
     Args:
-        idx (FlyteDirectory): The FlyteDirectory object representing the bowtie2 index.
+        idx (Reference): The Reference object containing the bowtie2 index.
         samples (List[Reads]): A list of Reads objects containing sample data
             to be processed.
 

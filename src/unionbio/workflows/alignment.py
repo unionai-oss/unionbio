@@ -11,7 +11,6 @@ from unionbio.tasks.bowtie2 import bowtie2_align_samples, bowtie2_index
 from unionbio.tasks.multiqc import render_multiqc
 
 
-
 @workflow
 def alignment_wf(seq_dir: FlyteDirectory = seq_dir_pth) -> FlyteFile:
     """

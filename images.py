@@ -65,6 +65,7 @@ build_scope = [
     "parabricks_img",
 ]
 
+
 def update_img_config(config_path: Path, fqns: dict[str, str]):
     with open(config_path, "r") as f:
         cfg_content = f.read()
@@ -75,7 +76,9 @@ def update_img_config(config_path: Path, fqns: dict[str, str]):
     with open(config_path, "w") as f:
         f.write(cfg_content)
 
+
 ## Entrypoints ##
+
 
 def build():
     build_specs = []
@@ -100,7 +103,7 @@ def build_test():
     # Prepare builds
     for img_str in build_scope:
         spec = eval(img_str)
-        spec.tag_format="{spec_hash}-test"
+        spec.tag_format = "{spec_hash}-test"
         spec.source_root = test_rt
         spec.packages.append("pytest")
         fqns[f"{img_str}_test_fqn"] = spec.image_name()

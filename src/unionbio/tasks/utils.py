@@ -8,11 +8,14 @@ from flytekit import task, current_context
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
-from unionbio.config import main_img_fqn, logger, parabricks_img_fqn, remote_reads, remote_ref, remote_sites_vcf, remote_sites_idx
-from unionbio.tasks.helpers import fetch_file, cache_hash
+from unionbio.config import (
+    main_img_fqn,
+    logger,
+    parabricks_img_fqn,
+    remote_reads,
+)
+from unionbio.tasks.helpers import fetch_file
 from unionbio.types import Reads, Reference, VCF, Alignment
-
-
 
 
 @task(container_image=main_img_fqn)
@@ -41,14 +44,15 @@ def fetch_remote_reference(url: str) -> Reference:
 
 
 @task(container_image=main_img_fqn)
-def fetch_remote_reads(urls: List[str] = remote_reads) -> List[Reads]:
+def fetch_remote_reads(urls: List[str]) -> List[Reads]:
     """
     Fetches remote reads from a list of URLs and returns a list of Reads objects.
 
     Args:
+        urls (List[str]): A list of URLs pointing to the reads to fetch.
 
     Returns:
-
+        List[Reads]: A list of Reads objects representing the fetched reads.
     """
     workdir = current_context().working_directory
     for url in urls:
@@ -62,9 +66,11 @@ def fetch_remote_sites(sites: str, idx: str) -> VCF:
     Fetches remote known sites from a URL and returns a Sites object.
 
     Args:
+        sites (str): The URL of the known sites VCF file.
+        idx (str): The URL of the known sites VCF index file
 
     Returns:
-
+        VCF: A VCF object representing the fetched known sites.
     """
     workdir = current_context().working_directory
     sites_path = fetch_file(sites, workdir)
@@ -72,11 +78,25 @@ def fetch_remote_sites(sites: str, idx: str) -> VCF:
     sample_name = Path(sites_path.stem)
     while sample_name.suffix:
         sample_name = sample_name.with_suffix("")
-    return VCF(sample=str(sample_name), caller='NA', vcf=FlyteFile(path=str(sites_path)), vcf_idx=FlyteFile(path=str(idx_path)))
+    return VCF(
+        sample=str(sample_name),
+        caller="NA",
+        vcf=FlyteFile(path=str(sites_path)),
+        vcf_idx=FlyteFile(path=str(idx_path)),
+    )
 
 
 @task
 def fetch_files(urls: List[str]) -> List[FlyteFile]:
+    """
+    Fetches files from a list of URLs and returns a list of FlyteFile objects.
+
+    Args:
+        urls (List[str]): A list of URLs pointing to the files to fetch.
+
+    Returns:
+        List[FlyteFile]: A list of FlyteFile objects representing the fetched files.
+    """
     outfiles = []
     workdir = current_context().working_directory
     for url in urls:
@@ -125,6 +145,9 @@ def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
 
     Args:
         rep_dir (FlyteDirectory): The input directory containing FastQC reports.
+
+    Returns:
+        str: The status of the FastQC reports (PASS, WARN, or FAIL).
     """
     rep_dir.download()
     all_zips = list(Path(rep_dir.path).rglob("*fastqc.zip*"))
@@ -224,7 +247,8 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
 
     return isec_out
 
-@task(container_image=main_img_fqn) #TODO: generalize
+
+@task(container_image=main_img_fqn)  # TODO: generalize
 def reformat_alignments(als: List[Alignment], to_format: str) -> List[Alignment]:
     """
     Reformat alignment files to ensure they are in the correct format.
@@ -252,17 +276,19 @@ def reformat_alignments(als: List[Alignment], to_format: str) -> List[Alignment]
             ]
             subproc_execute(convert_cmd)
             logger.debug("Running reformat cmd:")
-            logger.debug(' '.join(convert_cmd))
+            logger.debug(" ".join(convert_cmd))
             al.alignment = FlyteFile(path=al_out_fname)
-            logger.debug(f"Reformatted alignment file {al_out_fname} exists: {os.path.exists(al_out_fname)}")
-            
+            logger.debug(
+                f"Reformatted alignment file {al_out_fname} exists: {os.path.exists(al_out_fname)}"
+            )
+
             idx_fn = al.get_alignment_idx_fname()
-            idx_cmd = ["samtools", "index", al_out_fname, '-o', idx_fn]
+            idx_cmd = ["samtools", "index", al_out_fname, "-o", idx_fn]
             logger.debug("Running index cmd:")
-            logger.debug(' '.join(idx_cmd))
+            logger.debug(" ".join(idx_cmd))
             subproc_execute(idx_cmd)
             logger.debug(f"Index file {idx_fn} exists: {os.path.exists(idx_fn)}")
             al.alignment_idx = FlyteFile(path=idx_fn)
         als_out.append(al)
-        
+
     return als_out

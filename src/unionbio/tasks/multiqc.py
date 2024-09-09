@@ -1,6 +1,6 @@
 import os
 import shutil
-from flytekit import ImageSpec, current_context, task
+from flytekit import current_context, task
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
@@ -10,12 +10,10 @@ from unionbio.config import logger, main_img_fqn
 from unionbio.types import Alignment, Reads, VCF
 
 
-
-
 @task(container_image=main_img_fqn, enable_deck=True)
 def render_multiqc(
-    fqc: FlyteDirectory, 
-    filt_reps: List[Reads] | None, 
+    fqc: FlyteDirectory,
+    filt_reps: List[Reads] | None,
     sams: List[Alignment] | None,
     vcfs: List[VCF] | None,
 ) -> FlyteFile:
@@ -32,6 +30,7 @@ def render_multiqc(
         fqc (FlyteDirectory): A FlyteDirectory object containing FastQC reports.
         filt_reps (List[FiltSample]): A list of FiltSample objects representing filtered samples.
         sams (List[List[SamFile]]): A list of lists of SamFile objects representing alignment results.
+        vcfs (List[VCF]): An optional list of VCF objects containing calling stats.
 
     Returns:
         FlyteFile: A FlyteFile object representing the MultiQC report.

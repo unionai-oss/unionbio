@@ -9,7 +9,6 @@ from unionbio.config import remote_ref, main_img_fqn, logger
 from unionbio.types import Alignment, Reads
 
 
-
 """
 Generate Hisat2 index files from a reference genome.
 

@@ -1,4 +1,3 @@
-from pathlib import Path
 from flytekit.types.directory import FlyteDirectory
 from unionbio.tasks.haplotype_caller import haplotype_caller
 from tests.utils import copy_dir_conts

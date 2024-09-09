@@ -2,17 +2,14 @@ import os
 from filecmp import cmp
 from pathlib import Path
 from flytekit.types.directory import FlyteDirectory
-from flytekit.types.file import FlyteFile
 from unionbio.tasks.fastp import pyfastp
 from unionbio.tasks.fastqc import fastqc
-from unionbio.tasks.bwa import bwa_index, bwa_align
 from unionbio.tasks.mark_dups import mark_dups
 from unionbio.tasks.sort_sam import sort_sam
 from unionbio.tasks.base_recal import base_recalibrator
 from tests.config import test_assets
-from tests.utils import dir_conts_match, copy_dir_conts, comp_files
+from tests.utils import copy_dir_conts
 from unionbio.types import Alignment, Reads, Reference, VCF
-
 
 
 def test_fastqc(tmp_path):
@@ -46,6 +43,7 @@ def test_mark_dups():
     assert isinstance(dd_al, Alignment)
     assert dd_al.deduped
     assert Path(dd_al.alignment.path).exists()
+
 
 def test_base_recal(tmp_path):
     copy_dir_conts(test_assets["dedup_dir"], tmp_path)

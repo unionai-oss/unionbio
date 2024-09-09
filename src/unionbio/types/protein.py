@@ -14,6 +14,7 @@ class Protein(DataClassJSONMixin):
     Attributes:
         name (str): The name or identifier of the protein sequence.
         protein (FlyteFile): A FlyteFile object representing the path to the protein sequence file.
+        genes (FlyteFile): A FlyteFile object representing the path to the gene sequence file.
     """
 
     name: str

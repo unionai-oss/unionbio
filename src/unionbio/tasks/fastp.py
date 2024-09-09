@@ -6,7 +6,6 @@ from unionbio.config import main_img_fqn, logger, fastp_cpu
 from unionbio.types import Reads
 
 
-
 @task(
     requests=Resources(cpu=fastp_cpu, mem="2Gi"),
     container_image=main_img_fqn,
@@ -20,10 +19,10 @@ def pyfastp(rs: Reads) -> Reads:
     representing the filtered and processed data.
 
     Args:
-        rs (RawSample): A RawSample object containing raw sequencing data to be processed.
+        rs (Reads): A Reads object containing raw sequencing data to be processed.
 
     Returns:
-        FiltSample: A FiltSample object representing the filtered and preprocessed data.
+        Reads: A Reads object representing the filtered and preprocessed data.
     """
     ldir = Path(current_context().working_directory)
     samp = Reads(rs.sample)

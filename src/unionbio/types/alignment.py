@@ -1,6 +1,5 @@
 import os
 import shutil
-from itertools import chain
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass, fields
 from flytekit import current_context
@@ -66,10 +65,10 @@ class Alignment(DataClassJSONMixin):
 
     def get_metrics_fname(self):
         return f"{self._get_state_str()}_metrics.txt"
-    
+
     def aggregate(self, target: Path = None) -> Path:
         """
-        Explicitly aggregate alignment and supporting files into another given directory. 
+        Explicitly aggregate alignment and supporting files into another given directory.
         If None is provided, the current working is used.
 
         Args:
@@ -92,7 +91,12 @@ class Alignment(DataClassJSONMixin):
         return target
 
     @classmethod
-    def make_all(cls, dir: Path, include: list[str] = ["*.bam*", "*.sam", "*report*"], exclude: list[str] = []) -> list:
+    def make_all(
+        cls,
+        dir: Path,
+        include: list[str] = ["*.bam*", "*.sam", "*report*"],
+        exclude: list[str] = [],
+    ) -> list:
         samples = {}
         for fp in filter_dir(dir, include=include, exclude=exclude):
             sample, aligner = fp.stem.split("_")[0:2]
@@ -109,7 +113,7 @@ class Alignment(DataClassJSONMixin):
                 samples[sample].deduped = True
             else:
                 samples[sample].deduped = False
-            
+
             if "recal" in fp.name:
                 samples[sample].recalibrated = True
             else:

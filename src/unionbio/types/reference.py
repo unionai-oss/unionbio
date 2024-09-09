@@ -41,7 +41,7 @@ class Reference(DataClassJSONMixin):
             return unzipped
         else:
             return fp
-        
+
     def aggregate(self, target: Path = None) -> Path:
         """
         Explicitly aggregate the contents of the reference directory into
@@ -65,7 +65,7 @@ class Reference(DataClassJSONMixin):
             logger.debug(f"Moved {fo} to {fd}")
         self.ref_dir.path = target
         return target
-    
+
     @classmethod
     def from_remote(cls, url: str):
         ref = fetch_file(url, "/tmp")

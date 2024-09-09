@@ -7,7 +7,6 @@ from unionbio.config import main_img_fqn, logger
 from unionbio.types import Reference, Alignment, VCF
 
 
-
 @task(container_image=main_img_fqn)
 def base_recalibrator(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
     """
@@ -25,7 +24,9 @@ def base_recalibrator(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
     sites.aggregate()
     al.aggregate()
     con_dir = Path(current_context().working_directory)
-    logger.debug(f"Sites obj:\n{sites.sample}\n{sites.caller}\n{sites.vcf.path}\n{sites.vcf_idx.path}")
+    logger.debug(
+        f"Sites obj:\n{sites.sample}\n{sites.caller}\n{sites.vcf.path}\n{sites.vcf_idx.path}"
+    )
     recal_fn = al.get_bqsr_fname()
 
     gen_table_cmd = [
@@ -65,6 +66,9 @@ def base_recalibrator(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
 
     return al
 
+
 @dynamic
-def recalibrate_samples(als: list[Alignment], sites: VCF, ref: Reference) -> list[Alignment]:
+def recalibrate_samples(
+    als: list[Alignment], sites: VCF, ref: Reference
+) -> list[Alignment]:
     return [base_recalibrator(ref=ref, sites=sites, al=al) for al in als]

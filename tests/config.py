@@ -1,4 +1,5 @@
 from pathlib import Path
+
 proj_rt = Path(__file__).parent.parent
 test_dir = proj_rt.joinpath("tests")
 assets = test_dir.joinpath("assets")
@@ -24,14 +25,14 @@ test_assets = {
     "hs2_idx_dir": assets.joinpath("indices/hs2"),
     "bwa_idx_dir": assets.joinpath("indices/bwa"),
     "fastqc_dir": assets.joinpath("fastqc"),
-
-
     "ref_fn": "GRCh38_short.fasta",
     "prot_path": assets.joinpath("proteins/folding_proteins.fasta"),
     "ref_path": assets.joinpath("references/GRCh38_short.fasta"),
     "ref_idx_path": assets.joinpath("references/GRCh38_short.fasta.fai"),
     "bwa_sam_path": assets.joinpath("alignments/bwa/ERR250683-tiny_bwa.sam"),
-    "recal_out": assets.joinpath("alignments/recal/SRR812824-chr21_bowtie2_sorted_deduped_recal.sam"),
+    "recal_out": assets.joinpath(
+        "alignments/recal/SRR812824-chr21_bowtie2_sorted_deduped_recal.sam"
+    ),
     "sites_path": assets.joinpath("sites/known_indels_trunc.hg38.vcf.gz"),
     "sites_idx_path": assets.joinpath("sites/known_indels_trunc.hg38.vcf.gz.tbi"),
     "vcf_path": assets.joinpath("vcfs/test-sample-1_test-caller.vcf.gz"),

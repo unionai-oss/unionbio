@@ -14,8 +14,8 @@ def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
     Call variants using HaplotypeCaller from GATK.
 
     Args:
-        ref (Reference): A reference object containing the reference FASTA file.
-        al (Alignment): An alignment object containing the aligned reads.
+        ref (Reference): A Reference object containing the reference FASTA file.
+        al (Alignment): An Alignment object containing the aligned reads.
 
     Returns:
         VCF: A VCF object containing the called variants.
@@ -52,6 +52,7 @@ def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
     vcf_out.vcf = FlyteFile(path=str(vcf_fn))
     vcf_out.vcf_idx = FlyteFile(path=str(vcf_idx_fn))
     return vcf_out
+
 
 @dynamic
 def hc_call_samples(ref: Reference, als: List[Alignment]) -> List[VCF]:

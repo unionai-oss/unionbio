@@ -7,6 +7,7 @@ from flytekit.remote import FlyteRemote
 from flytekit.configuration import Config
 from unionbio.config import logger
 
+
 def cache_hash(input: str | List[str]) -> str:
     """
     Generate a hash from a URI to use as a cache key.
@@ -17,9 +18,10 @@ def cache_hash(input: str | List[str]) -> str:
     Returns:
         str: The first 6 characters of the hash of the URI(s).
     """
-    if type(input) == list:
+    if isinstance(input, list):
         input = "".join(input)
     return str(hash(input))[:6]
+
 
 def gunzip_file(gzip_file: Path) -> Path:
     # Ensure the input file exists
@@ -118,7 +120,7 @@ def filter_dir(dir: Path, include: list[str] = ["*"], exclude: list[str] = []):
 
     Args:
         dir (Path): The directory whose contents you would like to filter.
-        include (list[str], optional): A list of wildcarded patterns to include 
+        include (list[str], optional): A list of wildcarded patterns to include
             by passing to rglob. Defaults to ["*"].
         exclude (list[str], optional): A list of patterns to exclude. Defaults to [].
 

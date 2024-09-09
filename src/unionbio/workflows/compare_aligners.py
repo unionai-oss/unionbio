@@ -13,8 +13,6 @@ from unionbio.tasks.sample_types import FiltSample, Alignment
 from unionbio.tasks.utils import check_fastqc_reports, prepare_raw_samples
 
 
-
-
 @dynamic
 def compare_aligners(
     bt2_idx: FlyteDirectory, hs2_idx: FlyteDirectory, samples: List[FiltSample]
