@@ -4,8 +4,9 @@ from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
 from unionbio.config import current_registry
 
-test_rt = Path(__file__).parent
-prod_rt = test_rt.joinpath("src")
+project_rt = Path(__file__).parent
+prod_rt = project_rt.joinpath("src")
+ws_rt = project_rt.joinpath("workspaces")
 
 main_img = ImageSpec(
     name="main",
@@ -77,6 +78,24 @@ def update_img_config(config_path: Path, fqns: dict[str, str]):
         f.write(cfg_content)
 
 
+def update_ws_config(config_path: Path, fqn: str):
+    with open(config_path, 'r') as file:
+        yaml_data = file.readlines()
+
+    # Manually parsing instead of using yaml library to preserve structure
+    lines_out = []
+    for line in yaml_data:
+        if line.startswith("container_image:"):
+            ll = line.split(": ")
+            ll[1] = fqn
+            lines_out.append(": ".join(ll))
+        else:
+            lines_out.append(line)
+
+    with open(config_path, 'w') as file:
+        file.writelines(lines_out)
+
+
 ## Entrypoints ##
 
 
@@ -104,10 +123,18 @@ def build_test():
     for img_str in build_scope:
         spec = eval(img_str)
         spec.tag_format = "{spec_hash}-test"
-        spec.source_root = test_rt
+        spec.source_root = project_rt
         spec.packages.append("pytest")
-        fqns[f"{img_str}_test_fqn"] = spec.image_name()
+        fqn = spec.image_name()
+        fqns[f"{img_str}_test_fqn"] = fqn
         build_specs.append(spec)
+
+        # Update workspace config
+        try:
+            ws_cfg_path = ws_rt.joinpath(img_str.replace("_img", ""), "ws.yaml")
+            update_ws_config(ws_cfg_path, fqn)
+        except FileNotFoundError:
+            print(f"Workspace config not found for {img_str}")
 
     update_img_config(Path("tests/config.py"), fqns)
 

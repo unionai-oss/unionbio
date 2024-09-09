@@ -1,0 +1,12 @@
+name: main-workspace
+# Make sure that the project and domain exists
+project: default
+domain: development
+container_image: docker.io/unionbio/folding:xo5Oe_akN8rmpGBPz3ykeQ-test
+resources:
+    cpu: "2"
+    mem: "4Gi"
+    gpu: "1"
+
+metadata: null
+on_startup: null
