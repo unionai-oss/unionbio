@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "unionbio"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["pryce-turner <pryce.turner@gmail.com>"]
 readme = "README.md"
