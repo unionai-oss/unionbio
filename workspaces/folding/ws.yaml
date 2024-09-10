@@ -9,5 +9,6 @@ resources:
     mem: "4Gi"
     gpu: "1"
 
+workspace_root: ~/workspace
 metadata: null
 on_startup: null
