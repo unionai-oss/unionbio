@@ -8,11 +8,13 @@ project_rt = Path(__file__).parent
 prod_rt = project_rt.joinpath("src")
 ws_rt = project_rt.joinpath("workspaces")
 
+union_version = "union==0.1.73"
+
 main_img = ImageSpec(
     name="main",
     platform="linux/amd64",
     python_version="3.12",
-    packages=["flytekit==1.13.1", "union==0.1.57"],
+    packages=[union_version],
     source_root=prod_rt,
     conda_channels=["bioconda"],
     conda_packages=[
@@ -35,7 +37,7 @@ folding_img = ImageSpec(
     name="folding",
     platform="linux/amd64",
     python_version="3.12",
-    packages=["transformers", "torch", "flytekit==1.13.1", "union==0.1.57"],
+    packages=["transformers", "torch", union_version],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
@@ -54,7 +56,7 @@ parabricks_img = ImageSpec(
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
     platform="linux/amd64",
     python_version="3.12",
-    packages=["flytekit==1.13.1", "union==0.1.57"],
+    packages=[union_version],
     source_root=prod_rt,
     builder="fast-builder",
     registry=current_registry,
@@ -87,7 +89,7 @@ def update_ws_config(config_path: Path, fqn: str):
     for line in yaml_data:
         if line.startswith("container_image:"):
             ll = line.split(": ")
-            ll[1] = fqn
+            ll[1] = f"{fqn}\n"
             lines_out.append(": ".join(ll))
         else:
             lines_out.append(line)
