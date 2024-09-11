@@ -1,8 +1,10 @@
 import re
+import os
 from pathlib import Path
 from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
-from unionbio.config import current_registry
+
+current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
 
 project_rt = Path(__file__).parent
 prod_rt = project_rt.joinpath("src")
@@ -47,6 +49,18 @@ folding_img = ImageSpec(
         "py3Dmol",
         "matplotlib",
     ],
+    apt_packages=["curl"],
+    builder="fast-builder",
+    registry=current_registry,
+)
+
+alphafold_img = ImageSpec(
+    name="alphafold",
+    base_image="docker.io/unionbio/alphafold:base-20240910",
+    platform="linux/amd64",
+    python_version="3.12",
+    packages=[union_version],
+    source_root=prod_rt,
     builder="fast-builder",
     registry=current_registry,
 )
@@ -63,9 +77,10 @@ parabricks_img = ImageSpec(
 )
 
 build_scope = [
-    "main_img",
-    "folding_img",
-    "parabricks_img",
+    # "main_img",
+    # "folding_img",
+    "alphafold_img",
+    # "parabricks_img",
 ]
 
 

@@ -24,9 +24,6 @@ remote_sites_idx = "https://github.com/unionai-oss/unionbio/raw/main/tests/asset
 # Tool config
 fastp_cpu = "3"
 
-current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
-src_rt = Path(__file__).parent.parent
-
 # Image tags
 # While tasks can reference imageSpec directly, using the tag allows registering tasks
 # from a containerized environment. These also contain the actual unionbio package.
