@@ -60,6 +60,7 @@ alphafold_img = ImageSpec(
     platform="linux/amd64",
     python_version="3.12",
     packages=[union_version],
+    apt_packages=["aria2"],
     source_root=prod_rt,
     builder="fast-builder",
     registry=current_registry,
