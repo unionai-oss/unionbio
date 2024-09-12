@@ -1,8 +1,10 @@
 import os
+from pathlib import Path
 from flytekit import task, workflow, Resources
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import alphafold_img_fqn
+from unionbio.types.protein import Protein
 
 actor = ActorEnvironment(
     name="af-actor",
@@ -19,11 +21,13 @@ actor = ActorEnvironment(
     container_image=alphafold_img_fqn,
 )
 
+DB_LOC = Path("/mnt/af_dbs")
+
 
 @actor.task
 def dl_dbs(
     script_loc: str = "/app/alphafold/scripts/download_all_data.sh",
-    output_loc: str = "/mnt/af_dbs",
+    output_loc: Path = DB_LOC,
     reduced: bool = False,
 ) -> str:
     os.makedirs(output_loc, exist_ok=True)
@@ -38,7 +42,11 @@ def dl_dbs(
 
 
 @actor.task
-def run_af(entry: str = "/app/run_alphafold.sh"):
+def run_af(
+    fastas: list[Protein],
+    entry: str = "/app/run_alphafold.sh",
+    db_dir: Path = DB_LOC,
+):
     cfg = {
         "use_gpu": True,  # 'Enable NVIDIA runtime to run with GPUs.'
         "models_to_relax": "best",  # ['best', 'all', 'none'],
@@ -61,7 +69,7 @@ def run_af(entry: str = "/app/run_alphafold.sh"):
         # 'basename is used to name the output directories for each prediction.'
         "output_dir": "/tmp/alphafold",
         # 'Path to a directory that will store the results.'
-        "data_dir": None,
+        "data_dir": DB_LOC,
         # 'Path to directory with supporting data: AlphaFold parameters and genetic '
         # 'and template databases. Set to the target of download_all_databases.sh.'
         "max_template_date": None,
@@ -91,6 +99,36 @@ def run_af(entry: str = "/app/run_alphafold.sh"):
         # 'have changed.'
     }
 
+    # You can individually override the following paths if you have placed the
+    # data in locations other than the
+    db_cfg = {
+        # Path to the Uniref90 database for use by JackHMMER.
+        "uniref90_database_path": db_dir.joinpath("uniref90", "uniref90.fasta"),
+        # Path to the Uniprot database for use by JackHMMER.
+        "uniprot_database_path": db_dir.joinpath("uniprot", "uniprot.fasta"),
+        # Path to the MGnify database for use by JackHMMER.
+        "mgnify_database_path": db_dir.joinpath("mgnify", "mgy_clusters_2022_05.fa"),
+        # Path to the BFD database for use by HHblits.
+        "bfd_database_path": db_dir.joinpath(
+            "bfd", "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
+        ),
+        # Path to the Small BFD database for use by JackHMMER.
+        "small_bfd_database_path": db_dir.joinpath(
+            "small_bfd", "bfd-first_non_consensus_sequences.fasta"
+        ),
+        # Path to the Uniref30 database for use by HHblits.
+        "uniref30_database_path": db_dir.joinpath("uniref30", "UniRef30_2021_03"),
+        # Path to the PDB70 database for use by HHsearch.
+        "pdb70_database_path": db_dir.joinpath("pdb70", "pd: db_dir.b70"),
+        # Path to the PDB seqres database for use by hmmsearch.
+        "pdb_seqres_database_path": db_dir.joinpath("pdb_seqres", "pdb_seqres.txt"),
+        # Path to a directory with template mmCIF structures, each named <pdb_id>.cif.
+        "template_mmcif_dir": db_dir.joinpath("pdb_mmcif", "mmcif_fi: db_dir.les"),
+        # Path to a file mapping obsolete PDB IDs to their replacements.
+        "obsolete_pdbs_path": db_dir.joinpath("pdb_mmcif", "obsolete.: db_dir.dat"),
+    }
+
     af_cmd = [
         entry,
     ]
+)
