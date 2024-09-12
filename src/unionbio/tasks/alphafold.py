@@ -46,9 +46,23 @@ def run_af(
     fastas: list[Protein],
     entry: str = "/app/run_alphafold.sh",
     db_dir: Path = DB_LOC,
+    cfg_ov: dict = {},
+    db_cfg_ov: dict = {},
 ):
+    def_env = {
+        'NVIDIA_VISIBLE_DEVICES': "all", # 'Comma separated list of devices to pass to NVIDIA_VISIBLE_DEVICES.'
+        # The following flags allow us to make predictions on proteins that
+        # would typically be too long to fit into GPU memory.
+        'TF_FORCE_UNIFIED_MEMORY': '1',
+        'XLA_PYTHON_CLIENT_MEM_FRACTION': '4.0',
+    }
+    for var, val in def_env.items():
+        if var not in os.environ:
+            os.environ[var] = val
+
     cfg = {
         "use_gpu": True,  # 'Enable NVIDIA runtime to run with GPUs.'
+        "enable_gpu_relax": True,  #'Run relax on GPU if GPU is enabled.'
         "models_to_relax": "best",  # ['best', 'all', 'none'],
         # 'The models to run the final relaxation step on. '
         # 'If `all`, all models are relaxed, which may be time '
@@ -58,18 +72,7 @@ def run_af(
         # 'distracting stereochemical violations but might help '
         # 'in case you are having issues with the relaxation '
         # 'stage.'
-        "enable_gpu_relax": True,  #'Run relax on GPU if GPU is enabled.'
-        "gpu_devices": "all",
-        # 'Comma separated list of devices to pass to NVIDIA_VISIBLE_DEVICES.'
-        "fasta_paths": None,
-        # 'Paths to FASTA files, each containing a prediction '
-        # 'target that will be folded one after another. If a FASTA file contains '
-        # 'multiple sequences, then it will be folded as a multimer. Paths should be '
-        # 'separated by commas. All FASTA paths must have a unique basename as the '
-        # 'basename is used to name the output directories for each prediction.'
         "output_dir": "/tmp/alphafold",
-        # 'Path to a directory that will store the results.'
-        "data_dir": DB_LOC,
         # 'Path to directory with supporting data: AlphaFold parameters and genetic '
         # 'and template databases. Set to the target of download_all_databases.sh.'
         "max_template_date": None,
@@ -98,37 +101,65 @@ def run_af(
         # 'WARNING: This will not check if the sequence, database or configuration '
         # 'have changed.'
     }
+    cfg = {**cfg, **cfg_ov}
+
+    # Set up the GPU relaxation flag and remove it's components from cfg dict
+    cfg["use_gpu_relax"] = cfg["use_gpu"] and cfg["enable_gpu_relax"]
+    del cfg["enable_gpu_relax"]
+    del cfg["use_gpu"]
 
     # You can individually override the following paths if you have placed the
-    # data in locations other than the
+    # data in locations other than the default dir
     db_cfg = {
+        "data_dir": db_dir,
         # Path to the Uniref90 database for use by JackHMMER.
         "uniref90_database_path": db_dir.joinpath("uniref90", "uniref90.fasta"),
-        # Path to the Uniprot database for use by JackHMMER.
-        "uniprot_database_path": db_dir.joinpath("uniprot", "uniprot.fasta"),
         # Path to the MGnify database for use by JackHMMER.
         "mgnify_database_path": db_dir.joinpath("mgnify", "mgy_clusters_2022_05.fa"),
-        # Path to the BFD database for use by HHblits.
-        "bfd_database_path": db_dir.joinpath(
-            "bfd", "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
-        ),
-        # Path to the Small BFD database for use by JackHMMER.
-        "small_bfd_database_path": db_dir.joinpath(
-            "small_bfd", "bfd-first_non_consensus_sequences.fasta"
-        ),
-        # Path to the Uniref30 database for use by HHblits.
-        "uniref30_database_path": db_dir.joinpath("uniref30", "UniRef30_2021_03"),
-        # Path to the PDB70 database for use by HHsearch.
-        "pdb70_database_path": db_dir.joinpath("pdb70", "pd: db_dir.b70"),
-        # Path to the PDB seqres database for use by hmmsearch.
-        "pdb_seqres_database_path": db_dir.joinpath("pdb_seqres", "pdb_seqres.txt"),
         # Path to a directory with template mmCIF structures, each named <pdb_id>.cif.
         "template_mmcif_dir": db_dir.joinpath("pdb_mmcif", "mmcif_fi: db_dir.les"),
         # Path to a file mapping obsolete PDB IDs to their replacements.
         "obsolete_pdbs_path": db_dir.joinpath("pdb_mmcif", "obsolete.: db_dir.dat"),
     }
 
+    if db_cfg.get("model_preset") == "multimer":
+        # Path to the PDB seqres database for use by hmmsearch.
+        db_cfg["pdb_seqres_database_path"] = db_dir.joinpath("pdb_seqres", "pdb_seqres.txt"),
+        # Path to the Uniprot database for use by JackHMMER.
+        db_cfg["uniprot_database_path"] = db_dir.joinpath("uniprot", "uniprot.fasta"),
+    else:
+        # Path to the PDB70 database for use by HHsearch.
+        db_cfg["pdb70_database_path"] = db_dir.joinpath("pdb70", "pd: db_dir.b70"),
+
+    if cfg.get("db_preset") == "reduced_dbs":
+        # Path to the Small BFD database for use by JackHMMER.
+        db_cfg["small_bfd_database_path"] = db_dir.joinpath(
+            "small_bfd", "bfd-first_non_consensus_sequences.fasta"
+        ),
+    else:
+        # Path to the Uniref30 database for use by HHblits.
+        db_cfg["uniref30_database_path"] = db_dir.joinpath("uniref30", "UniRef30_2021_03"),
+        # Path to the BFD database for use by HHblits.
+        db_cfg["bfd_database_path"] = db_dir.joinpath(
+            "bfd", "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
+        ),
+    db_cfg = {**db_cfg, **db_cfg_ov}
+
     af_cmd = [
         entry,
+        "--logstostderr",
     ]
-)
+
+    fasta_str = ",".join([str(fasta.sequence_fasta.path) for fasta in fastas])
+    af_cmd.append(f"--fasta_paths={fasta_str}")
+    # 'Paths to FASTA files, each containing a prediction '
+    # 'target that will be folded one after another. If a FASTA file contains '
+    # 'multiple sequences, then it will be folded as a multimer. Paths should be '
+    # 'separated by commas. All FASTA paths must have a unique basename as the '
+    # 'basename is used to name the output directories for each prediction.'
+
+    for k, v in db_cfg.items():
+        af_cmd.append(f"--{k}={v}")
+
+    for k, v in cfg.items():
+        af_cmd.append(f"--{k}={v}")
