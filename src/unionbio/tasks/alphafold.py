@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 from pathlib import Path
 from flytekit import task, workflow, Resources
@@ -23,10 +24,14 @@ actor = ActorEnvironment(
     container_image=alphafold_img_fqn,
 )
 
-DB_LOC = "/mnt/af_dbs"
+DB_LOC = "/root/af_dbs"
 
-@actor.task
-# @task
+@task(container_image=alphafold_img_fqn, environment={"PYTHONPATH": "/root"})
+def keepalive():
+    time.sleep(3600)
+
+# @actor.task
+@task(container_image=alphafold_img_fqn)
 def dl_dbs(
     script_loc: str = "/app/alphafold/scripts/download_all_data.sh",
     output_loc: str = DB_LOC,
@@ -43,8 +48,8 @@ def dl_dbs(
     return "\n".join(os.listdir(output_loc))
 
 
-@actor.task
-# @task
+# @actor.task
+@task(container_image=alphafold_img_fqn)
 def run_af(
     # fastas: list[Protein],
     fasta: FlyteFile="s3://union-cloud-oc-staging-dogfood/bio-assets/P68871_sequence.fasta",
@@ -53,6 +58,16 @@ def run_af(
     cfg_ov: dict | None = None,
     db_cfg_ov: dict | None = None,
 ):
+    
+    os.makedirs(db_dir, exist_ok=True)
+    subproc_execute(
+        [
+            "/app/alphafold/scripts/download_all_data.sh",
+            db_dir,
+            "reduced_dbs"
+        ]
+    )
+
     def_env = {
         'NVIDIA_VISIBLE_DEVICES': "all", # 'Comma separated list of devices to pass to NVIDIA_VISIBLE_DEVICES.'
         # The following flags allow us to make predictions on proteins that
@@ -168,7 +183,8 @@ def run_af(
 
     for k, v in cfg.items():
         af_cmd.append(f"--{k}={v}")
-
+    
+    # sys.path.append("/opt/conda/lib/python3.11/site-packages")
     cmd_str = " ".join(af_cmd)
     print(cmd_str)
 
@@ -176,8 +192,9 @@ def run_af(
 
 @workflow
 def af_wf():
-    dl_dbs(reduced=True)
+    # dl_dbs(reduced=True)
     run_af(
         fasta="s3://union-cloud-oc-staging-dogfood/bio-assets/P68871_sequence.fasta",
         cfg_ov={"db_preset": "reduced_dbs"}
         )
+    # keepalive()

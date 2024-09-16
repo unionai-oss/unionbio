@@ -63,7 +63,7 @@ alphafold_img = ImageSpec(
     apt_packages=["aria2"],
     source_root=prod_rt,
     entrypoint=[],
-    env={"PYTHONPATH": "/root:/opt/conda/lib/python3.11/site-packages"}, # Enable package discovery from base image
+    # env={"PYTHONPATH": "/root:/opt/conda/lib/python3.11/site-packages"}, # Enable package discovery from base image
     builder="fast-builder",
     registry=current_registry,
 )

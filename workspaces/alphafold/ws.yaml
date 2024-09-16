@@ -1,12 +1,12 @@
-name: folding-workspace
+name: alphafold-workspace
 # Make sure that the project and domain exists
-project: default
+project: flytesnacks
 domain: development
-container_image: docker.io/unionbio/folding:6VxY9Ol4NZvVQp7SYSLJtA-test
+container_image: docker.io/unionbio/alphafold:63BefdNgRB1NvkUpLHCIrA
 
 resources:
-    cpu: "2"
-    mem: "4Gi"
+    cpu: "8"
+    mem: "12Gi"
     gpu: "1"
 
 workspace_root: ~/workspace
