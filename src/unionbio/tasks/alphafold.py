@@ -1,6 +1,8 @@
 import os
+import time
 from pathlib import Path
 from flytekit import task, workflow, Resources
+from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import alphafold_img_fqn
@@ -15,19 +17,19 @@ actor = ActorEnvironment(
     requests=Resources(
         cpu="8",
         mem="8Gi",
-        ephemeral_storage="600Gi",
+        ephemeral_storage="300Gi",
         gpu="1",
     ),
     container_image=alphafold_img_fqn,
 )
 
-DB_LOC = Path("/mnt/af_dbs")
-
+DB_LOC = "/mnt/af_dbs"
 
 @actor.task
+# @task
 def dl_dbs(
     script_loc: str = "/app/alphafold/scripts/download_all_data.sh",
-    output_loc: Path = DB_LOC,
+    output_loc: str = DB_LOC,
     reduced: bool = False,
 ) -> str:
     os.makedirs(output_loc, exist_ok=True)
@@ -42,12 +44,14 @@ def dl_dbs(
 
 
 @actor.task
+# @task
 def run_af(
-    fastas: list[Protein],
+    # fastas: list[Protein],
+    fasta: FlyteFile="s3://union-cloud-oc-staging-dogfood/bio-assets/P68871_sequence.fasta",
     entry: str = "/app/run_alphafold.sh",
-    db_dir: Path = DB_LOC,
-    cfg_ov: dict = {},
-    db_cfg_ov: dict = {},
+    db_dir: str = DB_LOC,
+    cfg_ov: dict | None = None,
+    db_cfg_ov: dict | None = None,
 ):
     def_env = {
         'NVIDIA_VISIBLE_DEVICES': "all", # 'Comma separated list of devices to pass to NVIDIA_VISIBLE_DEVICES.'
@@ -150,7 +154,8 @@ def run_af(
         "--logstostderr",
     ]
 
-    fasta_str = ",".join([str(fasta.sequence_fasta.path) for fasta in fastas])
+    # fasta_str = ",".join([str(fasta.sequence_fasta.path) for fasta in fastas])
+    fasta_str = str(fasta.path)
     af_cmd.append(f"--fasta_paths={fasta_str}")
     # 'Paths to FASTA files, each containing a prediction '
     # 'target that will be folded one after another. If a FASTA file contains '
@@ -163,3 +168,16 @@ def run_af(
 
     for k, v in cfg.items():
         af_cmd.append(f"--{k}={v}")
+
+    cmd_str = " ".join(af_cmd)
+    print(cmd_str)
+
+    time.sleep(3600)
+
+@workflow
+def af_wf():
+    dl_dbs(reduced=True)
+    run_af(
+        fasta="s3://union-cloud-oc-staging-dogfood/bio-assets/P68871_sequence.fasta",
+        cfg_ov={"db_preset": "reduced_dbs"}
+        )

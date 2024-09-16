@@ -22,7 +22,7 @@ hisat2_index = ShellTask(
     name="hisat2-index",
     debug=True,
     metadata=TaskMetadata(retries=3, cache=True, cache_version=remote_ref),
-    requests=Resources(cpu="4", mem="10Gi"),
+    requests=Resources(cpu="2", mem="10Gi"),
     container_image=main_img_fqn,
     script="""
     mkdir {outputs.idx}
@@ -37,7 +37,7 @@ hisat2_index = ShellTask(
 
 @task(
     container_image=main_img_fqn,
-    requests=Resources(cpu="4", mem="10Gi"),
+    requests=Resources(cpu="2", mem="10Gi"),
 )
 def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:
     """

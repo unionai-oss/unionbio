@@ -11,7 +11,7 @@ from unionbio.types import Reference, Reads, Alignment
 
 @task(
     container_image=main_img_fqn,
-    requests=Resources(cpu="4", mem="10Gi"),
+    requests=Resources(cpu="2", mem="10Gi"),
     cache=True,
     cache_version=remote_ref,
 )
@@ -49,7 +49,7 @@ def bwa_index(ref: Reference) -> Reference:
 
 @task(
     container_image=main_img_fqn,
-    requests=Resources(cpu="4", mem="10Gi"),
+    requests=Resources(cpu="2", mem="10Gi"),
 )
 def bwa_align(ref: Reference, reads: Reads, rgtag: str = "") -> Alignment:
     """Aligns reads to a reference genome using BWA.

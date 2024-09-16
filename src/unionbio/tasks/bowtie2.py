@@ -11,7 +11,7 @@ from unionbio.types import Alignment, Reads, Reference
 
 @task(
     container_image=main_img_fqn,
-    requests=Resources(cpu="4", mem="10Gi"),
+    requests=Resources(cpu="2", mem="10Gi"),
 )
 def bowtie2_index(ref: Reference) -> Reference:
     """
@@ -48,7 +48,7 @@ def bowtie2_index(ref: Reference) -> Reference:
 
 @task(
     container_image=main_img_fqn,
-    requests=Resources(cpu="4", mem="10Gi"),
+    requests=Resources(cpu="2", mem="10Gi"),
 )
 def bowtie2_align_paired_reads(idx: Reference, fs: Reads) -> Alignment:
     """
