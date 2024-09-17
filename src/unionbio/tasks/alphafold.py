@@ -58,15 +58,6 @@ def run_af(
     cfg_ov: dict | None = None,
     db_cfg_ov: dict | None = None,
 ):
-    
-    os.makedirs(db_dir, exist_ok=True)
-    subproc_execute(
-        [
-            "/app/alphafold/scripts/download_all_data.sh",
-            db_dir,
-            "reduced_dbs"
-        ]
-    )
 
     def_env = {
         'NVIDIA_VISIBLE_DEVICES': "all", # 'Comma separated list of devices to pass to NVIDIA_VISIBLE_DEVICES.'
