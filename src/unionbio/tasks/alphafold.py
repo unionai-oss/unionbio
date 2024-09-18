@@ -6,50 +6,77 @@ from flytekit import task, workflow, Resources
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
-from unionbio.config import alphafold_img_fqn
+from unionbio.config import alphafold_img_fqn, logger
 from unionbio.types.protein import Protein
 
 actor = ActorEnvironment(
     name="af-actor",
     replica_count=1,
-    parallelism=1,
-    backlog_length=10,
     ttl_seconds=600,
     requests=Resources(
-        cpu="8",
+        cpu="3",
         mem="8Gi",
         ephemeral_storage="300Gi",
-        gpu="1",
+        # gpu="1",
     ),
-    container_image=alphafold_img_fqn,
+    container_image="docker.io/unionbio/alphafold:mmseq-gcloud-20240918-1",
+    # container_image=alphafold_img_fqn,
 )
 
-DB_LOC = "/root/af_dbs"
+DB_LOC = "/root/af_dbs/"
 
-@task(container_image=alphafold_img_fqn, environment={"PYTHONPATH": "/root"})
-def keepalive():
-    time.sleep(3600)
+# @task(container_image=alphafold_img_fqn, environment={"PYTHONPATH": "/root"})
+# def keepalive():
+#     time.sleep(3600)
 
-# @actor.task
-@task(container_image=alphafold_img_fqn)
+@actor.task
+# @task(container_image="docker.io/unionbio/alphafold:mmseq-gcloud-20240918-1", requests=Resources(cpu="3", mem="8Gi", ephemeral_storage="300Gi"))
 def dl_dbs(
-    script_loc: str = "/app/alphafold/scripts/download_all_data.sh",
+    db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/af_dbs_test.tar.zst",
     output_loc: str = DB_LOC,
-    reduced: bool = False,
+    threads: int = 3,
 ) -> str:
     os.makedirs(output_loc, exist_ok=True)
     dl_cmd = [
-        script_loc,
+        "gcloud",
+        "storage",
+        "cp",
+        db_uri,
+        "-",
+        "|",
+        "tar",
+        "-I",
+        f"'zstd -T{threads}'",
+        "--strip-components=1",
+        "-x",
+        "-C",
         output_loc,
     ]
-    if reduced:
-        dl_cmd.append("reduced_dbs")
-    subproc_execute(command=dl_cmd)
+    cmd_str = " ".join(dl_cmd)
+    logger.info(f"Downloading databases with command: {cmd_str}")
+    start = time.time()
+    subproc_execute(command=cmd_str, shell=True)
+    logger.info(f"Downloaded in {time.time() - start} seconds")
     return "\n".join(os.listdir(output_loc))
 
+@actor.task
+def check_dbs(db_loc: str = DB_LOC) -> str:
+    out = subproc_execute(
+        [
+            "du",
+            "-h",
+            db_loc,
+        ]
+    )
+    # return out.output
+    return "Different"
 
-# @actor.task
-@task(container_image=alphafold_img_fqn)
+@actor.task
+def check_out() -> str:
+    return "Hello"
+
+@actor.task
+# @task(container_image=alphafold_img_fqn)
 def run_af(
     # fastas: list[Protein],
     fasta: FlyteFile="s3://union-cloud-oc-staging-dogfood/bio-assets/P68871_sequence.fasta",
@@ -183,9 +210,11 @@ def run_af(
 
 @workflow
 def af_wf():
-    # dl_dbs(reduced=True)
-    run_af(
-        fasta="s3://union-cloud-oc-staging-dogfood/bio-assets/P68871_sequence.fasta",
-        cfg_ov={"db_preset": "reduced_dbs"}
-        )
+    dl = dl_dbs()
+    chk = check_dbs()
+    dl >> chk
+    # run_af(
+    #     fasta="s3://union-cloud-oc-staging-dogfood/bio-assets/P68871_sequence.fasta",
+    #     cfg_ov={"db_preset": "reduced_dbs"}
+    #     )
     # keepalive()
