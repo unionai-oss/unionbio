@@ -9,32 +9,30 @@ from union.actor import ActorEnvironment
 from unionbio.config import alphafold_img_fqn, logger
 from unionbio.types.protein import Protein
 
+
+DB_LOC = "/root/af_dbs/"
+CPU = "15"
+
+
 actor = ActorEnvironment(
     name="af-actor",
     replica_count=1,
     ttl_seconds=600,
     requests=Resources(
-        cpu="3",
-        mem="8Gi",
+        cpu=CPU,
+        mem="32Gi",
         ephemeral_storage="300Gi",
-        # gpu="1",
+        gpu="1",
     ),
     container_image="docker.io/unionbio/alphafold:mmseq-gcloud-20240918-1",
-    # container_image=alphafold_img_fqn,
 )
 
-DB_LOC = "/root/af_dbs/"
-
-# @task(container_image=alphafold_img_fqn, environment={"PYTHONPATH": "/root"})
-# def keepalive():
-#     time.sleep(3600)
 
 @actor.task
-# @task(container_image="docker.io/unionbio/alphafold:mmseq-gcloud-20240918-1", requests=Resources(cpu="3", mem="8Gi", ephemeral_storage="300Gi"))
 def dl_dbs(
     db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/af_dbs_test.tar.zst",
     output_loc: str = DB_LOC,
-    threads: int = 3,
+    threads: str = CPU,
 ) -> str:
     os.makedirs(output_loc, exist_ok=True)
     dl_cmd = [
@@ -57,41 +55,26 @@ def dl_dbs(
     start = time.time()
     subproc_execute(command=cmd_str, shell=True)
     logger.info(f"Downloaded in {time.time() - start} seconds")
-    return "\n".join(os.listdir(output_loc))
+    logger.debug(f"Database files: {os.listdir(output_loc)}")
+    assert "params" in os.listdir(output_loc)
+    return output_loc
+
 
 @actor.task
-def check_dbs(db_loc: str = DB_LOC) -> str:
-    out = subproc_execute(
-        [
-            "du",
-            "-h",
-            db_loc,
-        ]
-    )
-    # return out.output
-    return "Different"
-
-@actor.task
-def check_out() -> str:
-    return "Hello"
-
-@actor.task
-# @task(container_image=alphafold_img_fqn)
 def run_af(
     # fastas: list[Protein],
-    fasta: FlyteFile="s3://union-cloud-oc-staging-dogfood/bio-assets/P68871_sequence.fasta",
+    fasta: FlyteFile = "gs://opta-gcp-dogfood-gcp/bio-assets/P68871.fasta",
     entry: str = "/app/run_alphafold.sh",
     db_dir: str = DB_LOC,
     cfg_ov: dict | None = None,
     db_cfg_ov: dict | None = None,
 ):
-
     def_env = {
-        'NVIDIA_VISIBLE_DEVICES': "all", # 'Comma separated list of devices to pass to NVIDIA_VISIBLE_DEVICES.'
+        "NVIDIA_VISIBLE_DEVICES": "all",  # 'Comma separated list of devices to pass to NVIDIA_VISIBLE_DEVICES.'
         # The following flags allow us to make predictions on proteins that
         # would typically be too long to fit into GPU memory.
-        'TF_FORCE_UNIFIED_MEMORY': '1',
-        'XLA_PYTHON_CLIENT_MEM_FRACTION': '4.0',
+        "TF_FORCE_UNIFIED_MEMORY": "1",
+        "XLA_PYTHON_CLIENT_MEM_FRACTION": "4.0",
     }
     for var, val in def_env.items():
         if var not in os.environ:
@@ -161,25 +144,31 @@ def run_af(
 
     if db_cfg.get("model_preset") == "multimer":
         # Path to the PDB seqres database for use by hmmsearch.
-        db_cfg["pdb_seqres_database_path"] = db_dir.joinpath("pdb_seqres", "pdb_seqres.txt"),
+        db_cfg["pdb_seqres_database_path"] = (
+            db_dir.joinpath("pdb_seqres", "pdb_seqres.txt"),
+        )
         # Path to the Uniprot database for use by JackHMMER.
-        db_cfg["uniprot_database_path"] = db_dir.joinpath("uniprot", "uniprot.fasta"),
+        db_cfg["uniprot_database_path"] = (db_dir.joinpath("uniprot", "uniprot.fasta"),)
     else:
         # Path to the PDB70 database for use by HHsearch.
-        db_cfg["pdb70_database_path"] = db_dir.joinpath("pdb70", "pd: db_dir.b70"),
+        db_cfg["pdb70_database_path"] = (db_dir.joinpath("pdb70", "pd: db_dir.b70"),)
 
     if cfg.get("db_preset") == "reduced_dbs":
         # Path to the Small BFD database for use by JackHMMER.
-        db_cfg["small_bfd_database_path"] = db_dir.joinpath(
-            "small_bfd", "bfd-first_non_consensus_sequences.fasta"
-        ),
+        db_cfg["small_bfd_database_path"] = (
+            db_dir.joinpath("small_bfd", "bfd-first_non_consensus_sequences.fasta"),
+        )
     else:
         # Path to the Uniref30 database for use by HHblits.
-        db_cfg["uniref30_database_path"] = db_dir.joinpath("uniref30", "UniRef30_2021_03"),
+        db_cfg["uniref30_database_path"] = (
+            db_dir.joinpath("uniref30", "UniRef30_2021_03"),
+        )
         # Path to the BFD database for use by HHblits.
-        db_cfg["bfd_database_path"] = db_dir.joinpath(
-            "bfd", "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
-        ),
+        db_cfg["bfd_database_path"] = (
+            db_dir.joinpath(
+                "bfd", "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
+            ),
+        )
     db_cfg = {**db_cfg, **db_cfg_ov}
 
     af_cmd = [
@@ -201,20 +190,19 @@ def run_af(
 
     for k, v in cfg.items():
         af_cmd.append(f"--{k}={v}")
-    
+
     # sys.path.append("/opt/conda/lib/python3.11/site-packages")
     cmd_str = " ".join(af_cmd)
     print(cmd_str)
 
     time.sleep(3600)
 
+
 @workflow
 def af_wf():
-    dl = dl_dbs()
-    chk = check_dbs()
-    dl >> chk
-    # run_af(
-    #     fasta="s3://union-cloud-oc-staging-dogfood/bio-assets/P68871_sequence.fasta",
-    #     cfg_ov={"db_preset": "reduced_dbs"}
-    #     )
-    # keepalive()
+    dl = dl_dbs(db_uri="gs://opta-gcp-dogfood-gcp/bio-assets/af_dbs_small.tar.zst")
+    run = run_af(
+        fasta="gs://opta-gcp-dogfood-gcp/bio-assets/P68871.fasta",
+        cfg_ov={"db_preset": "reduced_dbs"},
+    )
+    dl >> run
