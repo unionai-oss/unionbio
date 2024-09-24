@@ -21,16 +21,16 @@ actor = ActorEnvironment(
     requests=Resources(
         cpu=CPU,
         mem="32Gi",
-        ephemeral_storage="300Gi",
         gpu="1",
     ),
-    container_image="docker.io/unionbio/alphafold:mmseq-gcloud-20240918-1",
+    container_image=alphafold_img_fqn,
 )
 
 
 @actor.task
 def dl_dbs(
     db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/af_dbs_test.tar.zst",
+    # db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/af_dbs_small.tar.zst"
     output_loc: str = DB_LOC,
     threads: str = CPU,
 ) -> str:
@@ -59,13 +59,37 @@ def dl_dbs(
     assert "params" in os.listdir(output_loc)
     return output_loc
 
+@actor.task
+def dl_dbs_rec(
+    db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/af_dbs",
+    output_loc: str = DB_LOC,
+) -> str:
+    os.makedirs(output_loc, exist_ok=True)
+    dl_cmd = [
+        "gcloud",
+        "storage",
+        "cp",
+        "-r",
+        f"{db_uri}/'*'",
+        output_loc,
+    ]
+    cmd_str = " ".join(dl_cmd)
+    logger.info(f"Downloading databases with command: {cmd_str}")
+    start = time.time()
+    # subproc_execute(command=cmd_str, shell=True)
+    time.sleep(3600)
+    logger.info(f"Downloaded in {time.time() - start} seconds")
+    logger.debug(f"Database files: {os.listdir(output_loc)}")
+    assert "params" in os.listdir(output_loc)
+    return output_loc
+
 
 @actor.task
 def run_af(
     # fastas: list[Protein],
     fasta: FlyteFile = "gs://opta-gcp-dogfood-gcp/bio-assets/P68871.fasta",
     entry: str = "/app/run_alphafold.sh",
-    db_dir: str = DB_LOC,
+    db_path: str = DB_LOC,
     cfg_ov: dict | None = None,
     db_cfg_ov: dict | None = None,
 ):
@@ -128,6 +152,7 @@ def run_af(
     del cfg["enable_gpu_relax"]
     del cfg["use_gpu"]
 
+    db_dir = Path(db_path)
     # You can individually override the following paths if you have placed the
     # data in locations other than the default dir
     db_cfg = {
@@ -137,39 +162,38 @@ def run_af(
         # Path to the MGnify database for use by JackHMMER.
         "mgnify_database_path": db_dir.joinpath("mgnify", "mgy_clusters_2022_05.fa"),
         # Path to a directory with template mmCIF structures, each named <pdb_id>.cif.
-        "template_mmcif_dir": db_dir.joinpath("pdb_mmcif", "mmcif_fi: db_dir.les"),
+        "template_mmcif_dir": db_dir.joinpath("pdb_mmcif", "mmcif_files"),
         # Path to a file mapping obsolete PDB IDs to their replacements.
-        "obsolete_pdbs_path": db_dir.joinpath("pdb_mmcif", "obsolete.: db_dir.dat"),
+        "obsolete_pdbs_path": db_dir.joinpath("pdb_mmcif", "obsolete.dat"),
     }
 
     if db_cfg.get("model_preset") == "multimer":
         # Path to the PDB seqres database for use by hmmsearch.
-        db_cfg["pdb_seqres_database_path"] = (
-            db_dir.joinpath("pdb_seqres", "pdb_seqres.txt"),
+        db_cfg["pdb_seqres_database_path"] = db_dir.joinpath(
+            "pdb_seqres", "pdb_seqres.txt"
         )
         # Path to the Uniprot database for use by JackHMMER.
-        db_cfg["uniprot_database_path"] = (db_dir.joinpath("uniprot", "uniprot.fasta"),)
+        db_cfg["uniprot_database_path"] = db_dir.joinpath("uniprot", "uniprot.fasta")
     else:
         # Path to the PDB70 database for use by HHsearch.
-        db_cfg["pdb70_database_path"] = (db_dir.joinpath("pdb70", "pd: db_dir.b70"),)
+        db_cfg["pdb70_database_path"] = db_dir.joinpath("pdb70", "pdb70")
 
     if cfg.get("db_preset") == "reduced_dbs":
         # Path to the Small BFD database for use by JackHMMER.
-        db_cfg["small_bfd_database_path"] = (
-            db_dir.joinpath("small_bfd", "bfd-first_non_consensus_sequences.fasta"),
+        db_cfg["small_bfd_database_path"] = db_dir.joinpath(
+            "small_bfd", "bfd-first_non_consensus_sequences.fasta"
         )
     else:
         # Path to the Uniref30 database for use by HHblits.
-        db_cfg["uniref30_database_path"] = (
-            db_dir.joinpath("uniref30", "UniRef30_2021_03"),
+        db_cfg["uniref30_database_path"] = db_dir.joinpath(
+            "uniref30", "UniRef30_2021_03"
         )
         # Path to the BFD database for use by HHblits.
-        db_cfg["bfd_database_path"] = (
-            db_dir.joinpath(
-                "bfd", "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
-            ),
+        db_cfg["bfd_database_path"] = db_dir.joinpath(
+            "bfd", "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
         )
-    db_cfg = {**db_cfg, **db_cfg_ov}
+    if db_cfg_ov:
+        db_cfg = {**db_cfg, **db_cfg_ov}
 
     af_cmd = [
         entry,
@@ -193,14 +217,14 @@ def run_af(
 
     # sys.path.append("/opt/conda/lib/python3.11/site-packages")
     cmd_str = " ".join(af_cmd)
-    print(cmd_str)
+    logger.info(f"Running AlphaFold with command: {cmd_str}")
 
     time.sleep(3600)
 
 
 @workflow
 def af_wf():
-    dl = dl_dbs(db_uri="gs://opta-gcp-dogfood-gcp/bio-assets/af_dbs_small.tar.zst")
+    dl = dl_dbs()
     run = run_af(
         fasta="gs://opta-gcp-dogfood-gcp/bio-assets/P68871.fasta",
         cfg_ov={"db_preset": "reduced_dbs"},

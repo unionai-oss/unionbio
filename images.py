@@ -59,11 +59,22 @@ alphafold_img = ImageSpec(
     base_image="docker.io/unionbio/alphafold:base-20240910",
     platform="linux/amd64",
     python_version="3.12",
+    apt_packages=["curl", "tar", "zstd"],
     packages=[union_version],
-    apt_packages=["aria2"],
     source_root=prod_rt,
     entrypoint=[],
-    # env={"PYTHONPATH": "/root:/opt/conda/lib/python3.11/site-packages"}, # Enable package discovery from base image
+    # env={ # Enable package discovery from base image
+    #     "PYTHONPATH": "/root:/opt/conda/lib/python3.11/site-packages"
+    # },
+    commands=[
+    # Install gcloud
+    'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] '
+    'https://packages.cloud.google.com/apt cloud-sdk main" | tee -a '
+    '/etc/apt/sources.list.d/google-cloud-sdk.list && curl '
+    'https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor '
+    '-o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && '
+    'apt-get install google-cloud-cli -y'
+],
     builder="fast-builder",
     registry=current_registry,
 )
@@ -99,7 +110,7 @@ def update_img_config(config_path: Path, fqns: dict[str, str]):
 
 
 def update_ws_config(config_path: Path, fqn: str):
-    with open(config_path, 'r') as file:
+    with open(config_path, "r") as file:
         yaml_data = file.readlines()
 
     # Manually parsing instead of using yaml library to preserve structure
@@ -112,7 +123,7 @@ def update_ws_config(config_path: Path, fqn: str):
         else:
             lines_out.append(line)
 
-    with open(config_path, 'w') as file:
+    with open(config_path, "w") as file:
         file.writelines(lines_out)
 
 
