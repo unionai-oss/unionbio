@@ -2,7 +2,7 @@ name: alphafold-workspace
 # Make sure that the project and domain exists
 project: flytesnacks
 domain: development
-container_image: docker.io/unionbio/alphafold:tTceLf_mDSIeibgfj_AsRw-test
+container_image: docker.io/unionbio/alphafold:DpYThWApiGl2eGd77veyOA-test
 
 resources:
     cpu: "15"
