@@ -63,24 +63,35 @@ parabricks_img = ImageSpec(
 )
 
 colabfold_img = ImageSpec(
-    name="folding",
+    name="colabfold",
     platform="linux/amd64",
-    python_version="3.12",
+    apt_packages=["curl", "tar", "zstd", "gpg"],
+    python_version="3.10",
     packages=[
-        "colabfold[alphafold-minus-jax] @ git+https://github.com/sokrypton/ColabFold",
+        union_version,
+        # "colabfold[alphafold-minus-jax] @ git+https://github.com/sokrypton/ColabFold",
         "colabfold[alphafold]",
-        "jax[cuda12]==0.4.28",
+        "jax[cuda12]",
         "tensorflow",
         "silence_tensorflow"
     ],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
-        "openmm==7.7.0",
+        "openmm",
         "pdbfixer",
-        "kalign2=2.04",
-        "hhsuite=3.3.0",
-        "mmseqs2=15.6f452",
+        "kalign2",
+        "hhsuite",
+        "mmseqs2",
+    ],
+    commands=[
+    # Install gcloud
+    'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] '
+    'https://packages.cloud.google.com/apt cloud-sdk main" | tee -a '
+    '/etc/apt/sources.list.d/google-cloud-sdk.list && curl '
+    'https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor '
+    '-o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && '
+    'apt-get install google-cloud-cli -y'
     ],
     builder="fast-builder",
     registry=current_registry,
@@ -90,7 +101,7 @@ build_scope = [
     # "main_img",
     # "folding_img",
     # "parabricks_img",
-    colabfold_img,
+    "colabfold_img",
 ]
 
 
