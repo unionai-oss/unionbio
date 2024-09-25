@@ -2,8 +2,9 @@ import os
 import sys
 import time
 from pathlib import Path
-from flytekit import task, workflow, Resources
+from flytekit import task, workflow, Resources, current_context
 from flytekit.types.file import FlyteFile
+from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
@@ -72,3 +73,26 @@ def dl_dbs(
     logger.info(f"Downloaded in {time.time() - start} seconds")
     logger.debug(f"Database files: {os.listdir(output_loc)}")
     return output_loc
+
+@actor.task
+def cf_search(seq: FlyteFile, db_loc: str = DB_LOC) -> FlyteDirectory:
+    outdir = Path(current_context.working_directory).joinpath("search_out")
+    search_cmd = [
+        "colabfold_search",
+        "--use-env 1",
+        "--use-templates 1",
+        "--db-load-mode 2",
+        "--db2 pdb100_230517",
+        "--mmseqs /root/micromamba/envs/dev/bin/mmseqs",
+        f"--threads {CPU}",
+        seq.path,
+        db_loc,
+        outdir,
+    ]
+    cmd_str = " ".join(search_cmd)
+    logger.info(f"Running search with command: {cmd_str}")
+    start = time.time()
+    subproc_execute(command=search_cmd)
+    logger.info(f"Search completed in {time.time() - start} seconds")
+    logger.debug(f"Search output: {os.listdir(outdir)}")
+    return outdir
