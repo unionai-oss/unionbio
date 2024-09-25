@@ -62,10 +62,35 @@ parabricks_img = ImageSpec(
     registry=current_registry,
 )
 
+colabfold_img = ImageSpec(
+    name="folding",
+    platform="linux/amd64",
+    python_version="3.12",
+    packages=[
+        "colabfold[alphafold-minus-jax] @ git+https://github.com/sokrypton/ColabFold",
+        "colabfold[alphafold]",
+        "jax[cuda12]==0.4.28",
+        "tensorflow",
+        "silence_tensorflow"
+    ],
+    source_root=prod_rt,
+    conda_channels=["bioconda", "conda-forge"],
+    conda_packages=[
+        "openmm==7.7.0",
+        "pdbfixer",
+        "kalign2=2.04",
+        "hhsuite=3.3.0",
+        "mmseqs2=15.6f452",
+    ],
+    builder="fast-builder",
+    registry=current_registry,
+)
+
 build_scope = [
-    "main_img",
-    "folding_img",
-    "parabricks_img",
+    # "main_img",
+    # "folding_img",
+    # "parabricks_img",
+    colabfold_img,
 ]
 
 
