@@ -713,6 +713,16 @@ files = [
 ]
 
 [[package]]
+name = "durationpy"
+version = "0.7"
+description = "Module for converting between datetime.timedelta and Go's Duration strings."
+optional = false
+python-versions = "*"
+files = [
+    {file = "durationpy-0.7.tar.gz", hash = "sha256:8447c43df4f1a0b434e70c15a38d77f5c9bd17284bfc1ff1d430f233d5083732"},
+]
+
+[[package]]
 name = "envd"
 version = "0.3.45"
 description = "A development environment management tool for data scientists."
@@ -804,6 +814,21 @@ files = [
 [package.dependencies]
 envd = "*"
 flytekit = ">=1.12.0"
+
+[[package]]
+name = "flytekitplugins-pod"
+version = "1.13.5"
+description = "Flytekit plugin to support K8s Pod tasks"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "flytekitplugins_pod-1.13.5-py3-none-any.whl", hash = "sha256:d4ed2a264e46ff844254989548986d3106e9fffad015a98b59d6bb382ea18008"},
+    {file = "flytekitplugins_pod-1.13.5.tar.gz", hash = "sha256:2e65582b0768f9185f954f05c954740e29680961fd484a7e48a50e3392d1c0ff"},
+]
+
+[package.dependencies]
+flytekit = ">=1.3.0b2"
+kubernetes = ">=12.0.1"
 
 [[package]]
 name = "frozenlist"
@@ -1534,6 +1559,33 @@ SecretStorage = {version = ">=3.2", markers = "sys_platform == \"linux\""}
 completion = ["shtab (>=1.1.0)"]
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
 testing = ["pytest (>=6,!=8.1.*)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
+
+[[package]]
+name = "kubernetes"
+version = "31.0.0"
+description = "Kubernetes python client"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "kubernetes-31.0.0-py2.py3-none-any.whl", hash = "sha256:bf141e2d380c8520eada8b351f4e319ffee9636328c137aa432bc486ca1200e1"},
+    {file = "kubernetes-31.0.0.tar.gz", hash = "sha256:28945de906c8c259c1ebe62703b56a03b714049372196f854105afe4e6d014c0"},
+]
+
+[package.dependencies]
+certifi = ">=14.05.14"
+durationpy = ">=0.7"
+google-auth = ">=1.0.1"
+oauthlib = ">=3.2.2"
+python-dateutil = ">=2.5.3"
+pyyaml = ">=5.4.1"
+requests = "*"
+requests-oauthlib = "*"
+six = ">=1.9.0"
+urllib3 = ">=1.24.2"
+websocket-client = ">=0.32.0,<0.40.0 || >0.40.0,<0.41.dev0 || >=0.43.dev0"
+
+[package.extras]
+adal = ["adal (>=1.0.2)"]
 
 [[package]]
 name = "markdown-it-py"
@@ -2920,13 +2972,13 @@ files = [
 
 [[package]]
 name = "union"
-version = "0.1.66"
+version = "0.1.81"
 description = "Adds Union specific functionality to Flytekit"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "union-0.1.66-py3-none-any.whl", hash = "sha256:302f5b6b618677c3ff18ac4f61ff7608c4ee9e2fd6e52f7d6515d2775176ef0b"},
-    {file = "union-0.1.66.tar.gz", hash = "sha256:0b768138deeeb5b92fb9e980f2b6e06913f5be458ffc3c86e439a7a133838ff3"},
+    {file = "union-0.1.81-py3-none-any.whl", hash = "sha256:5e24d12c5ed03825f0bcbd4af6dc3ff76e77ae8ffcdc2115afa64afb8fc91357"},
+    {file = "union-0.1.81.tar.gz", hash = "sha256:a51184b1fb0807378dd9ba280077ab58769c4cf642f8d170ab34879640d38b1e"},
 ]
 
 [package.dependencies]
@@ -2942,10 +2994,12 @@ importlib-metadata = "*"
 jinja2 = "*"
 keyring = "*"
 mashumaro = "*"
+protobuf = {version = "<5.28.0", markers = "platform_system == \"Windows\""}
 pyyaml = "*"
 rich = "*"
 rich-click = "*"
 sentry-sdk = ">=2.0.0"
+typing-extensions = "*"
 unionai-actor = {version = ">=0.1.1", markers = "platform_system == \"Linux\" and platform_machine == \"x86_64\""}
 unionmeta-byoc = {version = "*", optional = true, markers = "extra == \"byoc\""}
 
@@ -3250,4 +3304,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "949293b5ee2d1d23e446524f9a6c30c84e09a0a55b22a409d3bbc9aec815b2d3"
+content-hash = "82454a55990638dc9ac07aa9312916f84c8305c7964aa1de5ee249349e304494"

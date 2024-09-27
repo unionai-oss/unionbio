@@ -1,0 +1,14 @@
+name: colabfold-workspace
+# Make sure that the project and domain exists
+project: default
+domain: development
+container_image: docker.io/unionbio/colabfold:Pi12DNaEP3r9ZghGWummOA-test
+
+resources:
+    cpu: "14"
+    mem: "32Gi"
+    gpu: "1"
+
+workspace_root: ~/workspace
+metadata: null
+on_startup: null

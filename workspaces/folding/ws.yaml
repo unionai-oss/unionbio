@@ -1,4 +1,4 @@
-name: main-workspace
+name: folding-workspace
 # Make sure that the project and domain exists
 project: default
 domain: development

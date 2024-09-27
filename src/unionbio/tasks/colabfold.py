@@ -1,31 +1,56 @@
 import os
-import sys
 import time
 from pathlib import Path
-from typing import Tuple, List
-from flytekit import task, workflow, Resources, current_context
+from kubernetes.client.models import (
+    V1Container,
+    V1PodSpec,
+    V1Toleration,
+    V1EnvVar,
+)
+from flytekit import workflow, current_context, PodTemplate
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
-from unionbio.types.protein import Protein
-
 
 DB_LOC = "/root/af_dbs/"
-CPU = "15"
-os.environ["ALPHAFOLD_DATA_DIR"] = DB_LOC
+CPU = "16"
 
+pod_template = PodTemplate(
+    primary_container_name="primary",
+    pod_spec=V1PodSpec(
+        containers=[
+            V1Container(
+                name="primary",
+                image=colabfold_img_fqn,
+                resources={
+                    "requests": {"cpu": 1, "memory": "1Gi", "google.com/tpu": 1},
+                    "limits": {"cpu": 1, "memory": "5Gi", "google.com/tpu": 1},
+                },
+                env=[V1EnvVar(name="ALPHAFOLD_DATA_DIR", value=DB_LOC)]
+            )
+        ],
+        node_selector={
+            "cloud.google.com/gke-tpu-accelerator": "tpu-v5-lite-podslice",
+            "cloud.google.com/gke-tpu-topology": "1x1",
+        },
+        tolerations=[
+            V1Toleration(
+                effect="NoSchedule",
+                key="google.com/tpu",
+                operator="Equal",
+                value="present",
+            )
+        ],
+    ),
+)
 
 actor = ActorEnvironment(
     name="colabfold-actor",
     replica_count=1,
-    ttl_seconds=600,
-    requests=Resources(
-        cpu=CPU,
-        mem="32Gi",
-        gpu="1",
-    ),
+    # pod_template=pod_template,
+    ttl_seconds=300,
     container_image=colabfold_img_fqn,
 )
 
@@ -103,6 +128,7 @@ def predict_structure(
     msa: FlyteDirectory,
     a3m_files: list[str],
     templates: dict[str, str],
+    db_loc: str = DB_LOC,
 ) -> FlyteDirectory:
     from colabfold.predict import run_alphafold
 
@@ -121,3 +147,15 @@ def predict_structure(
     )
     logger.info(f"Prediction completed in {time.time() - start} seconds")
     return FlyteDirectory(path=results)
+
+
+@actor.task
+def check() -> str:
+    print(os.getenv("POD_TEMPLATE"), flush=True)
+    return '\n'.join(os.listdir(DB_LOC))
+
+@workflow
+def cf_wf():
+    dl = dl_dbs(db_uri="gs://opta-gcp-dogfood-gcp/bio-assets/P68871.fasta")
+    chk = check()
+    dl >> chk

@@ -8,7 +8,7 @@ project_rt = Path(__file__).parent
 prod_rt = project_rt.joinpath("src")
 ws_rt = project_rt.joinpath("workspaces")
 
-union_version = "union==0.1.73"
+union_version = "union==0.1.81"
 
 main_img = ImageSpec(
     name="main",
@@ -73,7 +73,8 @@ colabfold_img = ImageSpec(
         "colabfold[alphafold]",
         "jax[cuda12]",
         "tensorflow",
-        "silence_tensorflow"
+        "silence_tensorflow",
+        "flytekitplugins-pod",
     ],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
