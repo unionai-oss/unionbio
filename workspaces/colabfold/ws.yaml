@@ -1,6 +1,6 @@
 name: colabfold-workspace
 # Make sure that the project and domain exists
-project: default
+project: flytesnacks
 domain: development
 container_image: docker.io/unionbio/colabfold:Pi12DNaEP3r9ZghGWummOA-test
 
