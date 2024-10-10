@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 from pathlib import Path
 from kubernetes.client.models import (
@@ -7,15 +8,18 @@ from kubernetes.client.models import (
     V1Toleration,
     V1EnvVar,
 )
-from flytekit import workflow, current_context, PodTemplate
+from flytekit import task, workflow, current_context, PodTemplate
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
+
+sys.path = ['/home/flytekit/workspace/unionbio/src', '/root/micromamba/envs/dev/bin', '/root/unionbio/src/unionbio', '/root', '/root/micromamba/envs/dev/lib/python310.zip', '/root/micromamba/envs/dev/lib/python3.10', '/root/micromamba/envs/dev/lib/python3.10/lib-dynload', '/root/micromamba/envs/dev/lib/python3.10/site-packages']
+
 from unionbio.config import colabfold_img_fqn, logger
 
 DB_LOC = "/root/af_dbs/"
-CPU = "16"
+CPU = "14"
 
 pod_template = PodTemplate(
     primary_container_name="primary",
@@ -55,7 +59,8 @@ actor = ActorEnvironment(
 )
 
 
-@actor.task
+# @actor.task
+@task
 def dl_dbs(
     db_uri: str,
     output_loc: str = DB_LOC,
@@ -103,26 +108,33 @@ def dl_dbs(
     return output_loc
 
 
-@actor.task
+# @actor.task
+# @task
 def generate_msas(
-    seq: FlyteFile, db_loc: str = DB_LOC
+    # seq: FlyteFile,
+    seq: Path = Path("/root/P68871.fasta"),
+    db_loc: str = DB_LOC
 ) -> tuple[FlyteDirectory, list[str], dict[str, str]]:
     from colabfold.batch import get_msa_and_templates
 
-    outdir = Path(current_context.working_directory).joinpath("search_out")
+    outdir = Path(current_context().working_directory).joinpath("search_out")
     start = time.time()
+    qseq = open(seq).read()
     a3m_files, template_results = get_msa_and_templates(
-        seq.path,
+        # seq.path,
+        jobname="job_1",
+        query_sequences=qseq,
+
         msa_mode="mmseqs2_uniref_env",
         use_templates=True,
-        msa_output_dir=outdir,
+        result_dir=outdir,
     )
     logger.info(f"Search completed in {time.time() - start} seconds")
     logger.debug(f"Search output: {os.listdir(outdir)}")
     return FlyteDirectory(outdir), a3m_files, template_results
 
 
-@actor.task
+# @actor.task
 def predict_structure(
     seq: FlyteFile,
     msa: FlyteDirectory,
@@ -139,7 +151,8 @@ def predict_structure(
     results = Path(current_context.working_directory).joinpath("af_results")
     start = time.time()
     prediction_results = run_alphafold(
-        fasta_path=seq.path,
+        # fasta_path=seq.path,
+        fasta_path=seq,
         a3m_files=a3m_files,
         templates_results=templates,
         result_dir=results,
@@ -149,7 +162,7 @@ def predict_structure(
     return FlyteDirectory(path=results)
 
 
-@actor.task
+# @actor.task
 def check() -> str:
     print(os.getenv("POD_TEMPLATE"), flush=True)
     return '\n'.join(os.listdir(DB_LOC))
@@ -159,3 +172,5 @@ def cf_wf():
     dl = dl_dbs(db_uri="gs://opta-gcp-dogfood-gcp/bio-assets/P68871.fasta")
     chk = check()
     dl >> chk
+
+generate_msas()
