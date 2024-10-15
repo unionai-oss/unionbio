@@ -2,7 +2,7 @@ name: colabfold-workspace
 # Make sure that the project and domain exists
 project: flytesnacks
 domain: development
-container_image: docker.io/unionbio/colabfold:Pi12DNaEP3r9ZghGWummOA-test
+container_image: docker.io/unionbio/colabfold:nD6bb4CEdFcGL9EmHx0hqQ-test
 
 resources:
     cpu: "14"

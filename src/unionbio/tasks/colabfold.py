@@ -78,30 +78,40 @@ def dl_dbs(
     return output_loc
 
 
-# @actor.task
-# @task
-def generate_msas(
-    # seq: FlyteFile,
-    seq: Path = Path("/root/P68871.fasta"),
-    db_loc: str = DB_LOC
-) -> tuple[FlyteDirectory, list[str], dict[str, str]]:
-    from colabfold.batch import get_msa_and_templates
+@task
+def msa_search(
+    seq: FlyteFile = "gs://opta-gcp-dogfood-gcp/bio-assets/P84868.fasta",
+):
+    from colabfold.mmseqs import search  # type: ignore
 
-    outdir = Path(current_context().working_directory).joinpath("search_out")
-    start = time.time()
-    qseq = open(seq).read()
-    a3m_files, template_results = get_msa_and_templates(
-        # seq.path,
-        jobname="job_1",
-        query_sequences=qseq,
+    indir = Path(current_context().working_directory).joinpath("inputs")
+    outdir = Path(current_context().working_directory).joinpath("outputs")
+    os.makedirs(indir, exist_ok=True)
+    seq.download()
 
-        msa_mode="mmseqs2_uniref_env",
-        use_templates=True,
-        result_dir=outdir,
-    )
-    logger.info(f"Search completed in {time.time() - start} seconds")
-    logger.debug(f"Search output: {os.listdir(outdir)}")
-    return FlyteDirectory(outdir), a3m_files, template_results
+    # Define the source and destination paths
+    source = Path(seq.path)
+    destination = indir.joinpath(source.name)
+
+    # Move the file to the destination directory
+    source.rename(destination)
+
+    logger.debug(f"Running MMSeqs search on {destination}")
+    t = time.time()
+    sys.argv = [
+        sys.argv[0],
+        indir,
+        DB_LOC,
+        outdir,
+        "--db-load-mode",
+        "0",
+    ]
+    search.main()
+
+    logger.info(f"Created the following outputs in {time.time() - t} seconds:")
+    logger.info(f"MSA files: {os.listdir(outdir)}")
+
+    return FlyteDirectory(path=outdir)
 
 
 # @actor.task

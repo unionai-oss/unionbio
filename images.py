@@ -65,7 +65,7 @@ parabricks_img = ImageSpec(
 colabfold_img = ImageSpec(
     name="colabfold",
     platform="linux/amd64",
-    apt_packages=["curl", "tar", "zstd", "gpg"],
+    apt_packages=["curl", "tar", "zstd", "gpg", "git", "htop"],
     python_version="3.10",
     packages=[
         union_version,
