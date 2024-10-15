@@ -114,41 +114,27 @@ def msa_search(
     return FlyteDirectory(path=outdir)
 
 
-# @actor.task
-def predict_structure(
-    seq: FlyteFile,
-    msa: FlyteDirectory,
-    a3m_files: list[str],
-    templates: dict[str, str],
-    db_loc: str = DB_LOC,
-) -> FlyteDirectory:
-    from colabfold.predict import run_alphafold
+@task
+def af_predict(msas: FlyteDirectory) -> FlyteDirectory:
+    from colabfold import batch
 
-    # Check if MSA files are present e.g. Actor mode
-    if not os.listdir(msa.path):
-        msa.download()
+    outdir = Path(current_context().working_directory).joinpath("outputs")
+    msas.download()
+    logger.info(f"Running AlphaFold on {os.listdir(msas.path)}")
 
-    results = Path(current_context.working_directory).joinpath("af_results")
-    start = time.time()
-    prediction_results = run_alphafold(
-        # fasta_path=seq.path,
-        fasta_path=seq,
-        a3m_files=a3m_files,
-        templates_results=templates,
-        result_dir=results,
-        model_type="alphafold2_multimer_v3",
-    )
-    logger.info(f"Prediction completed in {time.time() - start} seconds")
-    return FlyteDirectory(path=results)
+    sys.argv = [
+        sys.argv[0],
+        f"--num-models=1",
+        msas.path,
+        outdir,
+    ]
+    batch.main()
 
-
-# @actor.task
-def check() -> str:
-    print(os.getenv("POD_TEMPLATE"), flush=True)
-    return '\n'.join(os.listdir(DB_LOC))
+    return FlyteDirectory(path=outdir)
 
 @workflow
 def cf_wf():
     dl = dl_dbs()
-    chk = check()
-    dl >> chk
+    msas = msa_search()
+    af = af_predict(msas=msas)
+
