@@ -21,40 +21,10 @@ from unionbio.config import colabfold_img_fqn, logger
 DB_LOC = "/root/af_dbs/"
 CPU = "14"
 
-pod_template = PodTemplate(
-    primary_container_name="primary",
-    pod_spec=V1PodSpec(
-        containers=[
-            V1Container(
-                name="primary",
-                image=colabfold_img_fqn,
-                resources={
-                    "requests": {"cpu": 1, "memory": "1Gi", "google.com/tpu": 1},
-                    "limits": {"cpu": 1, "memory": "5Gi", "google.com/tpu": 1},
-                },
-                env=[V1EnvVar(name="ALPHAFOLD_DATA_DIR", value=DB_LOC)]
-            )
-        ],
-        node_selector={
-            "cloud.google.com/gke-tpu-accelerator": "tpu-v5-lite-podslice",
-            "cloud.google.com/gke-tpu-topology": "1x1",
-        },
-        tolerations=[
-            V1Toleration(
-                effect="NoSchedule",
-                key="google.com/tpu",
-                operator="Equal",
-                value="present",
-            )
-        ],
-    ),
-)
-
 actor = ActorEnvironment(
     name="colabfold-actor",
     replica_count=1,
-    # pod_template=pod_template,
-    ttl_seconds=300,
+    ttl_seconds=1200,
     container_image=colabfold_img_fqn,
 )
 
