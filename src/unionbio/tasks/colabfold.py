@@ -62,7 +62,7 @@ actor = ActorEnvironment(
 # @actor.task
 @task
 def dl_dbs(
-    db_uri: str,
+    db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold_dbs_20240927.tar.zst",
     output_loc: str = DB_LOC,
     threads: str = CPU,
 ) -> str:
@@ -169,8 +169,6 @@ def check() -> str:
 
 @workflow
 def cf_wf():
-    dl = dl_dbs(db_uri="gs://opta-gcp-dogfood-gcp/bio-assets/P68871.fasta")
+    dl = dl_dbs()
     chk = check()
     dl >> chk
-
-generate_msas()
