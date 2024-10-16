@@ -24,7 +24,7 @@ CPU = "14"
 actor = ActorEnvironment(
     name="colabfold-actor",
     replica_count=1,
-    ttl_seconds=1200,
+    ttl_seconds=899,
     container_image=colabfold_img_fqn,
 )
 
@@ -100,11 +100,13 @@ def msa_search(
     t = time.time()
     sys.argv = [
         sys.argv[0],
-        indir,
-        DB_LOC,
-        outdir,
+        str(indir),
+        str(DB_LOC),
+        str(outdir),
         "--db-load-mode",
         "0",
+        "--split",
+        "0"
     ]
     search.main()
 
