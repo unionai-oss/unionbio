@@ -13,7 +13,7 @@ sys.path = ['/home/flytekit/workspace/unionbio/src', '/root/micromamba/envs/dev/
 from unionbio.config import colabfold_img_fqn, logger
 
 DB_LOC = "/root/af_dbs/"
-CPU = "14"
+CPU = "60"
 
 actor = ActorEnvironment(
     name="colabfold-actor",
@@ -73,8 +73,8 @@ def dl_dbs(
 
 @task
 def cf_search(
-    seq: FlyteFile = "gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
-    db_path: str = DB_LOC,
+    seq: FlyteFile = "/mnt/folding_io/fastas/P01308.fasta",
+    db_path: str = "/mnt/colabfold",
 ) -> tuple[FlyteFile, FlyteFile]:
 
     indir = Path(current_context().working_directory).joinpath("inputs")
@@ -82,14 +82,6 @@ def cf_search(
     os.makedirs(indir, exist_ok=True)
     seq.download()
 
-    # Define the source and destination paths
-    source = Path(seq.path)
-    destination = indir.joinpath(source.name)
-
-    # Move the file to the destination directory
-    source.rename(destination)
-
-    logger.debug(f"Running MMSeqs search on {destination}")
     t = time.time()
     cmd = [
         "colabfold_search",
@@ -107,6 +99,8 @@ def cf_search(
         db_path,
         str(outdir),
     ]
+    logger.debug(f"Running MMSeqs search on {seq.path} with command:")
+    logger.debug(' '.join(cmd))
     subproc_execute(cmd)
 
     for fn in os.listdir(outdir):
@@ -117,7 +111,7 @@ def cf_search(
             msa = FlyteFile(path=path)
 
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
-    logger.info(f"MSA files: {os.listdir(outdir)}")
+    logger.info(f"MSA files in {Path(outdir).absolute()}: {os.listdir(outdir)}")
 
     return hitfile, msa
 
