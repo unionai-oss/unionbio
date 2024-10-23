@@ -148,7 +148,8 @@ def af_predict(hitfile: FlyteFile, msa: FlyteFile) -> FlyteDirectory:
     return FlyteDirectory(path=outdir)
 
 @workflow
-def cf_wf():
+def cf_wf() -> FlyteDirectory:
     dl = dl_dbs()
-    msas = cf_search()
-    af = af_predict(msas=msa)
+    hitfile, msa = cf_search()
+    af = af_predict(hitfile=hitfile, msa=msa)
+    return af

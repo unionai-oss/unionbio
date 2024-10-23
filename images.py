@@ -29,7 +29,6 @@ main_img = ImageSpec(
         "htslib",
         "multiqc",
     ],
-    builder="fast-builder",
     registry=current_registry,
 )
 
@@ -47,7 +46,6 @@ folding_img = ImageSpec(
         "py3Dmol",
         "matplotlib",
     ],
-    builder="fast-builder",
     registry=current_registry,
 )
 
@@ -58,14 +56,13 @@ parabricks_img = ImageSpec(
     python_version="3.12",
     packages=[union_version],
     source_root=prod_rt,
-    builder="fast-builder",
     registry=current_registry,
 )
 
 colabfold_img = ImageSpec(
     name="colabfold",
     platform="linux/amd64",
-    apt_packages=["curl", "tar", "zstd", "gpg", "git"],
+    apt_packages=["curl", "tar", "zstd", "gpg", "git", "gcc", "libc6-dev", "linux-libc-dev"],
     python_version="3.10",
     packages=[
         union_version,
@@ -95,7 +92,6 @@ colabfold_img = ImageSpec(
         "-o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && "
         "apt-get install google-cloud-cli -y"
     ],
-    builder="fast-builder",
     registry=current_registry,
 )
 
