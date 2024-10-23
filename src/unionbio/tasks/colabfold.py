@@ -73,7 +73,7 @@ def dl_dbs(
 
 @task
 def cf_search(
-    seq: FlyteFile = "gs://opta-gcp-dogfood-gcp/bio-assets/rcsb_pdb_2HHB.fasta",
+    seq: FlyteFile = "gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
     db_path: str = DB_LOC,
 ) -> tuple[FlyteFile, FlyteFile]:
 
@@ -109,10 +109,17 @@ def cf_search(
     ]
     subproc_execute(cmd)
 
+    for fn in os.listdir(outdir):
+        path = Path(fn).absolute()
+        if path.suffix == ".m8":
+            hitfile = FlyteFile(path=path)
+        if path.suffix == ".a3m":
+            msa = FlyteFile(path=path)
+
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"MSA files: {os.listdir(outdir)}")
 
-    return FlyteDirectory(path=outdir)
+    return hitfile, msa
 
 
 @task

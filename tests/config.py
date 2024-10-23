@@ -47,3 +47,4 @@ test_assets = {
 main_img_test_fqn = "docker.io/unionbio/main:_UoQX5zU5caXaoP8EiSkfA-test"
 folding_img_test_fqn = "docker.io/unionbio/folding:IOYoDMeLmrHqCNACig9FgA-test"
 parabricks_img_test_fqn = "docker.io/unionbio/parabricks:mLAZ6dAhPWRofqXMiVVaWQ-test"
+colabfold_img_fqn = ""
