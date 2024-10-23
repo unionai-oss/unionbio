@@ -2,12 +2,6 @@ import os
 import sys
 import time
 from pathlib import Path
-from kubernetes.client.models import (
-    V1Container,
-    V1PodSpec,
-    V1Toleration,
-    V1EnvVar,
-)
 from flytekit import task, workflow, current_context, PodTemplate
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
@@ -24,7 +18,7 @@ CPU = "14"
 actor = ActorEnvironment(
     name="colabfold-actor",
     replica_count=1,
-    ttl_seconds=899,
+    ttl_seconds=600,
     container_image=colabfold_img_fqn,
 )
 
@@ -56,8 +50,6 @@ def dl_dbs(
             "-",
             "|",
             "tar",
-            "-I",
-            f"'zstd -T{threads}'",
             "--strip-components=1",
             "-x",
             "-C",
@@ -73,16 +65,17 @@ def dl_dbs(
     logger.info(f"Downloading databases with command: {cmd_str}")
     start = time.time()
     subproc_execute(command=cmd_str, shell=True)
-    logger.info(f"Downloaded in {time.time() - start} seconds")
+    elpased = time.time() - start
+    logger.info(f"Downloaded in {elpased} seconds ({elpased/3600} hours)")
     logger.debug(f"Database files: {os.listdir(output_loc)}")
     return output_loc
 
 
 @task
-def msa_search(
-    seq: FlyteFile = "gs://opta-gcp-dogfood-gcp/bio-assets/P84868.fasta",
-):
-    from colabfold.mmseqs import search  # type: ignore
+def cf_search(
+    seq: FlyteFile = "gs://opta-gcp-dogfood-gcp/bio-assets/rcsb_pdb_2HHB.fasta",
+    db_path: str = DB_LOC,
+) -> tuple[FlyteFile, FlyteFile]:
 
     indir = Path(current_context().working_directory).joinpath("inputs")
     outdir = Path(current_context().working_directory).joinpath("outputs")
@@ -98,17 +91,23 @@ def msa_search(
 
     logger.debug(f"Running MMSeqs search on {destination}")
     t = time.time()
-    sys.argv = [
-        sys.argv[0],
-        str(indir),
-        str(DB_LOC),
-        str(outdir),
+    cmd = [
+        "colabfold_search",
+        "--use-env",
+        "1",
+        "--use-templates",
+        "1",
         "--db-load-mode",
-        "0",
-        "--split",
-        "0"
+        "2",
+        "--db2",
+        "pdb100_230517",
+        "--threads",
+        CPU,
+        seq.path,
+        db_path,
+        str(outdir),
     ]
-    search.main()
+    subproc_execute(cmd)
 
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"MSA files: {os.listdir(outdir)}")
@@ -117,26 +116,32 @@ def msa_search(
 
 
 @task
-def af_predict(msas: FlyteDirectory) -> FlyteDirectory:
-    from colabfold import batch
+def af_predict(hitfile: FlyteFile, msa: FlyteFile) -> FlyteDirectory:
 
     outdir = Path(current_context().working_directory).joinpath("outputs")
-    msas.download()
+    msa.download()
+    hitfile.download()
     logger.info(f"Running AlphaFold on {os.listdir(msas.path)}")
 
-    sys.argv = [
-        sys.argv[0],
-        f"--num-models=1",
-        msas.path,
+    cmd = [
+        "--amber",
+        "--templates",
+        "--use-gpu-relax",
+        "--pdb-hit-file",
+        hitfile.path,
+        "--local-pdb-path",
+        str(Path(DB_LOC).joinpath("pdb/divided")),
+        "--random-seed",
+        "0",
+        msa.path,
         outdir,
     ]
-    batch.main()
+    subproc_execute(cmd)
 
     return FlyteDirectory(path=outdir)
 
 @workflow
 def cf_wf():
     dl = dl_dbs()
-    msas = msa_search()
-    af = af_predict(msas=msas)
-
+    msas = cf_search()
+    af = af_predict(msas=msa)

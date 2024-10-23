@@ -8,7 +8,7 @@ project_rt = Path(__file__).parent
 prod_rt = project_rt.joinpath("src")
 ws_rt = project_rt.joinpath("workspaces")
 
-union_version = "union==0.1.81"
+union_version = "union==0.1.85"
 
 main_img = ImageSpec(
     name="main",
@@ -65,7 +65,7 @@ parabricks_img = ImageSpec(
 colabfold_img = ImageSpec(
     name="colabfold",
     platform="linux/amd64",
-    apt_packages=["curl", "tar", "zstd", "gpg", "git", "htop"],
+    apt_packages=["curl", "tar", "zstd", "gpg", "git"],
     python_version="3.10",
     packages=[
         union_version,
@@ -75,6 +75,7 @@ colabfold_img = ImageSpec(
         "tensorflow",
         "silence_tensorflow",
         "flytekitplugins-pod",
+        "graphein",
     ],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
@@ -86,13 +87,13 @@ colabfold_img = ImageSpec(
         "mmseqs2",
     ],
     commands=[
-    # Install gcloud
-    'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] '
-    'https://packages.cloud.google.com/apt cloud-sdk main" | tee -a '
-    '/etc/apt/sources.list.d/google-cloud-sdk.list && curl '
-    'https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor '
-    '-o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && '
-    'apt-get install google-cloud-cli -y'
+        # Install gcloud
+        'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] '
+        'https://packages.cloud.google.com/apt cloud-sdk main" | tee -a '
+        "/etc/apt/sources.list.d/google-cloud-sdk.list && curl "
+        "https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor "
+        "-o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && "
+        "apt-get install google-cloud-cli -y"
     ],
     builder="fast-builder",
     registry=current_registry,
@@ -118,7 +119,7 @@ def update_img_config(config_path: Path, fqns: dict[str, str]):
 
 
 def update_ws_config(config_path: Path, fqn: str):
-    with open(config_path, 'r') as file:
+    with open(config_path, "r") as file:
         yaml_data = file.readlines()
 
     # Manually parsing instead of using yaml library to preserve structure
@@ -131,7 +132,7 @@ def update_ws_config(config_path: Path, fqn: str):
         else:
             lines_out.append(line)
 
-    with open(config_path, 'w') as file:
+    with open(config_path, "w") as file:
         file.writelines(lines_out)
 
 
@@ -163,10 +164,10 @@ def build_test():
         spec = eval(img_str)
         spec.tag_format = "{spec_hash}-test"
         spec.source_root = project_rt
-        spec.packages.append("pytest")
-        fqn = spec.image_name()
+        ns = spec.with_packages(["pytest"]).with_apt_packages(["screen", "htop"])
+        fqn = ns.image_name()
         fqns[f"{img_str}_test_fqn"] = fqn
-        build_specs.append(spec)
+        build_specs.append(ns)
 
         # Update workspace config
         try:
