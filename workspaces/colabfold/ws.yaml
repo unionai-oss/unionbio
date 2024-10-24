@@ -2,7 +2,7 @@ name: colabfold-workspace
 # Make sure that the project and domain exists
 project: pryce
 domain: development
-container_image: docker.io/unionbio/colabfold:aF3oGMh3jd5H5m2881nnfA-test
+container_image: docker.io/unionbio/colabfold:tFYw6tVX143NI3gjoRyiIw
 
 resources:
     cpu: "14"
@@ -12,3 +12,4 @@ resources:
 workspace_root: ~/workspace
 metadata: null
 on_startup: null
+ttl_seconds: 28800

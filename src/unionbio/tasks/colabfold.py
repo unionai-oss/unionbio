@@ -128,7 +128,7 @@ def af_predict(hitfile: FlyteFile, msa: FlyteFile) -> FlyteDirectory:
     outdir = Path(current_context().working_directory).joinpath("outputs")
     msa.download()
     hitfile.download()
-    logger.info(f"Running AlphaFold on {os.listdir(msas.path)}")
+    logger.info(f"Running AlphaFold on {msa.path} and {hitfile.path}")
 
     cmd = [
         "--amber",
