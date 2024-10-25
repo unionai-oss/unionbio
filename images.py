@@ -62,36 +62,25 @@ parabricks_img = ImageSpec(
 colabfold_img = ImageSpec(
     name="colabfold",
     platform="linux/amd64",
-    apt_packages=["curl", "tar", "zstd", "gpg", "git", "gcc", "libc6-dev", "linux-libc-dev"],
+    apt_packages=["curl", "tar", "zstd", "gpg", "git", "gcc", "wget"],
     python_version="3.10",
     packages=[
         union_version,
-        # "colabfold[alphafold-minus-jax] @ git+https://github.com/sokrypton/ColabFold",
-        "colabfold[alphafold]",
-        "jax[cuda12]",
-        "tensorflow",
-        "silence_tensorflow",
         "flytekitplugins-pod",
         "graphein",
     ],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
-        "openmm",
-        "pdbfixer",
-        "kalign2",
-        "hhsuite",
         "mmseqs2",
     ],
     commands=[
         # Install gcloud
-        'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] '
-        'https://packages.cloud.google.com/apt cloud-sdk main" | tee -a '
-        "/etc/apt/sources.list.d/google-cloud-sdk.list && curl "
-        "https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor "
-        "-o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && "
-        "apt-get install google-cloud-cli -y"
+        'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && apt-get install google-cloud-cli -y',
+        # Install localcolabfold
+        'wget https://raw.githubusercontent.com/YoshitakaMo/localcolabfold/main/install_colabbatch_linux.sh && bash install_colabbatch_linux.sh && chown -R 1000:1000 /localcolabfold',
     ],
+    env={"PATH":"/localcolabfold/colabfold-conda/bin:$PATH"},
     registry=current_registry,
 )
 
