@@ -12,7 +12,7 @@ sys.path = ['/home/flytekit/workspace/unionbio/src', '/root/micromamba/envs/dev/
 
 from unionbio.config import colabfold_img_fqn, logger
 
-DB_LOC = "/root/af_dbs/"
+DB_LOC = "/mnt/colabfold"
 CPU = "60"
 
 actor = ActorEnvironment(
@@ -117,7 +117,7 @@ def cf_search(
 
 
 @task
-def af_predict(hitfile: FlyteFile, msa: FlyteFile) -> FlyteDirectory:
+def af_predict(hitfile: FlyteFile, msa: FlyteFile, db_loc: str = DB_LOC) -> FlyteDirectory:
 
     outdir = Path(current_context().working_directory).joinpath("outputs")
     msa.download()
@@ -125,25 +125,28 @@ def af_predict(hitfile: FlyteFile, msa: FlyteFile) -> FlyteDirectory:
     logger.info(f"Running AlphaFold on {msa.path} and {hitfile.path}")
 
     cmd = [
+        "colabfold_batch",
         "--amber",
         "--templates",
         "--use-gpu-relax",
         "--pdb-hit-file",
         hitfile.path,
         "--local-pdb-path",
-        str(Path(DB_LOC).joinpath("pdb/divided")),
+        db_loc,
         "--random-seed",
         "0",
         msa.path,
-        outdir,
+        str(outdir),
     ]
+    logger.debug(f"Executing:")
+    logger.debug(' '.join(cmd))
     subproc_execute(cmd)
 
     return FlyteDirectory(path=outdir)
 
 @workflow
 def cf_wf() -> FlyteDirectory:
-    dl = dl_dbs()
+    dl = dl_dbs(db_uri)
     hitfile, msa = cf_search()
     af = af_predict(hitfile=hitfile, msa=msa)
     return af
