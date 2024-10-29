@@ -24,8 +24,8 @@ actor = ActorEnvironment(
 
 
 # @actor.task
-@task
-def dl_dbs(
+# @task
+def gcloud_dl(
     db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold_dbs_20240927.tar.zst",
     output_loc: str = DB_LOC,
     threads: str = CPU,
@@ -65,16 +65,48 @@ def dl_dbs(
     logger.info(f"Downloading databases with command: {cmd_str}")
     start = time.time()
     subproc_execute(command=cmd_str, shell=True)
-    elpased = time.time() - start
-    logger.info(f"Downloaded in {elpased} seconds ({elpased/3600} hours)")
+    elapsed = time.time() - start
+    logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
+    logger.debug(f"Database files: {os.listdir(output_loc)}")
+    return output_loc
+
+# @task
+def s3_sync(
+    db_uri: str,
+    output_loc: str = DB_LOC,
+    retries: int = 5,
+) -> str:
+    os.makedirs(output_loc, exist_ok=True)
+
+    dl_cmd = [
+        "aws",
+        "s3",
+        "sync",
+        db_uri,
+        output_loc
+    ]
+
+    cmd_str = " ".join(dl_cmd)
+    logger.info(f"Downloading databases with command: {cmd_str}")
+    start = time.time()
+
+    try:
+        subproc_execute(command=cmd_str, shell=True)
+    except RuntimeError:
+        retries -= 1
+        if retries = 0: raise
+        continue
+    
+    elapsed = time.time() - start
+    logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
     logger.debug(f"Database files: {os.listdir(output_loc)}")
     return output_loc
 
 
 @task
 def cf_search(
-    seq: FlyteFile = "/mnt/folding_io/fastas/P01308.fasta",
-    db_path: str = "/mnt/colabfold",
+    seq: FlyteFile,
+    db_path: str = DB_LOC,
 ) -> tuple[FlyteFile, FlyteFile]:
 
     indir = Path(current_context().working_directory).joinpath("inputs")
@@ -117,7 +149,7 @@ def cf_search(
 
 
 @task
-def af_predict(hitfile: FlyteFile, msa: FlyteFile, db_loc: str = DB_LOC) -> FlyteDirectory:
+def af_predict(hitfile: FlyteFile, msa: FlyteFile, mmcif_loc: str) -> FlyteDirectory:
 
     outdir = Path(current_context().working_directory).joinpath("outputs")
     msa.download()
@@ -132,7 +164,7 @@ def af_predict(hitfile: FlyteFile, msa: FlyteFile, db_loc: str = DB_LOC) -> Flyt
         "--pdb-hit-file",
         hitfile.path,
         "--local-pdb-path",
-        db_loc,
+        mmcif_loc,
         "--random-seed",
         "0",
         msa.path,
@@ -146,7 +178,7 @@ def af_predict(hitfile: FlyteFile, msa: FlyteFile, db_loc: str = DB_LOC) -> Flyt
 
 @workflow
 def cf_wf() -> FlyteDirectory:
-    dl = dl_dbs(db_uri)
-    hitfile, msa = cf_search()
-    af = af_predict(hitfile=hitfile, msa=msa)
+    dl = s3_sync(db_uri="s3://pryce-test/colabfold/")
+    hitfile, msa = cf_search(seq="/mnt/folding_io/fastas/P01308.fasta")
+    af = af_predict(hitfile=hitfile, msa=msa, mmcif_loc="/home/ubuntu/pdb_mmcif/mmcif_files")
     return af

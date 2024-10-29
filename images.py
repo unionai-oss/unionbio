@@ -1,4 +1,5 @@
 import re
+import sys
 from pathlib import Path
 from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
@@ -62,12 +63,12 @@ parabricks_img = ImageSpec(
 colabfold_img = ImageSpec(
     name="colabfold",
     platform="linux/amd64",
-    apt_packages=["curl", "tar", "zstd", "gpg", "git", "gcc", "wget"],
+    apt_packages=["curl", "tar", "zstd", "gpg", "git", "gcc", "wget", "unzip"],
     python_version="3.10",
     packages=[
         union_version,
         "flytekitplugins-pod",
-        "graphein",
+        # "graphein",
     ],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
@@ -75,6 +76,8 @@ colabfold_img = ImageSpec(
         "mmseqs2",
     ],
     commands=[
+        # Install awscli
+        'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install',
         # Install gcloud
         'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && apt-get install google-cloud-cli -y',
         # Install localcolabfold
