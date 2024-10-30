@@ -20,8 +20,8 @@ actor = ActorEnvironment(
 )
 
 
-# @actor.task
-@task
+# @task
+@actor.task
 def gcloud_dl(
     db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/*",
     output_loc: str = DB_LOC,
@@ -101,7 +101,7 @@ def s3_sync(
     return output_loc
 
 
-@task
+@actor.task
 def cf_search(
     seq: FlyteFile,
     db_path: str = DB_LOC,
@@ -148,7 +148,7 @@ def cf_search(
     return hitfile, msa
 
 
-@task
+@actor.task
 def af_predict(
     hitfile: FlyteFile, 
     msa: FlyteFile, 
