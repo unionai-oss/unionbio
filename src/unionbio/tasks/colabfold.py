@@ -7,9 +7,6 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
-
-# sys.path = ['/home/flytekit/workspace/unionbio/src', '/root/micromamba/envs/dev/bin', '/root/unionbio/src/unionbio', '/root', '/root/micromamba/envs/dev/lib/python310.zip', '/root/micromamba/envs/dev/lib/python3.10', '/root/micromamba/envs/dev/lib/python3.10/lib-dynload', '/root/micromamba/envs/dev/lib/python3.10/site-packages']
-
 from unionbio.config import colabfold_img_fqn, logger
 
 DB_LOC = "/mnt/colabfold"
@@ -24,9 +21,9 @@ actor = ActorEnvironment(
 
 
 # @actor.task
-# @task
+@task
 def gcloud_dl(
-    db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold_dbs_20240927.tar.zst",
+    db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/*",
     output_loc: str = DB_LOC,
     threads: str = CPU,
 ) -> str:
@@ -70,7 +67,7 @@ def gcloud_dl(
     logger.debug(f"Database files: {os.listdir(output_loc)}")
     return output_loc
 
-# @task
+@task
 def s3_sync(
     db_uri: str,
     output_loc: str = DB_LOC,
@@ -137,10 +134,10 @@ def cf_search(
     logger.debug(' '.join(cmd))
     # subproc_execute(cmd)
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
-    logger.info(f"MSA files in {Path(outdir).absolute()}: {os.listdir(outdir)}")
+    logger.info(f"MSA files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
-    for fn in os.listdir(outdir):
-        path = Path(fn).absolute()
+    for fn in Path(outdir).iterdir():
+        path = fn.resolve()
         if path.suffix == ".m8":
             hitfile = FlyteFile(path=str(path))
         if path.suffix == ".a3m":
@@ -157,7 +154,7 @@ def af_predict(
     msa: FlyteFile, 
     mmcif_loc: str = None,
     outdir: str = None,
-    ) -> FlyteDirectory:
+) -> FlyteDirectory:
 
     outdir = outdir or str(Path(current_context().working_directory).joinpath("outputs"))
     mmcif_loc = mmcif_loc or str(Path(DB_LOC).joinpath("pdb_mmcif", "mmcif_files"))
@@ -165,6 +162,7 @@ def af_predict(
     hitfile.download()
     logger.info(f"Running AlphaFold on {msa.path} and {hitfile.path}")
 
+    t = time.time()
     cmd = [
         "colabfold_batch",
         "--amber",
@@ -182,16 +180,19 @@ def af_predict(
     logger.debug(f"Executing:")
     logger.debug(' '.join(cmd))
     subproc_execute(cmd)
+    logger.info(f"Created the following outputs in {time.time() - t} seconds:")
+    logger.info(f"Output files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
     return FlyteDirectory(path=outdir)
 
 @workflow
-def cf_wf():
-    # dl = s3_sync(db_uri="s3://pryce-test/colabfold/")
-    hitfile, msa = cf_search(seq="/mnt/folding_io/fastas/P01308.fasta", outdir="/tmp/flyte20mwg4m3/user_spacen0xnt8re/outputs")
+def cf_wf() -> FlyteDirectory:
+    dl = gcloud_dl()
+    hitfile, msa = cf_search(
+        seq="gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
+    )
     af = af_predict(
-        hitfile="/tmp/flyteiwbp4nxz/user_spaceyifdbswm/outputs/sp_P01308_INS_HUMAN_Insulin_OS_Homo_sapiens_OX_9606_GN_INS_PE_1_SV_1_pdb100_230517.m8",
-        msa="/tmp/flyteiwbp4nxz/user_spaceyifdbswm/outputs/sp_P01308_INS_HUMAN_Insulin_OS_Homo_sapiens_OX_9606_GN_INS_PE_1_SV_1.a3m",
-        mmcif_loc="/mnt/pdb_mmcif/mmcif_files"
-        )
-    # return af
+        hitfile=hitfile,
+        msa=msa,
+    )
+    return af
