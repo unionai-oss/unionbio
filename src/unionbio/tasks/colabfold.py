@@ -1,21 +1,28 @@
 import os
 import sys
 import time
+import shlex
+import subprocess
 from pathlib import Path
-from flytekit import task, workflow, current_context, PodTemplate
+from flytekit import task, workflow, current_context, Resources
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
 
-DB_LOC = "/mnt/colabfold"
-CPU = "60"
+DB_LOC = "/root/colabfold_dbs"
+CPU = "30"
 
 actor = ActorEnvironment(
     name="colabfold-actor",
     replica_count=1,
     ttl_seconds=600,
+    requests=Resources(
+        cpu=CPU,
+        mem="100Gi",
+        gpu="1",
+    ),
     container_image=colabfold_img_fqn,
 )
 
@@ -23,49 +30,65 @@ actor = ActorEnvironment(
 # @task
 @actor.task
 def gcloud_dl(
-    db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/*",
+    db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold",
     output_loc: str = DB_LOC,
-    threads: str = CPU,
+    retries: int = 5,
+    prog_interval: int = 60,
 ) -> str:
     os.makedirs(output_loc, exist_ok=True)
+    """
+    Syncs files from a GCS source to a destination using gcloud storage rsync with retries and progress logger.
 
-    dl_cmd = [
-        "gcloud",
-        "storage",
-        "cp",
-    ]
+    Args:
+        source (str): Source GCS path (e.g., 'gs://your-bucket/path').
+        destination (str): Local destination path or another GCS path.
+        retries (int): Number of retry attempts on failure.
+    """
 
-    if "*" in db_uri:
-        dl_cmd += [
-            "-r",
-            db_uri,
-            output_loc,
-        ]
-    elif db_uri.endswith(".tar.zst"):
-        dl_cmd += [
-            db_uri,
-            "-",
-            "|",
-            "tar",
-            "--strip-components=1",
-            "-x",
-            "-C",
-            output_loc,
-        ]
-    else:
-        dl_cmd += [
-            db_uri,
-            output_loc,
-        ]
+    # Build the gcloud rsync command
+    command = ["gcloud", "storage", "rsync", "-r", db_uri, output_loc]
+    
+    attempt = 0
+    while attempt < retries:
+        attempt += 1
+        logger.info(f"Starting rsync attempt {attempt} of {retries}")
+        
+        # Run the rsync command with progress
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-    cmd_str = " ".join(dl_cmd)
-    logger.info(f"Downloading databases with command: {cmd_str}")
-    start = time.time()
-    subproc_execute(command=cmd_str, shell=True)
-    elapsed = time.time() - start
-    logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
-    logger.debug(f"Database files: {os.listdir(output_loc)}")
-    return output_loc
+        # Calculate the total size of objects to download
+        gsutil_size_command = f"gsutil du -s {db_uri}"
+        total_size_output = subprocess.check_output(shlex.split(gsutil_size_command))
+        total_size_bytes = int(total_size_output.split()[0])
+
+        print(f"Total size to download: {total_size_bytes / (1024 ** 3):.2f} GB")
+
+        while process.poll() is None:  # While the download is still running
+            # Calculate the current size of downloaded files
+            current_size_output = subprocess.check_output(shlex.split(f"du -sb {output_loc}"))
+            current_size_bytes = int(current_size_output.split()[0])
+
+            # Calculate and print the download progress
+            progress = (current_size_bytes / total_size_bytes) * 100
+            print(f"Downloaded {current_size_bytes / (1024 ** 3):.2f} GB ({progress:.2f}%)")
+
+            # Wait for the specified interval before checking again
+            time.sleep(prog_interval)
+            
+            # Check if rsync failed
+            if process.returncode != 0:
+                # Log the error and retry if failed
+                logger.error(f"Rsync attempt {attempt} failed with error:\n{process.stderr}")
+                if attempt < retries:
+                    logger.info(f"Retrying in 5 seconds...")
+                    time.sleep(5)
+                else:
+                    logger.error("Max retries reached. Rsync failed.")
+                    process.terminate()
+
+        logger.info("Rsync completed successfully.")
+        process.communicate()
+        return output_loc
 
 @task
 def s3_sync(
@@ -105,7 +128,7 @@ def s3_sync(
 def cf_search(
     seq: FlyteFile,
     db_path: str = DB_LOC,
-    outdir: str = None,
+    outdir: str | None = None,
 ) -> tuple[FlyteFile, FlyteFile]:
 
     outdir = outdir or str(Path(current_context().working_directory).joinpath("outputs"))
@@ -152,8 +175,8 @@ def cf_search(
 def af_predict(
     hitfile: FlyteFile, 
     msa: FlyteFile, 
-    mmcif_loc: str = None,
-    outdir: str = None,
+    mmcif_loc: str | None = None,
+    outdir: str | None = None,
 ) -> FlyteDirectory:
 
     outdir = outdir or str(Path(current_context().working_directory).joinpath("outputs"))
@@ -190,9 +213,15 @@ def cf_wf() -> FlyteDirectory:
     dl = gcloud_dl()
     hitfile, msa = cf_search(
         seq="gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
+        db_path=dl,
     )
     af = af_predict(
         hitfile=hitfile,
         msa=msa,
     )
     return af
+
+# @actor.task
+# def debug() -> str:
+#     from unionbio.config import logger
+#     return str(sys.path)
