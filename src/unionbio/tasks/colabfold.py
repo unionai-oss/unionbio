@@ -46,6 +46,13 @@ def gcloud_dl(
     """
 
     # Build the gcloud rsync command
+    # Calculate the total size of objects to download
+    logger.debug("Calculating size of objects to download...")
+    gsutil_size_command = f"gsutil du -s {db_uri}"
+    # total_size_output = subprocess.check_output(shlex.split(gsutil_size_command))
+    # total_size_bytes = int(total_size_output.split()[0])
+    # logger.info(f"Total size to download: {total_size_bytes} bytes or {total_size_bytes / (1024 ** 3):.2f} GB")
+    
     command = ["gcloud", "storage", "rsync", "-r", db_uri, output_loc]
     
     attempt = 0
@@ -54,14 +61,9 @@ def gcloud_dl(
         logger.info(f"Starting rsync attempt {attempt} of {retries}")
         
         # Run the rsync command with progress
+        logger.debug("Running rsync command:")
+        logger.debug(' '.join(command))
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        # Calculate the total size of objects to download
-        gsutil_size_command = f"gsutil du -s {db_uri}"
-        total_size_output = subprocess.check_output(shlex.split(gsutil_size_command))
-        total_size_bytes = int(total_size_output.split()[0])
-
-        print(f"Total size to download: {total_size_bytes / (1024 ** 3):.2f} GB")
 
         while process.poll() is None:  # While the download is still running
             # Calculate the current size of downloaded files
@@ -69,26 +71,30 @@ def gcloud_dl(
             current_size_bytes = int(current_size_output.split()[0])
 
             # Calculate and print the download progress
-            progress = (current_size_bytes / total_size_bytes) * 100
-            print(f"Downloaded {current_size_bytes / (1024 ** 3):.2f} GB ({progress:.2f}%)")
+            # progress = (current_size_bytes / total_size_bytes) * 100
+            # print(f"Downloaded {current_size_bytes / (1024 ** 3):.2f} GB ({progress:.2f}%)")
 
             # Wait for the specified interval before checking again
             time.sleep(prog_interval)
             
-            # Check if rsync failed
-            if process.returncode != 0:
+            # Check if rsync succeeded
+            process.poll()
+            logger.debug(f"Return code: {process.returncode}")
+            if process.returncode is None:
+                continue
+            elif process.returncode == 0:
+                logger.info("Rsync completed successfully.")
+                process.communicate()
+                return output_loc
+            else:
                 # Log the error and retry if failed
-                logger.error(f"Rsync attempt {attempt} failed with error:\n{process.stderr}")
+                logger.error(f"Rsync attempt {attempt} failed with error:\n{process.stderr.read()}")
                 if attempt < retries:
                     logger.info(f"Retrying in 5 seconds...")
                     time.sleep(5)
                 else:
                     logger.error("Max retries reached. Rsync failed.")
                     process.terminate()
-
-        logger.info("Rsync completed successfully.")
-        process.communicate()
-        return output_loc
 
 @task
 def s3_sync(
