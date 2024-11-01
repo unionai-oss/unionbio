@@ -2,20 +2,25 @@ import os
 import sys
 import time
 from pathlib import Path
-from flytekit import task, workflow, current_context, PodTemplate
+from flytekit import task, workflow, current_context, PodTemplate, Resources, dynamic
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
 
-DB_LOC = "/mnt/colabfold"
-CPU = "60"
+DB_LOC = "/root/colabfold_dbs"
+CPU = "30"
 
 actor = ActorEnvironment(
     name="colabfold-actor",
     replica_count=1,
     ttl_seconds=600,
+    requests=Resources(
+        cpu=CPU,
+        mem="100Gi",
+        gpu="1",
+    ),
     container_image=colabfold_img_fqn,
 )
 
@@ -25,39 +30,18 @@ actor = ActorEnvironment(
 def gcloud_dl(
     db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/*",
     output_loc: str = DB_LOC,
-    threads: str = CPU,
 ) -> str:
     os.makedirs(output_loc, exist_ok=True)
 
     dl_cmd = [
         "gcloud",
         "storage",
-        "cp",
+        "rsync",
+        "-R",
+        db_uri,
+        output_loc,
     ]
-
-    if "*" in db_uri:
-        dl_cmd += [
-            "-r",
-            db_uri,
-            output_loc,
-        ]
-    elif db_uri.endswith(".tar.zst"):
-        dl_cmd += [
-            db_uri,
-            "-",
-            "|",
-            "tar",
-            "--strip-components=1",
-            "-x",
-            "-C",
-            output_loc,
-        ]
-    else:
-        dl_cmd += [
-            db_uri,
-            output_loc,
-        ]
-
+            
     cmd_str = " ".join(dl_cmd)
     logger.info(f"Downloading databases with command: {cmd_str}")
     start = time.time()
@@ -65,7 +49,19 @@ def gcloud_dl(
     elapsed = time.time() - start
     logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
     logger.debug(f"Database files: {os.listdir(output_loc)}")
-    return output_loc
+    # return output_loc
+    return str(elapsed)
+
+@dynamic
+def fetch_all_assets():
+    for uri in [
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb/",
+        # "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb_mmcif/*",
+    ]:
+        gcloud_dl(db_uri=uri)
 
 @task
 def s3_sync(
@@ -185,14 +181,37 @@ def af_predict(
 
     return FlyteDirectory(path=outdir)
 
+@actor.task
+def zombie() -> str:
+    resurrections = 200
+    while True:
+        resurrections -= 1
+        logger.info("I'm a zombie!")
+        time.sleep(30)
+        if resurrections == 0:
+            return "No more brainsss"
+        
+@actor.task
+def reg_dl(db_uri: FlyteDirectory) -> str:
+    s = time.time()
+    db_uri.download()
+    el = time.time() - s
+    return str(el)
+
 @workflow
-def cf_wf() -> FlyteDirectory:
-    dl = gcloud_dl()
-    hitfile, msa = cf_search(
-        seq="gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
-    )
-    af = af_predict(
-        hitfile=hitfile,
-        msa=msa,
-    )
-    return af
+def cf_wf():# -> FlyteDirectory:
+    d1 = gcloud_dl(db_uri = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/") # only one that works
+    # d2 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb/")
+    # d4 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/")
+    # d1 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/")
+    # d1 >> d2 >> d3 >> d4
+    # fetch_all_assets()
+    # z = zombie()
+    # hitfile, msa = cf_search(
+    #     seq="gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
+    # )
+    # af = af_predict(
+    #     hitfile=hitfile,
+    #     msa=msa,
+    # )
+    # return af
