@@ -2,7 +2,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from flytekit import task, workflow, current_context, PodTemplate, Resources, dynamic
+from flytekit import task, workflow, current_context, PodTemplate, Resources, dynamic, Deck
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
@@ -24,8 +24,6 @@ actor = ActorEnvironment(
     container_image=colabfold_img_fqn,
 )
 
-
-# @task
 @actor.task
 def gcloud_dl(
     db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/*",
@@ -49,21 +47,10 @@ def gcloud_dl(
     elapsed = time.time() - start
     logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
     logger.debug(f"Database files: {os.listdir(output_loc)}")
-    # return output_loc
-    return str(elapsed)
+    return output_loc
 
-@dynamic
-def fetch_all_assets():
-    for uri in [
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb/",
-        # "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb_mmcif/*",
-    ]:
-        gcloud_dl(db_uri=uri)
 
-@task
+@actor.task
 def s3_sync(
     db_uri: str,
     output_loc: str = DB_LOC,
@@ -180,33 +167,14 @@ def af_predict(
     logger.info(f"Output files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
     return FlyteDirectory(path=outdir)
-
-@actor.task
-def zombie() -> str:
-    resurrections = 200
-    while True:
-        resurrections -= 1
-        logger.info("I'm a zombie!")
-        time.sleep(30)
-        if resurrections == 0:
-            return "No more brainsss"
         
-@actor.task
-def reg_dl(db_uri: FlyteDirectory) -> str:
-    s = time.time()
-    db_uri.download()
-    el = time.time() - s
-    return str(el)
 
 @workflow
 def cf_wf():# -> FlyteDirectory:
-    d1 = gcloud_dl(db_uri = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/") # only one that works
+    # d1 = gcloud_dl(db_uri = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/") # only one that works
     # d2 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb/")
     # d4 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/")
-    # d1 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/")
-    # d1 >> d2 >> d3 >> d4
-    # fetch_all_assets()
-    # z = zombie()
+    d1 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/")
     # hitfile, msa = cf_search(
     #     seq="gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
     # )
