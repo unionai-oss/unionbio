@@ -2972,13 +2972,13 @@ files = [
 
 [[package]]
 name = "union"
-version = "0.1.87"
+version = "0.1.93"
 description = "Adds Union specific functionality to Flytekit"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "union-0.1.87-py3-none-any.whl", hash = "sha256:7c8ae9845d7da8e87c8a839a1099c2fbf2052e3f786dd8da9f0ee0964f516820"},
-    {file = "union-0.1.87.tar.gz", hash = "sha256:46ba24ab6f4c2cc7040c5a116fc84544c7f21773191b0338d643a6b87990afa6"},
+    {file = "union-0.1.93-py3-none-any.whl", hash = "sha256:15ec7427fcc8214f35d9e69daf65cb392ddbdedb9ab0f6b838d87dc0f4cfef1d"},
+    {file = "union-0.1.93.tar.gz", hash = "sha256:c05500a90410a93f9283a5b5bd824400b31b3473149bd25c86bab26d1b71c847"},
 ]
 
 [package.dependencies]
@@ -3000,19 +3000,19 @@ rich = "*"
 rich-click = "*"
 sentry-sdk = ">=2.0.0"
 typing-extensions = "*"
-unionai-actor = {version = ">=0.1.3", markers = "platform_system == \"Linux\" and platform_machine == \"x86_64\""}
+unionai-actor = {version = ">=0.1.4", markers = "platform_system == \"Linux\" and platform_machine == \"x86_64\""}
 
 [package.extras]
 byoc = ["unionmeta-byoc"]
 
 [[package]]
 name = "unionai-actor"
-version = "0.1.3"
+version = "0.1.4"
 description = "Enables Union.ai actors"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "unionai_actor-0.1.3-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ec6492202d53e22515478cafceeecd970d42af916b172874b6419c99f0aa56b5"},
+    {file = "unionai_actor-0.1.4-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:04c1aadc71c9aec36c9c4c4a4262789cffa9175d9c7a7188b2b496764981a7d0"},
 ]
 
 [[package]]
@@ -3292,4 +3292,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "48f13bd6cff91c4d783a1e9c8542640be5074331279b087dbae65c7a65e573e8"
+content-hash = "6d1853b35dcdf77a7164a982b3e489d130885212987ebb2b37a52ea18d4798ae"
