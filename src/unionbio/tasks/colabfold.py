@@ -176,10 +176,13 @@ def af_predict(
 @task(enable_deck=True, container_image=colabfold_img_fqn)
 def visualize(af_res: FlyteDirectory) -> str:
     
+    import base64
     import plotly
     from graphein.protein.config import ProteinGraphConfig 
     from graphein.protein.graphs import construct_graph
     from graphein.protein.visualisation import plotly_protein_structure_graph
+    from PIL import Image
+    from io import BytesIO
     
     af_res.download()
 
@@ -199,6 +202,15 @@ def visualize(af_res: FlyteDirectory) -> str:
     prot_deck = Deck("Structure")
     html = plotly.io.to_html(p)
     prot_deck.append(html)
+
+    pred_qual = Deck("Prediction Quality")
+    for i in list(Path(af_res.path).glob("*.png")):
+        with Image.open(i) as img:
+            img_bytes = BytesIO()
+            img.save(img_bytes, format="PNG")
+            image_base64 = base64.b64encode(img_bytes.getvalue()).decode()
+            pred_qual.append(f'<html><body><img src="data:image/png;base64,{image_base64}"/></body></html>')
+
     return "Done"
         
 
