@@ -1,18 +1,15 @@
 import os
-import sys
 import time
-import shlex
-import subprocess
+import base64
+from io import BytesIO
 from pathlib import Path
-from flytekit import task, workflow, current_context, PodTemplate, Resources, dynamic, Deck
+from flytekit import task, workflow, current_context, Resources, Deck
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
 
-DB_LOC = "/root/colabfold_dbs"
-CPU = "30"
 DB_LOC = "/root/colabfold_dbs"
 CPU = "30"
 
@@ -119,7 +116,7 @@ def cf_search(
     ]
     logger.debug(f"Running MMSeqs search on {seq.path} with command:")
     logger.debug(' '.join(cmd))
-    # subproc_execute(cmd)
+    subproc_execute(cmd)
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"MSA files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
@@ -174,15 +171,13 @@ def af_predict(
 
 
 @task(enable_deck=True, container_image=colabfold_img_fqn)
-def visualize(af_res: FlyteDirectory) -> str:
+def visualize(af_res: FlyteDirectory) -> FlyteFile:
     
-    import base64
     import plotly
     from graphein.protein.config import ProteinGraphConfig 
     from graphein.protein.graphs import construct_graph
     from graphein.protein.visualisation import plotly_protein_structure_graph
     from PIL import Image
-    from io import BytesIO
     
     af_res.download()
 
@@ -193,16 +188,18 @@ def visualize(af_res: FlyteDirectory) -> str:
     p = plotly_protein_structure_graph(
         g,
         colour_edges_by="kind",
-        colour_nodes_by="degree",
+        colour_nodes_by="seq_position",
         label_node_ids=False,
-        plot_title="Peptide backbone graph. Nodes coloured by degree.",
+        plot_title="Peptide backbone graph. Nodes coloured by position.",
         node_size_multiplier=1
         )
     
+    # Append structure to deck
     prot_deck = Deck("Structure")
     html = plotly.io.to_html(p)
     prot_deck.append(html)
 
+    # Append prediction quality images to deck
     pred_qual = Deck("Prediction Quality")
     for i in list(Path(af_res.path).glob("*.png")):
         with Image.open(i) as img:
@@ -211,24 +208,29 @@ def visualize(af_res: FlyteDirectory) -> str:
             image_base64 = base64.b64encode(img_bytes.getvalue()).decode()
             pred_qual.append(f'<html><body><img src="data:image/png;base64,{image_base64}"/></body></html>')
 
-    return "Done"
+    # Write structure to file
+    of = "structure.html"
+    with open(of, "w") as f:
+        p.write_html(f)
+
+    return FlyteFile(path=of)
         
 
 @workflow
-def cf_wf():# -> FlyteDirectory:
-    visualize(af_res="gs://opta-gcp-dogfood-gcp/bio-assets/hemoglobin/fold_out/")
-    # d1 = gcloud_dl(db_uri = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/") # only one that works
-    # d2 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb/")
-    # d4 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/")
-    # d1 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/")
-    # hitfile, msa = cf_search(
-    #     seq="gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
-    # )
-    # af = af_predict(
-    #     hitfile=hitfile,
-    #     msa=msa,
-    # )
-    # return af
+def cf_wf() -> FlyteFile:
+    d1 = gcloud_dl(db_uri = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/") # only one that works
+    d2 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb/")
+    d4 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/")
+    d1 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/")
+    hitfile, msa = cf_search(
+        seq="gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
+    )
+    af = af_predict(
+        hitfile=hitfile,
+        msa=msa,
+    )
+    plot = visualize(af_res="gs://opta-gcp-dogfood-gcp/bio-assets/hemoglobin/fold_out/")
+    return plot
 
 # @actor.task
 # def debug() -> str:
