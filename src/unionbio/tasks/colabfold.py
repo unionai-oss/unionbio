@@ -26,10 +26,50 @@ actor = ActorEnvironment(
 )
 
 @actor.task
-def gcloud_dl(
-    db_uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold",
+def sync_dbs(
+    uris: list[str] = [
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
+    ],
     output_loc: str = DB_LOC,
 ) -> str:
+    
+    os.makedirs(output_loc, exist_ok=True)
+    
+    for uri in uris:
+        dl_cmd = [
+            "gcloud",
+            "storage",
+            "rsync",
+            "-R",
+            uri,
+            output_loc,
+        ]
+                
+        cmd_str = " ".join(dl_cmd)
+        logger.info(f"Downloading databases with command: {cmd_str}")
+        start = time.time()
+        subproc_execute(command=cmd_str, shell=True)
+        elapsed = time.time() - start
+        logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
+        logger.debug(f"Database files: {os.listdir(output_loc)}")
+    
+    return output_loc
+
+
+@actor.task
+def sync_mmcif(
+    uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/mmcif_tar/",
+    output_loc: str | None = None,
+) -> str:
+    
+    import zstandard as zstd
+    import tarfile
+    
+    output_loc = output_loc or str(Path(DB_LOC).joinpath("pdb"))
+    temp_dir = "/tmp/mmcif/"
     os.makedirs(output_loc, exist_ok=True)
 
     dl_cmd = [
@@ -37,8 +77,8 @@ def gcloud_dl(
         "storage",
         "rsync",
         "-R",
-        db_uri,
-        output_loc,
+        uri,
+        temp_dir,
     ]
             
     cmd_str = " ".join(dl_cmd)
@@ -48,8 +88,24 @@ def gcloud_dl(
     elapsed = time.time() - start
     logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
     logger.debug(f"Database files: {os.listdir(output_loc)}")
-    return output_loc
 
+    # Loop over each file in the source directory
+    for filename in os.listdir(temp_dir):
+        if filename.endswith(".tar.zst"):
+            src_path = os.path.join(temp_dir, filename)
+            print(f"Decompressing {src_path}...")
+
+            # Decompress the .zst file
+            with open(src_path, 'rb') as compressed_file:
+                decompressor = zstd.ZstdDecompressor()
+                with decompressor.stream_reader(compressed_file) as decompressed_stream:
+                    # Extract the .tar content from the decompressed stream
+                    with tarfile.open(fileobj=decompressed_stream, mode='r:') as tar:
+                        tar.extractall(path=output_loc)
+            
+            print(f"Decompressed and extracted {src_path} to {output_loc}")
+
+    return output_loc
 
 @actor.task
 def s3_sync(
