@@ -10,7 +10,8 @@ from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
 
-DB_LOC = "/root/colabfold_dbs"
+DB_LOC = "/mnt/colabfold_dbs"
+MMCIF_LOC = str(Path(DB_LOC).joinpath("pdb"))
 CPU = "30"
 
 actor = ActorEnvironment(
@@ -29,7 +30,6 @@ actor = ActorEnvironment(
 def sync_dbs(
     uris: list[str] = [
         "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb/",
         "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
         "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
     ],
@@ -62,13 +62,12 @@ def sync_dbs(
 @actor.task
 def sync_mmcif(
     uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/mmcif_tar/",
-    output_loc: str | None = None,
+    output_loc: str = MMCIF_LOC,
 ) -> str:
     
     import zstandard as zstd
     import tarfile
     
-    output_loc = output_loc or str(Path(DB_LOC).joinpath("pdb"))
     temp_dir = "/tmp/mmcif/"
     os.makedirs(output_loc, exist_ok=True)
 
@@ -87,7 +86,7 @@ def sync_mmcif(
     subproc_execute(command=cmd_str, shell=True)
     elapsed = time.time() - start
     logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
-    logger.debug(f"Database files: {os.listdir(output_loc)}")
+    logger.debug(f"Database files: {os.listdir(temp_dir)}")
 
     # Loop over each file in the source directory
     for filename in os.listdir(temp_dir):
@@ -192,12 +191,12 @@ def cf_search(
 def af_predict(
     hitfile: FlyteFile, 
     msa: FlyteFile, 
-    mmcif_loc: str | None = None,
+    mmcif_loc: str = MMCIF_LOC,
     outdir: str | None = None,
 ) -> FlyteDirectory:
 
     outdir = outdir or str(Path(current_context().working_directory).joinpath("outputs"))
-    mmcif_loc = mmcif_loc or str(Path(DB_LOC).joinpath("pdb_mmcif", "mmcif_files"))
+    mmcif_loc = mmcif_loc or str(Path(DB_LOC).joinpath("pdb"))
     msa.download()
     hitfile.download()
     logger.info(f"Running AlphaFold on {msa.path} and {hitfile.path}")
@@ -274,10 +273,8 @@ def visualize(af_res: FlyteDirectory) -> FlyteFile:
 
 @workflow
 def cf_wf() -> FlyteFile:
-    d1 = gcloud_dl(db_uri = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/") # only one that works
-    d2 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb/")
-    d4 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/")
-    d1 = gcloud_dl("gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/")
+    db_path = sync_dbs()
+    mmcif_path = sync_mmcif()
     hitfile, msa = cf_search(
         seq="gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
     )
@@ -287,8 +284,3 @@ def cf_wf() -> FlyteFile:
     )
     plot = visualize(af_res="gs://opta-gcp-dogfood-gcp/bio-assets/hemoglobin/fold_out/")
     return plot
-
-# @actor.task
-# def debug() -> str:
-#     from unionbio.config import logger
-#     return str(sys.path)
