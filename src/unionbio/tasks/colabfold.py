@@ -10,9 +10,9 @@ from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
 
-DB_LOC = "/mnt/colabfold_dbs"
+DB_LOC = str(Path.home().joinpath("colabfold_dbs"))
 MMCIF_LOC = str(Path(DB_LOC).joinpath("pdb"))
-CPU = "30"
+CPU = "14"
 
 actor = ActorEnvironment(
     name="colabfold-actor",
@@ -26,13 +26,9 @@ actor = ActorEnvironment(
     container_image=colabfold_img_fqn,
 )
 
-@actor.task
+@task
 def sync_dbs(
-    uris: list[str] = [
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
-    ],
+    uris: list[str],
     output_loc: str = DB_LOC,
 ) -> str:
     
@@ -59,7 +55,7 @@ def sync_dbs(
     return output_loc
 
 
-@actor.task
+@task
 def sync_mmcif(
     uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/mmcif_tar/",
     output_loc: str = MMCIF_LOC,
@@ -106,7 +102,7 @@ def sync_mmcif(
 
     return output_loc
 
-@actor.task
+@task
 def s3_sync(
     db_uri: str,
     output_loc: str = DB_LOC,
@@ -140,7 +136,7 @@ def s3_sync(
     return output_loc
 
 
-@actor.task
+@task
 def cf_search(
     seq: FlyteFile,
     db_path: str = DB_LOC,
@@ -187,7 +183,7 @@ def cf_search(
     return hitfile, msa
 
 
-@actor.task
+@task
 def af_predict(
     hitfile: FlyteFile, 
     msa: FlyteFile, 
@@ -273,14 +269,18 @@ def visualize(af_res: FlyteDirectory) -> FlyteFile:
 
 @workflow
 def cf_wf() -> FlyteFile:
-    db_path = sync_dbs()
+    db_path = sync_dbs(uris=[
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
+    ])
     mmcif_path = sync_mmcif()
     hitfile, msa = cf_search(
-        seq="gs://opta-gcp-dogfood-gcp/bio-assets/P01308.fasta",
+        seq="gs://opta-gcp-dogfood-gcp/bio-assets/fastas/P01308.fasta",
     )
     af = af_predict(
         hitfile=hitfile,
         msa=msa,
     )
-    plot = visualize(af_res="gs://opta-gcp-dogfood-gcp/bio-assets/hemoglobin/fold_out/")
+    plot = visualize(af_res=af)
     return plot
