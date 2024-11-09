@@ -72,16 +72,10 @@ colabfold_img = ImageSpec(
         "colabfold[alphafold-minus-jax] @ git+https://github.com/sokrypton/ColabFold",
         "colabfold[alphafold]",
         "jax[cuda12]",
-        "tensorflow",
-        "silence_tensorflow"
     ],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
-        "openmm",
-        "pdbfixer",
-        "kalign2=2.04",
-        "hhsuite=3.3.0",
         "mmseqs2=15.6f452"
         ],
     commands=[

@@ -150,8 +150,6 @@ def cf_search(
     t = time.time()
     cmd = [
         "colabfold_search",
-        "-s",
-        "1",
         "--use-env",
         "1",
         "--use-templates",
@@ -160,8 +158,6 @@ def cf_search(
         "2",
         "--db2",
         "pdb100_230517",
-        "--mmseqs",
-        "/usr/local/mmseqs/bin/mmseqs",
         "--threads",
         CPU,
         seq.path,
@@ -271,7 +267,7 @@ def visualize(af_res: FlyteDirectory) -> FlyteFile:
         
 
 @workflow
-def cf_wf():# -> FlyteFile:
+def cf_wf() -> FlyteFile:
     # db_path = sync_dbs(uris=[
     #     "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
     #     "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
@@ -281,9 +277,9 @@ def cf_wf():# -> FlyteFile:
     hitfile, msa = cf_search(
         seq="/mnt/P01308.fasta",
     )
-    # af = af_predict(
-    #     hitfile=hitfile,
-    #     msa=msa,
-    # )
-    # plot = visualize(af_res=af)
-    # return plot
+    af = af_predict(
+        hitfile=hitfile,
+        msa=msa,
+    )
+    plot = visualize(af_res=af)
+    return plot
