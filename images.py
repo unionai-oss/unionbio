@@ -63,25 +63,39 @@ parabricks_img = ImageSpec(
 colabfold_img = ImageSpec(
     name="colabfold",
     platform="linux/amd64",
-    apt_packages=["curl", "tar", "zstd", "gpg", "git", "gcc", "wget", "unzip"],
+    apt_packages=["curl", "tar", "zstd", "gpg", "git", "gcc", "wget", "unzip", "build-essential", "libc6-dev"],
     python_version="3.10",
     packages=[
         union_version,
         "flytekitplugins-pod",
         "graphein",
+        "colabfold[alphafold-minus-jax] @ git+https://github.com/sokrypton/ColabFold",
+        "colabfold[alphafold]",
+        "jax[cuda12]",
+        "tensorflow",
+        "silence_tensorflow"
     ],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
-        "colabfold[alphafold]", 
-        "jax[cuda12]", 
-        "tensorflow"
+        "openmm",
+        "pdbfixer",
+        "kalign2=2.04",
+        "hhsuite=3.3.0",
+        "mmseqs2=15.6f452"
         ],
     commands=[
-        # Install gcloud
-        'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && apt-get install google-cloud-cli -y',
         # Install mmseqs
-        'wget https://mmseqs.com/latest/mmseqs-linux-avx2.tar.gz; tar xvfz mmseqs-linux-avx2.tar.gz; export PATH=$(pwd)/mmseqs/bin/:$PATH',
+        # 'cd /usr/local && \
+        # wget https://github.com/soedinglab/MMseqs2/releases/download/15-6f452/mmseqs-linux-avx2.tar.gz && \
+        # tar xvfz mmseqs-linux-avx2.tar.gz && \
+        # rm -f mmseqs-linux-avx2.tar.gz',
+        # Install gcloud
+        'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
+        | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+        | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
+        apt-get update -y && apt-get install google-cloud-cli -y',
         ],
     registry=current_registry,
 )
