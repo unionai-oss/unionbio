@@ -271,20 +271,20 @@ def visualize(af_res: FlyteDirectory) -> FlyteFile:
         
 
 @workflow
-def cf_wf():# -> FlyteFile:
-    # db_path = sync_dbs(uris=[
-    #     "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
-    #     "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
-    #     "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
-    # ])
-    # mmcif_path = sync_mmcif()
+def cf_wf() -> FlyteFile:
+    db_path = sync_dbs(uris=[
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
+        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
+    ])
+    mmcif_path = sync_mmcif()
     hitfile, msa = cf_search(
-        seq="/mnt/P01308.fasta",
-        # seq="gs://opta-gcp-dogfood-gcp/bio-assets/fastas/P01308.fasta",
+        # seq="/mnt/P01308.fasta",
+        seq="gs://opta-gcp-dogfood-gcp/bio-assets/fastas/P01308.fasta",
     )
     af = af_predict(
         hitfile=hitfile,
         msa=msa,
     )
-    # plot = visualize(af_res=af)
-    # return plot
+    plot = visualize(af_res=af)
+    return plot
