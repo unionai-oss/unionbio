@@ -77,7 +77,11 @@ colabfold_img = ImageSpec(
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
     conda_packages=[
-        "mmseqs2=15.6f452"
+        "mmseqs2=15.6f452",
+        "openmm",
+        "pdbfixer",
+        "kalign2=2.04",
+        "hhsuite=3.3.0",
         ],
     commands=[
         # Install gcloud

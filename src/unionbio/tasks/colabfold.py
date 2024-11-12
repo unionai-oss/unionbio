@@ -10,10 +10,10 @@ from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
 
-DB_LOC = "/home/flytekit/colabfold_dbs"
-# DB_LOC = "/mnt/colabfold"
+# DB_LOC = "/home/flytekit/colabfold_dbs"
+DB_LOC = "/mnt/colabfold"
 MMCIF_LOC = str(Path(DB_LOC).joinpath("pdb"))
-CPU = "30"
+CPU = "60"
 
 actor = ActorEnvironment(
     name="colabfold-actor",
@@ -27,8 +27,8 @@ actor = ActorEnvironment(
     container_image=colabfold_img_fqn,
 )
 
-# @task
-@actor.task
+@task
+# @actor.task
 def sync_dbs(
     uris: list[str],
     output_loc: str = DB_LOC,
@@ -57,8 +57,8 @@ def sync_dbs(
     return output_loc
 
 
-# @task
-@actor.task
+@task
+# @actor.task
 def sync_mmcif(
     uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/mmcif_tar/",
     output_loc: str = MMCIF_LOC,
@@ -152,6 +152,8 @@ def cf_search(
     t = time.time()
     cmd = [
         "colabfold_search",
+        "-s",
+        "1",
         "--use-env",
         "1",
         "--use-templates",
@@ -277,12 +279,12 @@ def cf_wf():# -> FlyteFile:
     # ])
     # mmcif_path = sync_mmcif()
     hitfile, msa = cf_search(
-    #     seq="/mnt/P01308.fasta",
-        seq="gs://opta-gcp-dogfood-gcp/bio-assets/fastas/P01308.fasta",
+        seq="/mnt/P01308.fasta",
+        # seq="gs://opta-gcp-dogfood-gcp/bio-assets/fastas/P01308.fasta",
     )
-    # af = af_predict(
-    #     hitfile=hitfile,
-    #     msa=msa,
-    # )
+    af = af_predict(
+        hitfile=hitfile,
+        msa=msa,
+    )
     # plot = visualize(af_res=af)
     # return plot
