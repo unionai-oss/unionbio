@@ -1,0 +1,1 @@
+from unionbo.tasks.colabfold import af_predict

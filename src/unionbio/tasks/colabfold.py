@@ -10,10 +10,10 @@ from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
 
-# DB_LOC = "/home/flytekit/colabfold_dbs"
-DB_LOC = "/mnt/colabfold"
+DB_LOC = "/home/flytekit/colabfold_dbs"
+# DB_LOC = "/mnt/colabfold"
 MMCIF_LOC = str(Path(DB_LOC).joinpath("pdb"))
-CPU = "60"
+CPU = "30"
 
 actor = ActorEnvironment(
     name="colabfold-actor",
@@ -27,8 +27,8 @@ actor = ActorEnvironment(
     container_image=colabfold_img_fqn,
 )
 
-@task
-# @actor.task
+# @task
+@actor.task
 def sync_dbs(
     uris: list[str],
     output_loc: str = DB_LOC,
@@ -57,8 +57,8 @@ def sync_dbs(
     return output_loc
 
 
-@task
-# @actor.task
+# @task
+@actor.task
 def sync_mmcif(
     uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/mmcif_tar/",
     output_loc: str = MMCIF_LOC,
@@ -139,7 +139,8 @@ def s3_sync(
     return output_loc
 
 
-@task
+# @task
+@actor.task
 def cf_search(
     seq: FlyteFile,
     db_path: str = DB_LOC,
@@ -186,7 +187,8 @@ def cf_search(
     return hitfile, msa
 
 
-@task
+# @task
+@actor.task
 def af_predict(
     hitfile: FlyteFile, 
     msa: FlyteFile, 
@@ -203,9 +205,7 @@ def af_predict(
     t = time.time()
     cmd = [
         "colabfold_batch",
-        "--amber",
         "--templates",
-        "--use-gpu-relax",
         "--pdb-hit-file",
         hitfile.path,
         "--local-pdb-path",
@@ -283,8 +283,11 @@ def cf_wf() -> FlyteFile:
         seq="gs://opta-gcp-dogfood-gcp/bio-assets/fastas/P01308.fasta",
     )
     af = af_predict(
+        # hitfile=FlyteFile(path="/mnt/folding_io/insulin_msa/sp_P01308_INS_HUMAN_Insulin_OS_Homo_sapiens_OX_9606_GN_INS_PE_1_SV_1_pdb100_230517.m8"),
+        # msa=FlyteFile(path="/mnt/folding_io/insulin_msa/sp_P01308_INS_HUMAN_Insulin_OS_Homo_sapiens_OX_9606_GN_INS_PE_1_SV_1.a3m"),
         hitfile=hitfile,
         msa=msa,
     )
     plot = visualize(af_res=af)
+    db_path >> mmcif_path >> hitfile
     return plot
