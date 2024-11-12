@@ -72,6 +72,7 @@ colabfold_img = ImageSpec(
         "colabfold[alphafold-minus-jax] @ git+https://github.com/sokrypton/ColabFold",
         "colabfold[alphafold]",
         "jax[cuda12]",
+        "zstandard",
     ],
     source_root=prod_rt,
     conda_channels=["bioconda", "conda-forge"],
@@ -79,11 +80,6 @@ colabfold_img = ImageSpec(
         "mmseqs2=15.6f452"
         ],
     commands=[
-        # Install mmseqs
-        # 'cd /usr/local && \
-        # wget https://github.com/soedinglab/MMseqs2/releases/download/15-6f452/mmseqs-linux-avx2.tar.gz && \
-        # tar xvfz mmseqs-linux-avx2.tar.gz && \
-        # rm -f mmseqs-linux-avx2.tar.gz',
         # Install gcloud
         'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
         | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
