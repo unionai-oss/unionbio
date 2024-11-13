@@ -69,21 +69,13 @@ colabfold_img = ImageSpec(
         union_version,
         "flytekitplugins-pod",
         "graphein",
-        "colabfold[alphafold-minus-jax] @ git+https://github.com/sokrypton/ColabFold",
-        "colabfold[alphafold]",
-        "jax[cuda12]",
         "zstandard",
     ],
     source_root=prod_rt,
-    conda_channels=["bioconda", "conda-forge"],
-    conda_packages=[
-        "mmseqs2=15.6f452",
-        "openmm",
-        "pdbfixer",
-        "kalign2=2.04",
-        "hhsuite=3.3.0",
-        ],
     commands=[
+        # Install localcolabfold
+        'wget https://raw.githubusercontent.com/YoshitakaMo/localcolabfold/main/install_colabbatch_linux.sh && \
+        bash install_colabbatch_linux.sh',
         # Install gcloud
         'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
         | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
@@ -91,6 +83,7 @@ colabfold_img = ImageSpec(
         | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
         apt-get update -y && apt-get install google-cloud-cli -y',
         ],
+    env={"PATH": "/localcolabfold/colabfold-conda/bin:$PATH"},
     registry=current_registry,
 )
 

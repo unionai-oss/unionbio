@@ -10,25 +10,11 @@ from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
 
-DB_LOC = "/home/flytekit/colabfold_dbs"
-# DB_LOC = "/mnt/colabfold"
+DB_LOC = "/mnt/colabfold"
 MMCIF_LOC = str(Path(DB_LOC).joinpath("pdb"))
-CPU = "30"
+CPU = "60"
 
-actor = ActorEnvironment(
-    name="colabfold-actor",
-    replica_count=1,
-    ttl_seconds=600,
-    requests=Resources(
-        cpu=CPU,
-        mem="100Gi",
-        gpu="1",
-    ),
-    container_image=colabfold_img_fqn,
-)
-
-# @task
-@actor.task
+@task
 def sync_dbs(
     uris: list[str],
     output_loc: str = DB_LOC,
@@ -57,8 +43,7 @@ def sync_dbs(
     return output_loc
 
 
-# @task
-@actor.task
+@task
 def sync_mmcif(
     uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/mmcif_tar/",
     output_loc: str = MMCIF_LOC,
@@ -105,42 +90,8 @@ def sync_mmcif(
 
     return output_loc
 
+
 @task
-def s3_sync(
-    db_uri: str,
-    output_loc: str = DB_LOC,
-    retries: int = 5,
-) -> str:
-    os.makedirs(output_loc, exist_ok=True)
-
-    dl_cmd = [
-        "aws",
-        "s3",
-        "sync",
-        db_uri,
-        output_loc
-    ]
-
-    cmd_str = " ".join(dl_cmd)
-    logger.info(f"Downloading databases with command: {cmd_str}")
-    start = time.time()
-
-    while retries > 0:
-        try:
-            subproc_execute(command=cmd_str, shell=True)
-        except RuntimeError:
-            retries -= 1
-            if retries == 0: raise
-            continue
-    
-    elapsed = time.time() - start
-    logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
-    logger.debug(f"Database files: {os.listdir(output_loc)}")
-    return output_loc
-
-
-# @task
-@actor.task
 def cf_search(
     seq: FlyteFile,
     db_path: str = DB_LOC,
@@ -185,8 +136,7 @@ def cf_search(
     return hitfile, msa
 
 
-# @task
-@actor.task
+@task
 def af_predict(
     hitfile: FlyteFile, 
     msa: FlyteFile, 
@@ -236,7 +186,7 @@ def visualize(af_res: FlyteDirectory) -> FlyteFile:
     af_res.download()
 
     # Select the highest confidence relaxed model
-    pdb = list(Path(af_res.path).glob("*_relaxed_rank_001*"))[0]
+    pdb = list(Path(af_res.path).glob("*relaxed_rank_001*"))[0]
     config = ProteinGraphConfig()
     g = construct_graph(config=config, path=pdb)
     p = plotly_protein_structure_graph(
@@ -271,20 +221,20 @@ def visualize(af_res: FlyteDirectory) -> FlyteFile:
         
 
 @workflow
-def cf_wf() -> FlyteFile:
-    db_path = sync_dbs(uris=[
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
-    ])
-    mmcif_path = sync_mmcif()
+def cf_wf():
+    # db_path = sync_dbs(uris=[
+    #     "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
+    #     "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
+    #     "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
+    # ])
+    # mmcif_path = sync_mmcif()
     hitfile, msa = cf_search(
-        seq="gs://opta-gcp-dogfood-gcp/bio-assets/fastas/rcsb_pdb_2HHB.fasta",
+        seq="/mnt/P01308.fasta",
     )
     af = af_predict(
         hitfile=hitfile,
         msa=msa,
     )
-    plot = visualize(af_res=af)
-    db_path >> mmcif_path >> hitfile
-    return plot
+    # plot = visualize(af_res=af)
+    # db_path >> mmcif_path >> hitfile
+    # return plot

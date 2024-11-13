@@ -33,4 +33,4 @@ src_rt = Path(__file__).parent.parent
 main_img_fqn = "docker.io/unionbio/main:skTnKwYy3TEJSjdTpo1j6g"
 folding_img_fqn = "docker.io/unionbio/folding:cbeU4_RV0mzBVRJOoOhfqg"
 parabricks_img_fqn = "docker.io/unionbio/parabricks:UbmcGj11ottGHfvyRoGjoQ"
-colabfold_img_fqn = "docker.io/unionbio/colabfold:ReeQniRDx4nJX9ZQeRj_tw"
+colabfold_img_fqn = "docker.io/unionbio/colabfold:Jbxh3786R93r85TV618kBA"
