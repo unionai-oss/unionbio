@@ -272,6 +272,7 @@ def visualize(af_res: FlyteDirectory) -> FlyteFile:
 
 @workflow
 def cf_wf() -> FlyteFile:
+# def cf_wf():
     db_path = sync_dbs(uris=[
         "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
         "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
@@ -283,8 +284,8 @@ def cf_wf() -> FlyteFile:
         seq="gs://opta-gcp-dogfood-gcp/bio-assets/fastas/P01308.fasta",
     )
     af = af_predict(
-        # hitfile=FlyteFile(path="/mnt/folding_io/insulin_msa/sp_P01308_INS_HUMAN_Insulin_OS_Homo_sapiens_OX_9606_GN_INS_PE_1_SV_1_pdb100_230517.m8"),
-        # msa=FlyteFile(path="/mnt/folding_io/insulin_msa/sp_P01308_INS_HUMAN_Insulin_OS_Homo_sapiens_OX_9606_GN_INS_PE_1_SV_1.a3m"),
+        hitfile=FlyteFile(path="/mnt/folding_io/insulin_msa/sp_P01308_INS_HUMAN_Insulin_OS_Homo_sapiens_OX_9606_GN_INS_PE_1_SV_1_pdb100_230517.m8"),
+        msa=FlyteFile(path="/mnt/folding_io/insulin_msa/sp_P01308_INS_HUMAN_Insulin_OS_Homo_sapiens_OX_9606_GN_INS_PE_1_SV_1.a3m"),
         hitfile=hitfile,
         msa=msa,
     )
