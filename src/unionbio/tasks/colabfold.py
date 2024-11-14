@@ -11,7 +11,6 @@ from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
 
 DB_LOC = "/home/flytekit/colabfold_dbs"
-# DB_LOC = "/mnt/colabfold"
 MMCIF_LOC = str(Path(DB_LOC).joinpath("pdb"))
 CPU = "30"
 
