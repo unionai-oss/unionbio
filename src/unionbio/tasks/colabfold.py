@@ -3,7 +3,7 @@ import time
 import base64
 from io import BytesIO
 from pathlib import Path
-from flytekit import task, workflow, current_context, Resources, Deck
+from flytekit import task, current_context, Resources, Deck
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
@@ -26,7 +26,6 @@ actor = ActorEnvironment(
     container_image=colabfold_img_fqn,
 )
 
-# @task
 @actor.task
 def sync_dbs(
     uris: list[str],
@@ -56,10 +55,9 @@ def sync_dbs(
     return output_loc
 
 
-# @task
 @actor.task
 def sync_mmcif(
-    uri: str = "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/mmcif_tar/",
+    uri: str,
     output_loc: str = MMCIF_LOC,
 ) -> str:
     
@@ -104,41 +102,7 @@ def sync_mmcif(
 
     return output_loc
 
-@task
-def s3_sync(
-    db_uri: str,
-    output_loc: str = DB_LOC,
-    retries: int = 5,
-) -> str:
-    os.makedirs(output_loc, exist_ok=True)
 
-    dl_cmd = [
-        "aws",
-        "s3",
-        "sync",
-        db_uri,
-        output_loc
-    ]
-
-    cmd_str = " ".join(dl_cmd)
-    logger.info(f"Downloading databases with command: {cmd_str}")
-    start = time.time()
-
-    while retries > 0:
-        try:
-            subproc_execute(command=cmd_str, shell=True)
-        except RuntimeError:
-            retries -= 1
-            if retries == 0: raise
-            continue
-    
-    elapsed = time.time() - start
-    logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
-    logger.debug(f"Database files: {os.listdir(output_loc)}")
-    return output_loc
-
-
-# @task
 @actor.task
 def cf_search(
     seq: FlyteFile,
@@ -184,7 +148,6 @@ def cf_search(
     return hitfile, msa
 
 
-# @task
 @actor.task
 def af_predict(
     hitfile: FlyteFile, 
@@ -267,23 +230,3 @@ def visualize(af_res: FlyteDirectory) -> FlyteFile:
         p.write_html(f)
 
     return FlyteFile(path=of)
-        
-
-@workflow
-def cf_wf() -> FlyteFile:
-    db_path = sync_dbs(uris=[
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/cf_envdb/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/pdb100/",
-        "gs://opta-gcp-dogfood-gcp/bio-assets/colabfold/uniref30/",
-    ])
-    mmcif_path = sync_mmcif()
-    hitfile, msa = cf_search(
-        seq="gs://opta-gcp-dogfood-gcp/bio-assets/fastas/rcsb_pdb_2HHB.fasta",
-    )
-    af = af_predict(
-        hitfile=hitfile,
-        msa=msa,
-    )
-    plot = visualize(af_res=af)
-    db_path >> mmcif_path >> hitfile
-    return plot
