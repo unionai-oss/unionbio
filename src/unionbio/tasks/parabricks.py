@@ -1,4 +1,3 @@
-from typing import Tuple
 from pathlib import Path
 from flytekit import task, Resources
 from flytekit.extras.tasks.shell import subproc_execute

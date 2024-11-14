@@ -2,6 +2,7 @@ import os
 import zipfile
 import requests
 import tarfile
+from time import time
 from pathlib import Path
 from typing import List
 from flytekit import task, current_context
@@ -12,7 +13,6 @@ from unionbio.config import (
     main_img_fqn,
     logger,
     parabricks_img_fqn,
-    remote_reads,
 )
 from unionbio.tasks.helpers import fetch_file
 from unionbio.types import Reads, Reference, VCF, Alignment
@@ -301,20 +301,14 @@ def s3_sync(
 ) -> str:
     os.makedirs(output_loc, exist_ok=True)
 
-    dl_cmd = [
-        "aws",
-        "s3",
-        "sync",
-        db_uri,
-        output_loc
-    ]
+    dl_cmd = ["aws", "s3", "sync", db_uri, output_loc]
 
     cmd_str = " ".join(dl_cmd)
     logger.info(f"Downloading databases with command: {cmd_str}")
     start = time.time()
 
     subproc_execute(command=cmd_str, shell=True)
-    
+
     elapsed = time.time() - start
     logger.info(f"Downloaded in {elapsed} seconds ({elapsed/3600} hours)")
     logger.debug(f"Database files: {os.listdir(output_loc)}")

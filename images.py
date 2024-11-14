@@ -1,5 +1,4 @@
 import re
-import sys
 from pathlib import Path
 from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
@@ -63,7 +62,18 @@ parabricks_img = ImageSpec(
 colabfold_img = ImageSpec(
     name="colabfold",
     platform="linux/amd64",
-    apt_packages=["curl", "tar", "zstd", "gpg", "git", "gcc", "wget", "unzip", "build-essential", "libc6-dev"],
+    apt_packages=[
+        "curl",
+        "tar",
+        "zstd",
+        "gpg",
+        "git",
+        "gcc",
+        "wget",
+        "unzip",
+        "build-essential",
+        "libc6-dev",
+    ],
     python_version="3.10",
     packages=[
         union_version,
@@ -74,15 +84,15 @@ colabfold_img = ImageSpec(
     source_root=prod_rt,
     commands=[
         # Install localcolabfold
-        'wget https://raw.githubusercontent.com/YoshitakaMo/localcolabfold/main/install_colabbatch_linux.sh && \
-        bash install_colabbatch_linux.sh',
+        "wget https://raw.githubusercontent.com/YoshitakaMo/localcolabfold/main/install_colabbatch_linux.sh && \
+        bash install_colabbatch_linux.sh",
         # Install gcloud
         'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
         | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
         curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
         | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
         apt-get update -y && apt-get install google-cloud-cli -y',
-        ],
+    ],
     env={"PATH": "/localcolabfold/colabfold-conda/bin:$PATH"},
     registry=current_registry,
 )
