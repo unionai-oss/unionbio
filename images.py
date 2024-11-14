@@ -32,23 +32,6 @@ main_img = ImageSpec(
     registry=current_registry,
 )
 
-folding_img = ImageSpec(
-    name="folding",
-    platform="linux/amd64",
-    python_version="3.12",
-    packages=["transformers", "torch", union_version],
-    source_root=prod_rt,
-    conda_channels=["bioconda", "conda-forge"],
-    conda_packages=[
-        "prodigal",
-        "biotite",
-        "biopython",
-        "py3Dmol",
-        "matplotlib",
-    ],
-    registry=current_registry,
-)
-
 parabricks_img = ImageSpec(
     name="parabricks",
     base_image="nvcr.io/nvidia/clara/clara-parabricks:4.3.0-1",
@@ -98,9 +81,8 @@ colabfold_img = ImageSpec(
 )
 
 build_scope = [
-    # "main_img",
-    # "folding_img",
-    # "parabricks_img",
+    "main_img",
+    "parabricks_img",
     "colabfold_img",
 ]
 
