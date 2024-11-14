@@ -132,7 +132,8 @@ def cf_search(
     ]
     logger.debug(f"Running MMSeqs search on {seq.path} with command:")
     logger.debug(" ".join(cmd))
-    subproc_execute(cmd)
+    proc = subproc_execute(cmd)
+    logger.debug(proc.output)
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"MSA files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
@@ -158,7 +159,6 @@ def af_predict(
     outdir = outdir or str(
         Path(current_context().working_directory).joinpath("outputs")
     )
-    mmcif_loc = mmcif_loc or str(Path(DB_LOC).joinpath("pdb"))
     msa.download()
     hitfile.download()
     logger.info(f"Running AlphaFold on {msa.path} and {hitfile.path}")
@@ -180,7 +180,8 @@ def af_predict(
     ]
     logger.debug("Executing:")
     logger.debug(" ".join(cmd))
-    subproc_execute(cmd)
+    proc = subproc_execute(cmd)
+    logger.debug(proc.output)
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"Output files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
