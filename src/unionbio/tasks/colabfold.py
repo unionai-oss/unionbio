@@ -107,6 +107,7 @@ def cf_search(
     seq: FlyteFile,
     db_path: str = DB_LOC,
     outdir: str | None = None,
+    search_args: list[str] | None = None,
 ) -> tuple[FlyteFile, FlyteFile]:
     outdir = outdir or str(
         Path(current_context().working_directory).joinpath("outputs")
@@ -114,22 +115,30 @@ def cf_search(
     seq.download()
 
     t = time.time()
-    cmd = [
-        "colabfold_search",
-        "--use-env",
-        "1",
-        "--use-templates",
-        "1",
-        "--db-load-mode",
-        "2",
-        "--db2",
-        "pdb100_230517",
-        "--threads",
-        CPU,
-        seq.path,
+    cmd = ["colabfold_search"]
+
+    if search_args:
+        cmd.extend(search_args)
+    else:
+        cmd.extend(
+            ["--use-env",
+            "1",
+            "--use-templates",
+            "1",
+            "--db-load-mode",
+            "2",
+            "--db2",
+            "pdb100_230517",
+            "--threads",
+            CPU]
+        )
+    
+    cmd.extend(
+    [   seq.path,
         db_path,
-        outdir,
-    ]
+        outdir]
+    )
+
     logger.debug(f"Running MMSeqs search on {seq.path} with command:")
     logger.debug(" ".join(cmd))
     proc = subproc_execute(cmd)
