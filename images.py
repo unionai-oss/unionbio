@@ -8,7 +8,7 @@ project_rt = Path(__file__).parent
 prod_rt = project_rt.joinpath("src")
 ws_rt = project_rt.joinpath("workspaces")
 
-union_version = "union==0.1.87"
+union_version = "union==0.1.103"
 
 main_img = ImageSpec(
     name="main",
