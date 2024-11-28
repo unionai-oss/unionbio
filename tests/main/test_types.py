@@ -118,15 +118,15 @@ def test_vcf():
 
 
 def test_vcf_make_all():
-    vcfs = VCF.make_all(test_assets["vcf_dir"], exclude=["SRR81284"])
-    assert len(vcfs) == 3
+    vcfs = VCF.make_all(test_assets["vcf_dir"], include=["*SRR812824-chr21*"])
+    assert len(vcfs) == 1
     assert isinstance(vcfs[0], VCF)
-    assert vcfs[0].sample == "test-sample-1"
-    assert vcfs[0].caller == "test-caller"
+    assert vcfs[0].sample == "SRR812824-chr21"
+    assert vcfs[0].caller == "haplo-caller"
     assert vcfs[0].vcf.path == str(test_assets["vcf_path"])
     assert vcfs[0].vcf_idx.path == str(test_assets["vcf_idx_path"])
-    assert vcfs[0].get_vcf_fname() == "test-sample-1_test-caller.g.vcf.gz"
-    assert vcfs[0].get_vcf_idx_fname() == "test-sample-1_test-caller.g.vcf.gz.tbi"
+    assert vcfs[0].get_vcf_fname() == "SRR812824-chr21_haplo-caller.g.vcf.gz"
+    assert vcfs[0].get_vcf_idx_fname() == "SRR812824-chr21_haplo-caller.g.vcf.gz.tbi"
 
 
 def test_protein():

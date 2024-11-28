@@ -35,8 +35,8 @@ test_assets = {
     ),
     "sites_path": assets.joinpath("sites/known_indels_trunc.hg38.vcf.gz"),
     "sites_idx_path": assets.joinpath("sites/known_indels_trunc.hg38.vcf.gz.tbi"),
-    "vcf_path": assets.joinpath("vcfs/test-sample-1_test-caller.vcf.gz"),
-    "vcf_idx_path": assets.joinpath("vcfs/test-sample-1_test-caller.vcf.gz.tbi"),
+    "vcf_path": assets.joinpath("vcfs/SRR812824-chr21_haplo-caller.g.vcf.gz"),
+    "vcf_idx_path": assets.joinpath("vcfs/SRR812824-chr21_haplo-caller.g.vcf.gz.tbi"),
     "raw_read": assets.joinpath("sequences/raw/ERR250683-tiny_1.fastq.gz"),
     "protein_path": assets.joinpath("proteins"),
 }

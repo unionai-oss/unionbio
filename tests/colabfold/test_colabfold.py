@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, '/home/flytekit/workspace/unionbio')
+# import sys
+# sys.path.insert(0, '/home/flytekit/workspace/unionbio')
 
 from flytekit.types.file import FlyteFile
 from unionbio.tasks.colabfold import cf_search, af_predict

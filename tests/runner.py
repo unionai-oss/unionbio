@@ -1,8 +1,8 @@
 import docker
-from .config import proj_rt, main_img_test_fqn
+from .config import proj_rt, main_img_test_fqn, colabfold_img_test_fqn
 
 
-def run_pytest_in_docker(fqn: str, test_prefix: str):
+def run_pytest_in_docker(fqn: str, test_prefix: str, gpu: bool=False):
     client = docker.from_env()
 
     try:
@@ -12,6 +12,7 @@ def run_pytest_in_docker(fqn: str, test_prefix: str):
         container = client.containers.run(
             name=con_name,
             image=fqn,
+            # runtime=
             volumes={
                 proj_rt.joinpath("tests"): {
                     "bind": "/root/tests",
@@ -48,4 +49,7 @@ def run_pytest_in_docker(fqn: str, test_prefix: str):
 
 
 def test_main():
-    run_pytest_in_docker(main_img_test_fqn, "main")
+    run_pytest_in_docker(main_img_test_fqn, "main/test_types.py")
+
+def test_colabfold():
+    run_pytest_in_docker(colabfold_img_test_fqn, "colabfold", gpu=True)
