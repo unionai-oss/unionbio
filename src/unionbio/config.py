@@ -9,7 +9,7 @@ console_handler.setFormatter(
     logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s")
 )
 logger.addHandler(console_handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # Default paths
 remote_ref = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/references/GRCh38_chr21.fasta"

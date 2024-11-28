@@ -18,11 +18,13 @@ class Protein(DataClassJSONMixin):
     """
 
     name: str
-    protein: FlyteFile | None = None
+    sequence: FlyteFile | None = None
+    msa: FlyteFile | None = None
+    hitfile: FlyteFile | None = None
     genes: FlyteFile | None = None
 
     def get_prot_fname(self):
-        return f"{self.name}_proteins.fasta"
+        return f"{self.name}.fasta"
 
     def get_genes_fname(self):
-        return f"{self.name}_genes.gff"
+        return f"{self.name}.gff"

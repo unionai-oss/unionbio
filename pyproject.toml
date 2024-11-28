@@ -21,6 +21,7 @@ flytekitplugins-pod = "^1.13.5"
 image-builder = "images:build"
 test-image-builder = "images:build_test"
 main-tests = "tests.runner:test_main"
+cf-tests = "tests.runner:test_colabfold"
 
 [build-system]
 requires = ["poetry-core"]
