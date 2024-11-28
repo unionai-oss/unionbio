@@ -95,8 +95,10 @@ def fetch_file(url: str, local_dir: str) -> Path:
     fname = url_parts[-1]
     remote_dir = "/".join(url_parts[3:-1])
     local_path = Path(local_dir).joinpath(fname)
+    logger.debug(f"File will be written to {local_path}")
 
     if prot == "ftp:":  # FTP
+        logger.debug("Fetching FTP file..")
         ftp = ftplib.FTP(host)
         ftp.login()
         ftp.cwd(remote_dir)
@@ -104,8 +106,11 @@ def fetch_file(url: str, local_dir: str) -> Path:
             ftp.retrbinary(f"RETR {fname}", file.write)
         ftp.quit()
     elif prot == "http:" or prot == "https:":  # HTTP
+        logger.debug("Fetching HTTP file..")
         try:
-            response = requests.get(url)
+            headers = {'User-Agent': 'My User Agent 1.0'}
+            response = requests.get(url, headers=headers)
+            logger.debug(response)
             with open(local_path, "wb") as file:
                 file.write(response.content)
         except requests.HTTPError as e:
@@ -136,3 +141,4 @@ def filter_dir(dir: Path, include: list[str] = ["*"], exclude: list[str] = []):
             yield f
         else:
             logger.debug(f"Excluded {f}")
+            

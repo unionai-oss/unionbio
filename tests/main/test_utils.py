@@ -12,12 +12,12 @@ from unionbio.types import VCF, Alignment
 
 def test_fetch_http_file(tmp_path):
     # Test that fetch_file downloads a file
-    url = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/raw/ERR250683-tiny_1.fastq.gz"
+    url = "https://github.com/unionai-oss/unionbio/raw/refs/heads/main/tests/assets/alignments/bwa/ERR250683-tiny_bwa_aligned.sam"
     outpath = fetch_file(url, tmp_path)
     assert outpath.exists()
     assert open(outpath, "rb").read(), "File {outpath} is empty"
-    assert outpath.name == "ERR250683-tiny_1.fastq.gz"
-    assert cmp(outpath, Path(test_assets["raw_read"]))
+    assert outpath.name == "ERR250683-tiny_bwa_aligned.sam"
+    assert cmp(outpath, Path(test_assets["bwa_sam_path"]))
 
 
 def test_fetch_ftp_file(tmp_path):

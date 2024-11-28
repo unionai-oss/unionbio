@@ -20,10 +20,11 @@ def run_pytest_in_docker(fqn: str, test_prefix: str, gpu: bool=False):
                 },
                 # Mount unionbio so it's discoverable in PYTHONPATH
                 proj_rt.joinpath("src/unionbio"): {
-                    "bind": "/root/unionbio",
+                    "bind": "/root/src/unionbio",
                     "mode": "rw",
                 },
             },
+            environment={"PYTHONPATH": "/root/src:/root"},
             command=f"pytest /root/tests/{test_prefix}",
             stdout=True,
             stderr=True,
@@ -49,7 +50,7 @@ def run_pytest_in_docker(fqn: str, test_prefix: str, gpu: bool=False):
 
 
 def test_main():
-    run_pytest_in_docker(main_img_test_fqn, "main/test_types.py")
+    run_pytest_in_docker(main_img_test_fqn, "main")
 
 def test_colabfold():
     run_pytest_in_docker(colabfold_img_test_fqn, "colabfold", gpu=True)

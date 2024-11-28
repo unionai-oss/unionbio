@@ -29,7 +29,7 @@ test_assets = {
     "prot_path": assets.joinpath("proteins/folding_proteins.fasta"),
     "ref_path": assets.joinpath("references/GRCh38_short.fasta"),
     "ref_idx_path": assets.joinpath("references/GRCh38_short.fasta.fai"),
-    "bwa_sam_path": assets.joinpath("alignments/bwa/ERR250683-tiny_bwa.sam"),
+    "bwa_sam_path": assets.joinpath("alignments/bwa/ERR250683-tiny_bwa_aligned.sam"),
     "recal_out": assets.joinpath(
         "alignments/recal/SRR812824-chr21_bowtie2_sorted_deduped_recal.sam"
     ),
