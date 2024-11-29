@@ -9,6 +9,7 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
 from unionbio.config import colabfold_img_fqn, logger
+from unionbio.types import Protein
 
 DB_LOC = "/home/flytekit/colabfold_dbs"
 MMCIF_LOC = str(Path(DB_LOC).joinpath("pdb"))
@@ -104,7 +105,7 @@ def sync_mmcif(
 
 @actor.task
 def cf_search(
-    seq: FlyteFile,
+    prot: Protein,
     db_path: str = DB_LOC,
     outdir: str | None = None,
     search_args: list[str] | None = None,

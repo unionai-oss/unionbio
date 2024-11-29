@@ -1,7 +1,9 @@
+from pathlib import Path
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
-
+from unionbio.config import logger
+from unionbio.tasks.helpers import filter_dir
 
 @dataclass
 class Protein(DataClassJSONMixin):
@@ -17,7 +19,7 @@ class Protein(DataClassJSONMixin):
         genes (FlyteFile): A FlyteFile object representing the path to the gene sequence file.
     """
 
-    name: str
+    sample: str
     sequence: FlyteFile | None = None
     msa: FlyteFile | None = None
     hitfile: FlyteFile | None = None
@@ -28,3 +30,25 @@ class Protein(DataClassJSONMixin):
 
     def get_genes_fname(self):
         return f"{self.name}.gff"
+
+    @classmethod
+    def make_all(
+        cls,
+        dir: Path,
+        include: list[str] = ["*.fasta*", "*.gff", "*.m8", "*.a3m"],
+        exclude: list[str] = [],
+    ) -> list:
+        samples = {}
+        for fp in filter_dir(dir, include=include, exclude=exclude):
+            sample = fp.stem
+
+            if sample not in samples:
+                samples[sample] = cls(sample=sample)
+
+            if fp.suffix == ".fasta":
+                samples[sample].sequence = FlyteFile(path=str(fp))
+            elif fp.suffix == ".m8":
+                samples[sample].alignment_idx = FlyteFile(path=str(fp))
+
+        logger.info(f"Created following Alignment objects from {dir}: {samples}")
+        return list(samples.values())
