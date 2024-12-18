@@ -14,9 +14,14 @@ class Protein(DataClassJSONMixin):
     that describe the associated metadata.
 
     Attributes:
-        name (str): The name or identifier of the protein sequence.
-        protein (FlyteFile): A FlyteFile object representing the path to the protein sequence file.
+        sample (str): The name or identifier of the protein sequence.
+        sequence (FlyteFile): A FlyteFile object representing the path to the protein sequence file.
+        msa (FlyteFile): A FlyteFile representing evolutionary structural information.
+        hitfil (FlyteFile): A FlyteFile capturing search results of similar proteins.
         genes (FlyteFile): A FlyteFile object representing the path to the gene sequence file.
+        predict_out (FlyteDirectory): A FlyteDirectory object representing predicted structure files and associated
+            confidence scores.
+
     """
 
     sample: str
@@ -24,6 +29,8 @@ class Protein(DataClassJSONMixin):
     msa: FlyteFile | None = None
     hitfile: FlyteFile | None = None
     genes: FlyteFile | None = None
+    predict_out: FlyteDirectory | None = None
+
 
     def get_prot_fname(self):
         return f"{self.sample}.fasta"
@@ -35,7 +42,7 @@ class Protein(DataClassJSONMixin):
     def make_all(
         cls,
         dir: Path,
-        include: list[str] = ["*.fasta", "*.gff", "*.m8", "*.a3m"],
+        include: list[str] = ["*.fasta", "*.gff", "*.m8", "*.a3m", "*.pdb", "*.png"],
         exclude: list[str] = [],
     ) -> list:
         samples = {}

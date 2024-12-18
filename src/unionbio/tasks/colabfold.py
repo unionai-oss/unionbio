@@ -161,17 +161,16 @@ def cf_search(
 
 @actor.task
 def af_predict(
-    hitfile: FlyteFile,
-    msa: FlyteFile,
+    prot: Protein,
     mmcif_loc: str = MMCIF_LOC,
     outdir: str | None = None,
 ) -> FlyteDirectory:
     outdir = outdir or str(
         Path(current_context().working_directory).joinpath("outputs")
     )
-    msa.download()
-    hitfile.download()
-    logger.info(f"Running AlphaFold on {msa.path} and {hitfile.path}")
+    msa = msa.download()
+    hits = hitfile.download()
+    logger.info(f"Running AlphaFold on {msa} and {hits}")
 
     t = time.time()
     cmd = [
@@ -180,12 +179,12 @@ def af_predict(
         "--amber",
         "--use-gpu-relax",
         "--pdb-hit-file",
-        hitfile.path,
+        str(hits),
         "--local-pdb-path",
         mmcif_loc,
         "--random-seed",
         "0",
-        msa.path,
+        str(msa),
         outdir,
     ]
     logger.debug("Executing:")
@@ -195,21 +194,22 @@ def af_predict(
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"Output files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
-    return FlyteDirectory(path=outdir)
+    prot.predict_out = FlyteDirectory(path=outdir)
+    return prot
 
 
 @task(enable_deck=True, container_image=colabfold_img_fqn)
-def visualize(af_res: FlyteDirectory) -> FlyteFile:
+def visualize(af_res: Protein) -> FlyteFile:
     import plotly
     from graphein.protein.config import ProteinGraphConfig
     from graphein.protein.graphs import construct_graph
     from graphein.protein.visualisation import plotly_protein_structure_graph
     from PIL import Image
 
-    af_res.download()
+    af_dir = af_res.predict_out.download()
 
     # Select the highest confidence relaxed model
-    pdb = list(Path(af_res.path).glob("*_relaxed_rank_001*"))[0]
+    pdb = list(Path(af_dir).glob("*_relaxed_rank_001*"))[0]
     config = ProteinGraphConfig()
     g = construct_graph(config=config, path=pdb)
     p = plotly_protein_structure_graph(
@@ -228,7 +228,7 @@ def visualize(af_res: FlyteDirectory) -> FlyteFile:
 
     # Append prediction quality images to deck
     pred_qual = Deck("Prediction Quality")
-    for i in list(Path(af_res.path).glob("*.png")):
+    for i in list(Path(af_dir).glob("*.png")):
         with Image.open(i) as img:
             img_bytes = BytesIO()
             img.save(img_bytes, format="PNG")
