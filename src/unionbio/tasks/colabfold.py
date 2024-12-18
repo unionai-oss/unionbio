@@ -109,11 +109,11 @@ def cf_search(
     db_path: str = DB_LOC,
     outdir: str | None = None,
     search_args: list[str] | None = None,
-) -> tuple[FlyteFile, FlyteFile]:
+) -> Protein:
     outdir = outdir or str(
         Path(current_context().working_directory).joinpath("outputs")
     )
-    seq.download()
+    prot.sequence.download()
 
     t = time.time()
     cmd = ["colabfold_search"]
@@ -135,28 +135,28 @@ def cf_search(
         )
     
     cmd.extend(
-    [   seq.path,
+        [prot.sequence.path,
         db_path,
         outdir]
     )
 
-    logger.debug(f"Running MMSeqs search on {seq.path} with command:")
+    logger.debug(f"Running MMSeqs search on {prot.sequence.path} with command:")
     logger.debug(" ".join(cmd))
     proc = subproc_execute(cmd)
-    logger.debug(proc.output)
+    # logger.debug(proc.output)
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"MSA files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
     for fn in Path(outdir).iterdir():
         path = fn.resolve()
         if path.suffix == ".m8":
-            hitfile = FlyteFile(path=str(path))
+            prot.hitfile = FlyteFile(path=str(path))
         if path.suffix == ".a3m":
-            msa = FlyteFile(path=str(path))
+            prot.msa = FlyteFile(path=str(path))
 
-    logger.debug(f"Returning {hitfile} and {msa}")
+    logger.debug(f"Returning {prot}")
 
-    return hitfile, msa
+    return prot
 
 
 @actor.task

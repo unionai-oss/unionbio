@@ -131,13 +131,13 @@ def test_vcf_make_all():
 
 def test_protein():
     prot = Protein("my-monomer", FlyteFile(path="sequence-path"))
-    assert prot.name == "my-monomer"
+    assert prot.sample == "my-monomer"
     assert prot.sequence.path == "sequence-path"
     assert prot.get_prot_fname() == "my-monomer.fasta"
     assert prot.get_genes_fname() == "my-monomer.gff"
 
 
 def test_protein_make_all(tmp_path):
-    copy_dir_conts(test_assets["protein_path"].joinpath("sequences"), tmp_path)
-    p = Protein.make_all()[0]
+    copy_dir_conts(test_assets["protein_path"], tmp_path)
+    p = Protein.make_all(tmp_path)[0]
     assert isinstance(p, Protein)

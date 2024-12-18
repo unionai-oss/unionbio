@@ -26,21 +26,21 @@ class Protein(DataClassJSONMixin):
     genes: FlyteFile | None = None
 
     def get_prot_fname(self):
-        return f"{self.name}.fasta"
+        return f"{self.sample}.fasta"
 
     def get_genes_fname(self):
-        return f"{self.name}.gff"
+        return f"{self.sample}.gff"
 
     @classmethod
     def make_all(
         cls,
         dir: Path,
-        include: list[str] = ["*.fasta*", "*.gff", "*.m8", "*.a3m"],
+        include: list[str] = ["*.fasta", "*.gff", "*.m8", "*.a3m"],
         exclude: list[str] = [],
     ) -> list:
         samples = {}
         for fp in filter_dir(dir, include=include, exclude=exclude):
-            sample = fp.stem
+            sample = "_".join(fp.stem.split("_")[:4])
 
             if sample not in samples:
                 samples[sample] = cls(sample=sample)
@@ -48,7 +48,11 @@ class Protein(DataClassJSONMixin):
             if fp.suffix == ".fasta":
                 samples[sample].sequence = FlyteFile(path=str(fp))
             elif fp.suffix == ".m8":
-                samples[sample].alignment_idx = FlyteFile(path=str(fp))
+                samples[sample].hitfile = FlyteFile(path=str(fp))
+            elif fp.suffix == ".a3m":
+                samples[sample].msa = FlyteFile(path=str(fp))
+            elif fp.suffix == ".gff":
+                samples[sample].genes = FlyteFile(path=str(fp))
 
-        logger.info(f"Created following Alignment objects from {dir}: {samples}")
+        logger.info(f"Created following Protein objects from {dir}: {samples}")
         return list(samples.values())
