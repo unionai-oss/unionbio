@@ -22,4 +22,4 @@ def test_cf_search(tmp_path):
         ]
     )
     assert isinstance(prot_out, Protein)
-    assert Path(prot_out.msa.path).stem in os.listdir(tmp_path.joinpath("search_out"))
+    assert Path(prot_out.msa.path).name in os.listdir(tmp_path.joinpath("search_out"))
