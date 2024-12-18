@@ -113,7 +113,7 @@ def cf_search(
     outdir = outdir or str(
         Path(current_context().working_directory).joinpath("outputs")
     )
-    prot.sequence.download()
+    seq = prot.sequence.download()
 
     t = time.time()
     cmd = ["colabfold_search"]
@@ -135,12 +135,12 @@ def cf_search(
         )
     
     cmd.extend(
-        [prot.sequence.path,
+        [seq,
         db_path,
         outdir]
     )
 
-    logger.debug(f"Running MMSeqs search on {prot.sequence.path} with command:")
+    logger.debug(f"Running MMSeqs search on {seq} with command:")
     logger.debug(" ".join(cmd))
     proc = subproc_execute(cmd)
     # logger.debug(proc.output)
