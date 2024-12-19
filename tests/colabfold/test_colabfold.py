@@ -26,4 +26,16 @@ def test_cf_search(tmp_path):
 
 
 def test_af_predict(tmp_path):
-    ...
+    copy_dir_conts(test_assets["protein_path"], tmp_path)
+    prot_in = Protein.make_all(tmp_path.joinpath("af_predict"))[0]
+    predict_out = af_predict(prot=prot_in, mmcif_loc=tmp_path.joinpath("af_predict", "cifs"), af_args=[
+        "--templates",
+        "--pdb-hit-file",
+        "prot.hitfile.path",
+        "--num-models",
+        "1",
+        "--num-recycle",
+        "1",
+        "--stop-at-score",
+        "1",
+    ])
