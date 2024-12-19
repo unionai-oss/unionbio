@@ -8,8 +8,8 @@ from tests.config import test_assets
 
 def test_cf_search(tmp_path):
     copy_dir_conts(test_assets["protein_path"], tmp_path)
-    prot_in = Protein.make_all(tmp_path.joinpath("sequences"))[0]
-    db_path = str(tmp_path.joinpath("databases"))
+    prot_in = Protein.make_all(tmp_path.joinpath("cf_search", "sequences"))[0]
+    db_path = str(tmp_path.joinpath("cf_search", "databases"))
     prot_out = cf_search(prot=prot_in, db_path=db_path, search_args=[
         "--db1", 
         "minisprot", 
@@ -22,7 +22,7 @@ def test_cf_search(tmp_path):
         ]
     )
     assert isinstance(prot_out, Protein)
-    assert Path(prot_out.msa.path).name in os.listdir(tmp_path.joinpath("search_out"))
+    assert Path(prot_out.msa.path).name in os.listdir(tmp_path.joinpath("cf_search", "search_out"))
 
 
 def test_af_predict(tmp_path):
