@@ -108,7 +108,7 @@ def fetch_file(url: str, local_dir: str) -> Path:
     elif prot == "http:" or prot == "https:":  # HTTP
         logger.debug("Fetching HTTP file..")
         try:
-            headers = {'User-Agent': 'My User Agent 1.0'}
+            headers = {"User-Agent": "My User Agent 1.0"}
             response = requests.get(url, headers=headers)
             logger.debug(response)
             with open(local_path, "wb") as file:
@@ -141,4 +141,3 @@ def filter_dir(dir: Path, include: list[str] = ["*"], exclude: list[str] = []):
             yield f
         else:
             logger.debug(f"Excluded {f}")
-            

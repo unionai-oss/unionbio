@@ -122,23 +122,21 @@ def cf_search(
         cmd.extend(search_args)
     else:
         cmd.extend(
-            ["--use-env",
-            "1",
-            "--use-templates",
-            "1",
-            "--db-load-mode",
-            "2",
-            "--db2",
-            "pdb100_230517",
-            "--threads",
-            CPU]
+            [
+                "--use-env",
+                "1",
+                "--use-templates",
+                "1",
+                "--db-load-mode",
+                "2",
+                "--db2",
+                "pdb100_230517",
+                "--threads",
+                CPU,
+            ]
         )
-    
-    cmd.extend(
-        [seq,
-        db_path,
-        outdir]
-    )
+
+    cmd.extend([seq, db_path, outdir])
 
     logger.debug(f"Running MMSeqs search on {seq} with command:")
     logger.debug(" ".join(cmd))
@@ -164,29 +162,44 @@ def af_predict(
     prot: Protein,
     mmcif_loc: str = MMCIF_LOC,
     outdir: str | None = None,
-) -> FlyteDirectory:
+    batch_args: list[str] | None = None,
+) -> Protein:
     outdir = outdir or str(
         Path(current_context().working_directory).joinpath("outputs")
     )
-    msa = msa.download()
-    hits = hitfile.download()
+    msa = prot.msa.download()
+    hits = prot.hitfile.download()
     logger.info(f"Running AlphaFold on {msa} and {hits}")
 
     t = time.time()
     cmd = [
         "colabfold_batch",
-        "--templates",
-        "--amber",
-        "--use-gpu-relax",
-        "--random-seed",
-        "0",
-        "--pdb-hit-file",
-        str(hits),
-        "--local-pdb-path",
-        mmcif_loc,
-        str(msa),
-        outdir,
     ]
+
+    if batch_args:
+        cmd.extend(batch_args)
+    else:
+        cmd.extend(
+            [
+                "--amber",
+                "--use-gpu-relax",
+                "--random-seed",
+                "0",
+            ]
+        )
+
+    cmd.extend(
+        [
+            "--templates",
+            "--pdb-hit-file",
+            str(hits),
+            "--local-pdb-path",
+            mmcif_loc,
+            str(msa),
+            outdir,
+        ]
+    )
+
     logger.debug("Executing:")
     logger.debug(" ".join(cmd))
     proc = subproc_execute(cmd)

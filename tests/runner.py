@@ -2,7 +2,7 @@ import docker
 from .config import proj_rt, main_img_test_fqn, colabfold_img_test_fqn
 
 
-def run_pytest_in_docker(fqn: str, test_prefix: str, rt: str=None):
+def run_pytest_in_docker(fqn: str, test_prefix: str, rt: str = None):
     client = docker.from_env()
 
     try:
@@ -51,6 +51,7 @@ def run_pytest_in_docker(fqn: str, test_prefix: str, rt: str=None):
 
 def test_main():
     run_pytest_in_docker(main_img_test_fqn, "main")
+
 
 def test_colabfold():
     run_pytest_in_docker(colabfold_img_test_fqn, "colabfold", rt="nvidia")

@@ -2,8 +2,10 @@ from pathlib import Path
 from mashumaro.mixins.json import DataClassJSONMixin
 from dataclasses import dataclass
 from flytekit.types.file import FlyteFile
+from flytekit.types.directory import FlyteDirectory
 from unionbio.config import logger
 from unionbio.tasks.helpers import filter_dir
+
 
 @dataclass
 class Protein(DataClassJSONMixin):
@@ -30,7 +32,6 @@ class Protein(DataClassJSONMixin):
     hitfile: FlyteFile | None = None
     genes: FlyteFile | None = None
     predict_out: FlyteDirectory | None = None
-
 
     def get_prot_fname(self):
         return f"{self.sample}.fasta"
