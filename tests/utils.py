@@ -1,29 +1,44 @@
 import os
 import shutil
 import filecmp
+from pathlib import Path
 from unionbio.config import logger
 
+def comp_lines(file1, file2):
+    with open(file1, "r") as f1, open(file2, "r") as f2:
+        for line1, line2 in zip(f1, f2):
+            if line1 != line2:
+                logger.error("Lines do not match:")
+                logger.error(line1.rstrip())
+                logger.error(line2.rstrip())
+                return False
+        return True
 
-def dir_conts_match(dir1, dir2):
-    dcmp = filecmp.dircmp(dir1, dir2)
+def compare_dirs(expected: Path, actual: Path, mode: str) -> bool:
+    
+    assert mode in ["exists", "whole", "lines"], f"Please choose a valid comparison mode: exists, whole, lines"
 
-    common_files = dcmp.common_files
-    common_dirs = dcmp.common_dirs
+    logger.debug(f"Comparing expected dir {expected} with test dir {actual} in mode {mode}")
+    exp_files = [f for f in expected.iterdir() if f.is_file()]
+    exp_dirs = [d for d in expected.iterdir() if d.is_dir()]
 
-    for common_file in common_files:
-        file1_path = os.path.join(dir1, common_file)
-        file2_path = os.path.join(dir2, common_file)
-        assert filecmp.cmp(
-            file1_path, file2_path
-        ), f"{file1_path} and {file2_path} do not match"
+    for exp_file in exp_files:
+        ac_file = actual.joinpath(exp_file.name)
+        if mode == "exists":
+            assert ac_file.exists(), f"Expected file {exp_file} does not exist in test directory"
+        elif mode == "whole":
+            assert filecmp.cmp(
+                exp_file, ac_file
+            ), f"{exp_file} and {ac_file} do not match"
+        elif mode == "lines":
+            assert comp_lines(exp_file, ac_file), f"Expected file {exp_file} and test file {ac_file} failed line by line comparison"
 
-    for common_dir in common_dirs:
-        subdir1 = os.path.join(dir1, common_dir)
-        subdir2 = os.path.join(dir2, common_dir)
-        dir_conts_match(subdir1, subdir2)
+    for exp_dir in exp_dirs:
+        ac_dir = actual.joinpath(exp_dir.name)
+        assert ac_dir.exists(), f"Expected subdirectory {ac_dir} does not exist in test directory"
+        compare_dirs(ac_dir, exp_dir, mode=mode)
 
     return True
-
 
 def copy_dir_conts(src_dir, dest_dir):
     # Ensure the destination directory exists
@@ -43,12 +58,3 @@ def copy_dir_conts(src_dir, dest_dir):
             shutil.copy2(src_path, dest_path)
 
 
-def comp_files(file1, file2):
-    with open(file1, "r") as f1, open(file2, "r") as f2:
-        for line1, line2 in zip(f1, f2):
-            if line1 != line2:
-                logger.error("Lines do not match:")
-                logger.error(line1)
-                logger.error(line2)
-                return False
-        return True
