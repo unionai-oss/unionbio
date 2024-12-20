@@ -2,7 +2,7 @@ import docker
 from .config import proj_rt, main_img_test_fqn, colabfold_img_test_fqn
 
 
-def run_pytest_in_docker(fqn: str, test_prefix: str, rt: str = None):
+def run_pytest_in_docker(fqn: str, test_prefix: str, rt: str = None, dr: list = None):
     client = docker.from_env()
 
     try:
@@ -13,6 +13,7 @@ def run_pytest_in_docker(fqn: str, test_prefix: str, rt: str = None):
             name=con_name,
             image=fqn,
             runtime=rt,
+            device_requests=dr,
             volumes={
                 proj_rt.joinpath("tests"): {
                     "bind": "/root/tests",
@@ -54,4 +55,14 @@ def test_main():
 
 
 def test_colabfold():
-    run_pytest_in_docker(colabfold_img_test_fqn, "colabfold", rt="nvidia")
+    run_pytest_in_docker(
+        colabfold_img_test_fqn,
+        "colabfold",
+        rt="nvidia",
+        dr=[
+            docker.types.DeviceRequest(
+                count=-1,  # -1 means all available GPUs
+                capabilities=[["gpu"]],
+            )
+        ],
+    )
