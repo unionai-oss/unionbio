@@ -7,7 +7,7 @@ from unionbio.tasks.hisat2 import hisat2_index, hisat2_align_paired_reads
 from unionbio.tasks.bowtie2 import bowtie2_index, bowtie2_align_paired_reads
 from unionbio.tasks.bwa import bwa_index, bwa_align
 from tests.config import test_assets
-from tests.utils import dir_conts_match, copy_dir_conts
+from tests.utils import compare_dirs, copy_dir_conts
 from unionbio.types import Alignment, Reads, Reference
 
 
@@ -45,7 +45,7 @@ def test_bowtie2_index(tmp_path):
     ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=tmp_path))
     idx = bowtie2_index(ref=ref)
     assert isinstance(idx, Reference)
-    assert dir_conts_match(test_assets["bwa_idx_dir"], idx.ref_dir.path)
+    assert compare_dirs(test_assets["bt2_idx_dir"], Path(idx.ref_dir.path), mode="exists")
 
 
 def test_bowtie2_align(tmp_path):
@@ -71,7 +71,7 @@ def test_bwa_index(tmp_path):
         test_assets["ref_idx_path"],
         Path(indexed_ref.ref_dir.path).joinpath(f'{test_assets["ref_fn"]}.fai'),
     )
-    assert dir_conts_match(test_assets["bwa_idx_dir"], indexed_ref.ref_dir.path)
+    assert compare_dirs(test_assets["bwa_idx_dir"], Path(indexed_ref.ref_dir.path), mode="exists")
 
 
 def test_bwa_align(tmp_path):
