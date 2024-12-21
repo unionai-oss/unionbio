@@ -158,7 +158,7 @@ def cf_search(
 
 
 @actor.task
-def af_predict(
+def af_predict_local(
     prot: Protein,
     mmcif_loc: str = MMCIF_LOC,
     outdir: str | None = None,
@@ -199,6 +199,33 @@ def af_predict(
             outdir,
         ]
     )
+
+    logger.debug("Executing:")
+    logger.debug(" ".join(cmd))
+    proc = subproc_execute(cmd)
+    logger.debug(proc.output)
+    logger.info(f"Created the following outputs in {time.time() - t} seconds:")
+    logger.info(f"Output files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
+
+    prot.predict_out = FlyteDirectory(path=outdir)
+    return prot
+
+
+@task(container_image=colabfold_img_fqn, requests=Resources(cpu="10", mem="50Gi", gpu="1"))
+def af_predict_hosted(prot: Protein, outdir: str | None = None) -> Protein:
+    outdir = outdir or str(
+        Path(current_context().working_directory).joinpath("outputs")
+    )
+    seq = prot.sequence.download()
+
+    logger.info(f"Running AlphaFold on {seq}")
+    t = time.time()
+
+    cmd = [
+        "colabfold_batch",
+        seq,
+        outdir,
+    ]
 
     logger.debug("Executing:")
     logger.debug(" ".join(cmd))

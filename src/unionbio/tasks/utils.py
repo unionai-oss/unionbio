@@ -4,22 +4,22 @@ import requests
 import tarfile
 from time import time
 from pathlib import Path
-from typing import List
+from typing import list
 from flytekit import task, current_context
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from unionbio.config import (
-    main_img_fqn,
     logger,
+    main_img_fqn,
     parabricks_img_fqn,
 )
 from unionbio.tasks.helpers import fetch_file
-from unionbio.types import Reads, Reference, VCF, Alignment
+from unionbio.types import Reads, Reference, VCF, Alignment, Protein
 
 
 @task(container_image=main_img_fqn)
-def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
+def prepare_raw_samples(seq_dir: FlyteDirectory) -> list[Reads]:
     """
     Prepare and process raw sequencing data to create a list of RawSample objects.
 
@@ -30,7 +30,7 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> List[Reads]:
         seq_dir (FlyteDirectory): The input directory containing raw sequencing data.
 
     Returns:
-        List[Reads]: A list of Reads objects representing the processed sequencing data.
+        list[Reads]: A list of Reads objects representing the processed sequencing data.
     """
     seq_dir.download()
     return Reads.make_all(Path(seq_dir))
@@ -44,15 +44,15 @@ def fetch_remote_reference(url: str) -> Reference:
 
 
 @task(container_image=main_img_fqn)
-def fetch_remote_reads(urls: List[str]) -> List[Reads]:
+def fetch_remote_reads(urls: list[str]) -> list[Reads]:
     """
     Fetches remote reads from a list of URLs and returns a list of Reads objects.
 
     Args:
-        urls (List[str]): A list of URLs pointing to the reads to fetch.
+        urls (list[str]): A list of URLs pointing to the reads to fetch.
 
     Returns:
-        List[Reads]: A list of Reads objects representing the fetched reads.
+        list[Reads]: A list of Reads objects representing the fetched reads.
     """
     workdir = current_context().working_directory
     for url in urls:
@@ -86,16 +86,36 @@ def fetch_remote_sites(sites: str, idx: str) -> VCF:
     )
 
 
+@task(container_image=main_img_fqn)
+def fetch_remote_protein(urls: list[str]) -> Protein:
+    """
+    Fetches files from a list of URLs and returns a list of Protein objects.
+
+    Args:
+        urls (list[str]): A list of URLs pointing to a3m, h8, fasta etc files.
+
+    Returns:
+        Protein: A Protein object representing the fetched files.
+    """
+    workdir = current_context().working_directory
+    for url in urls:
+        fetch_file(url, workdir)
+    prots = Protein.make_all(workdir)[0]
+    if len(prots) > 1:
+        logger.warning(f"More than 1 Protein object created from provided URLs: {prots}. Returning index 0.")
+    return prots[0]
+
+
 @task
-def fetch_files(urls: List[str]) -> List[FlyteFile]:
+def fetch_files(urls: list[str]) -> list[FlyteFile]:
     """
     Fetches files from a list of URLs and returns a list of FlyteFile objects.
 
     Args:
-        urls (List[str]): A list of URLs pointing to the files to fetch.
+        urls (list[str]): A list of URLs pointing to the files to fetch.
 
     Returns:
-        List[FlyteFile]: A list of FlyteFile objects representing the fetched files.
+        list[FlyteFile]: A list of FlyteFile objects representing the fetched files.
     """
     outfiles = []
     workdir = current_context().working_directory
@@ -249,15 +269,15 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
 
 
 @task(container_image=main_img_fqn)  # TODO: generalize
-def reformat_alignments(als: List[Alignment], to_format: str) -> List[Alignment]:
+def reformat_alignments(als: list[Alignment], to_format: str) -> list[Alignment]:
     """
     Reformat alignment files to ensure they are in the correct format.
 
     Args:
-        als (List[Alignment]): A list of Alignment objects containing the aligned reads.
+        als (list[Alignment]): A list of Alignment objects containing the aligned reads.
 
     Returns:
-        List[Alignment]: A list of Alignment objects with the reformatted alignment files.
+        list[Alignment]: A list of Alignment objects with the reformatted alignment files.
     """
     als_out = []
     for al in als:
