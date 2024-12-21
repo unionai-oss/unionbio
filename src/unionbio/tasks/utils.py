@@ -4,7 +4,6 @@ import requests
 import tarfile
 from time import time
 from pathlib import Path
-from typing import list
 from flytekit import task, current_context
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
@@ -100,7 +99,7 @@ def fetch_remote_protein(urls: list[str]) -> Protein:
     workdir = current_context().working_directory
     for url in urls:
         fetch_file(url, workdir)
-    prots = Protein.make_all(workdir)[0]
+    prots = Protein.make_all(Path(workdir))
     if len(prots) > 1:
         logger.warning(f"More than 1 Protein object created from provided URLs: {prots}. Returning index 0.")
     return prots[0]
