@@ -1,8 +1,10 @@
 import os
 import time
 import base64
+import subprocess
 from io import BytesIO
 from pathlib import Path
+from time import sleep
 from flytekit import task, current_context, Resources, Deck
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
@@ -221,6 +223,7 @@ def af_predict_hosted(prot: Protein, outdir: str | None = None) -> Protein:
     logger.info(f"Running AlphaFold on {seq}")
     t = time.time()
 
+    print(subprocess.check_output("nvidia-smi"))
     cmd = [
         "colabfold_batch",
         seq,
@@ -229,12 +232,14 @@ def af_predict_hosted(prot: Protein, outdir: str | None = None) -> Protein:
 
     logger.debug("Executing:")
     logger.debug(" ".join(cmd))
-    proc = subproc_execute(cmd)
+    # proc = subproc_execute(cmd)
+    sleep(3600)
     logger.debug(proc.output)
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"Output files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
     prot.predict_out = FlyteDirectory(path=outdir)
+    # prot.predict_out = FlyteDirectory(path="/tmp")
     return prot
 
 
