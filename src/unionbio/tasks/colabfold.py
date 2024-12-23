@@ -232,14 +232,12 @@ def af_predict_hosted(prot: Protein, outdir: str | None = None) -> Protein:
 
     logger.debug("Executing:")
     logger.debug(" ".join(cmd))
-    # proc = subproc_execute(cmd)
-    sleep(3600)
+    proc = subproc_execute(cmd)
     logger.debug(proc.output)
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"Output files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 
     prot.predict_out = FlyteDirectory(path=outdir)
-    # prot.predict_out = FlyteDirectory(path="/tmp")
     return prot
 
 
