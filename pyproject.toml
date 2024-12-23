@@ -8,12 +8,10 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
 flytekit = "^1.12.0"
-imagespec-fast-builder = "0.0.33"
 docker = "<7.0.0"
 requests = "2.31.0"
-flytekitplugins-envd = "^1.12.3"
 streamlit = "^1.36.0"
-union = "0.1.93"
+union = "0.1.117"
 kubernetes = "^31.0.0"
 flytekitplugins-pod = "^1.13.5"
 
