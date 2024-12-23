@@ -250,9 +250,10 @@ def visualize(af_res: Protein) -> FlyteFile:
     from PIL import Image
 
     af_dir = af_res.predict_out.download()
+    logger.debug(f"Visualizing AlphaFold results in {af_dir}")
 
     # Select the highest confidence relaxed model
-    pdb = list(Path(af_dir).glob("*_relaxed_rank_001*"))[0]
+    pdb = list(Path(af_dir).glob("*relaxed_rank_001*"))[0]
     config = ProteinGraphConfig()
     g = construct_graph(config=config, path=pdb)
     p = plotly_protein_structure_graph(
