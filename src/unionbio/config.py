@@ -20,13 +20,12 @@ remote_reads = [
 remote_rgtag = "@RG\tID:SRR812824\tSM:Sample1\tLB:Library1\tPL:illumina\tPU:SRR812824.2"
 remote_sites_vcf = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf"
 remote_sites_idx = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sites/Mills_and_1000G_gold_standard_chr21.indels.hg38.vcf.idx"
-remote_protein_fasta = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/proteins/af_predict/sequences/P42212.fasta"
+remote_protein_fasta = "https://rest.uniprot.org/uniprotkb/P42212.fasta"
 
 # Tool config
 fastp_cpu = "3"
 
-# current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
-current_registry = None
+current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
 src_rt = Path(__file__).parent.parent
 
 # Image tags
@@ -34,4 +33,4 @@ src_rt = Path(__file__).parent.parent
 # from a containerized environment. These also contain the actual unionbio package.
 main_img_fqn = "docker.io/unionbio/main:dzHYMihrCJBBJnqF_b_IgQ"
 parabricks_img_fqn = "docker.io/unionbio/parabricks:5hxhXIPbJq_ctRzjpgpImg"
-colabfold_img_fqn = "colabfold:z_XC1ekFFUkDyURQcUC1gw"
+colabfold_img_fqn = "docker.io/unionbio/colabfold:0rk81UDTuQfFOrqcb3pYnw"

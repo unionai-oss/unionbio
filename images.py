@@ -84,7 +84,6 @@ colabfold_img = ImageSpec(
         | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
         apt-get update -y && apt-get install google-cloud-cli -y',
     ],
-    # env={"PATH": "/opt/micromamba/envs/runtime/bin:$PATH"},
     registry=current_registry,
 )
 
