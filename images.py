@@ -88,8 +88,8 @@ colabfold_img = ImageSpec(
 )
 
 build_scope = [
-    # "main_img",
-    # "parabricks_img",
+    "main_img",
+    "parabricks_img",
     "colabfold_img",
 ]
 
