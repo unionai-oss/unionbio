@@ -25,7 +25,8 @@ remote_protein_fasta = "https://github.com/unionai-oss/unionbio/raw/main/tests/a
 # Tool config
 fastp_cpu = "3"
 
-current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
+# current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
+current_registry = None
 src_rt = Path(__file__).parent.parent
 
 # Image tags
@@ -33,4 +34,4 @@ src_rt = Path(__file__).parent.parent
 # from a containerized environment. These also contain the actual unionbio package.
 main_img_fqn = "docker.io/unionbio/main:dzHYMihrCJBBJnqF_b_IgQ"
 parabricks_img_fqn = "docker.io/unionbio/parabricks:5hxhXIPbJq_ctRzjpgpImg"
-colabfold_img_fqn = "docker.io/unionbio/colabfold:r_qHm3oEA2rJKUXOeIjKqw"
+colabfold_img_fqn = "colabfold:jOckajYyImrTuHBXl1b1HQ"

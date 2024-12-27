@@ -46,4 +46,4 @@ test_assets = {
 # from a containerized environment. These also contain the actual unionbio package.
 main_img_test_fqn = "docker.io/unionbio/main:QdrUUXRaX8dnLdBNcTTwlA-test"
 parabricks_img_test_fqn = "docker.io/unionbio/parabricks:Tq__Sxtd1fXeBZ5337quZw-test"
-colabfold_img_test_fqn = "docker.io/unionbio/colabfold:eL1JDVpBJ1p_xD_h0L9ybQ-test"
+colabfold_img_test_fqn = "colabfold:jC8IszFVflMLAxFIXluauA-test"
