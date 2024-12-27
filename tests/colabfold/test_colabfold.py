@@ -1,5 +1,6 @@
 import os
 import subprocess
+from time import sleep
 from pathlib import Path
 from unionbio.types.protein import Protein
 from unionbio.tasks.colabfold import cf_search, af_predict_local

@@ -57,7 +57,7 @@ def test_main():
 def test_colabfold():
     run_pytest_in_docker(
         colabfold_img_test_fqn,
-        "colabfold",
+        "colabfold/test_colabfold.py",
         rt="nvidia",
         dr=[
             docker.types.DeviceRequest(
