@@ -34,4 +34,4 @@ src_rt = Path(__file__).parent.parent
 # from a containerized environment. These also contain the actual unionbio package.
 main_img_fqn = "docker.io/unionbio/main:dzHYMihrCJBBJnqF_b_IgQ"
 parabricks_img_fqn = "docker.io/unionbio/parabricks:5hxhXIPbJq_ctRzjpgpImg"
-colabfold_img_fqn = "colabfold:jOckajYyImrTuHBXl1b1HQ"
+colabfold_img_fqn = "colabfold:z_XC1ekFFUkDyURQcUC1gw"

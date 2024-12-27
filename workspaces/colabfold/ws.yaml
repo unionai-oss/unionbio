@@ -2,7 +2,7 @@ name: colabfold-workspace
 # Make sure that the project and domain exists
 project: pryce
 domain: development
-container_image: colabfold:rdZE_3_lDdJaHxop9omGnQ-test
+container_image: colabfold:AZIdieAe3RbEubYfuZhfww-test
 
 resources:
     cpu: "14"

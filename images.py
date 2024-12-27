@@ -66,7 +66,6 @@ colabfold_img = ImageSpec(
         "colabfold[alphafold-minus-jax]@git+https://github.com/sokrypton/ColabFold.git",
         "colabfold[alphafold]",
         "jax[cuda12]==0.4.35",
-        # "dm-haiku==0.0.13"
     ],
     conda_channels=["conda-forge", "bioconda"],
     conda_packages=[
@@ -78,9 +77,6 @@ colabfold_img = ImageSpec(
     ],
     source_root=prod_rt,
     commands=[
-        # Install localcolabfold
-        # "wget https://raw.githubusercontent.com/YoshitakaMo/localcolabfold/main/install_colabbatch_linux.sh && \
-        # bash install_colabbatch_linux.sh",
         # Install gcloud
         'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
         | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
@@ -88,7 +84,7 @@ colabfold_img = ImageSpec(
         | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
         apt-get update -y && apt-get install google-cloud-cli -y',
     ],
-    env={"PATH": "/localcolabfold/colabfold-conda/bin:/opt/micromamba/envs/runtime/bin:$PATH"},
+    # env={"PATH": "/opt/micromamba/envs/runtime/bin:$PATH"},
     registry=current_registry,
 )
 
