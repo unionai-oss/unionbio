@@ -2,7 +2,7 @@ name: main-workspace
 # Make sure that the project and domain exists
 project: default
 domain: development
-container_image: docker.io/unionbio/main:PQKouem0y7RMsd46Qw8LnA-test
+container_image: docker.io/unionbio/main:M_Z0NkSt8zRmMqElFUT9tw-test
 resources:
     cpu: "2"
     mem: "4Gi"
