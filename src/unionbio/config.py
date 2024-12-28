@@ -26,11 +26,7 @@ remote_protein_fasta = "https://rest.uniprot.org/uniprotkb/P42212.fasta"
 fastp_cpu = "3"
 
 current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
-src_rt = Path(__file__).parent.parent
 
-# Image tags
-# While tasks can reference imageSpec directly, using the tag allows registering tasks
-# from a containerized environment. These also contain the actual unionbio package.
-main_img_fqn = "docker.io/unionbio/main:dMIor9sLFd3gOGcn3Szsbw"
-parabricks_img_fqn = "docker.io/unionbio/parabricks:GtK6MA8oTmSL_nRx_zag1Q"
-colabfold_img_fqn = "docker.io/unionbio/colabfold:FclvRNJJdRfHkuB_Z8f8_Q"
+project_rt = Path(__file__).parent.parent.parent
+prod_rt = project_rt.joinpath("src")
+ws_rt = project_rt.joinpath("workspaces")

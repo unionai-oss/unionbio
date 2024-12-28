@@ -1,7 +1,7 @@
 from pathlib import Path
+from unionbio.config import project_rt
 
-proj_rt = Path(__file__).parent.parent
-test_dir = proj_rt.joinpath("tests")
+test_dir = project_rt.joinpath("tests")
 assets = test_dir.joinpath("assets")
 
 test_assets = {
@@ -44,6 +44,6 @@ test_assets = {
 # Image tags
 # While tasks can reference imageSpec directly, using the tag allows registering tasks
 # from a containerized environment. These also contain the actual unionbio package.
-main_img_test_fqn = "docker.io/unionbio/main:c_ScHU6brQKNTDUosQA2yQ-test"
-parabricks_img_test_fqn = "docker.io/unionbio/parabricks:SHFGT2iZYSjJVmb_JVwLig-test"
-colabfold_img_test_fqn = "docker.io/unionbio/colabfold:U2onduOr6wi4_d81rGDljQ-test"
+main_img_test_fqn = "docker.io/unionbio/main:PQKouem0y7RMsd46Qw8LnA-test"
+parabricks_img_test_fqn = "docker.io/unionbio/parabricks:s2edjhyr0d5SptEftaNJvg-test"
+colabfold_img_test_fqn = "docker.io/unionbio/colabfold:2sYd_naN_oPBP_DdF_EzUA-test"

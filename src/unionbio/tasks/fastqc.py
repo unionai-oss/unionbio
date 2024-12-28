@@ -3,11 +3,12 @@ from typing import List
 from flytekit import task, current_context
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.directory import FlyteDirectory
-from unionbio.config import main_img_fqn, logger
+from unionbio.config import logger
+from unionbio.images import main_img
 from unionbio.types import Reads
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img)
 def fastqc(reads: List[Reads]) -> FlyteDirectory:
     """
     Perform quality control using FastQC.

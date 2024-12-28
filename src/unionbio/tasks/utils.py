@@ -8,16 +8,13 @@ from flytekit import task, current_context
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
-from unionbio.config import (
-    logger,
-    main_img_fqn,
-    parabricks_img_fqn,
-)
+from unionbio.config import logger
+from unionbio.images import main_img, parabricks_img
 from unionbio.tasks.helpers import fetch_file
 from unionbio.types import Reads, Reference, VCF, Alignment, Protein
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img)
 def prepare_raw_samples(seq_dir: FlyteDirectory) -> list[Reads]:
     """
     Prepare and process raw sequencing data to create a list of RawSample objects.
@@ -35,14 +32,14 @@ def prepare_raw_samples(seq_dir: FlyteDirectory) -> list[Reads]:
     return Reads.make_all(Path(seq_dir))
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img)
 def fetch_remote_reference(url: str) -> Reference:
     workdir = current_context().working_directory
     ref_path = fetch_file(url, workdir)
     return Reference(ref_name=str(ref_path.name), ref_dir=FlyteDirectory(path=workdir))
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img)
 def fetch_remote_reads(urls: list[str]) -> list[Reads]:
     """
     Fetches remote reads from a list of URLs and returns a list of Reads objects.
@@ -59,7 +56,7 @@ def fetch_remote_reads(urls: list[str]) -> list[Reads]:
     return Reads.make_all(Path(workdir))
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img)
 def fetch_remote_sites(sites: str, idx: str) -> VCF:
     """
     Fetches remote known sites from a URL and returns a Sites object.
@@ -85,7 +82,7 @@ def fetch_remote_sites(sites: str, idx: str) -> VCF:
     )
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img)
 def fetch_remote_protein(urls: list[str]) -> Protein:
     """
     Fetches files from a list of URLs and returns a list of Protein objects.
@@ -98,6 +95,7 @@ def fetch_remote_protein(urls: list[str]) -> Protein:
     """
     workdir = current_context().working_directory
     for url in urls:
+        logger.debug(f"Fetching {url}")
         fetch_file(url, workdir)
     prots = Protein.make_all(Path(workdir))
     if len(prots) > 1:
@@ -189,7 +187,7 @@ def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
     return "PASS"
 
 
-@task(container_image=parabricks_img_fqn)
+@task(container_image=parabricks_img)
 def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
     """
     Compares two BAM files and returns True if they are identical, False otherwise.
@@ -226,7 +224,7 @@ def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
 
 
 @task(
-    container_image=main_img_fqn,
+    container_image=main_img,
 )
 def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     """
@@ -267,7 +265,7 @@ def intersect_vcfs(vcf1: VCF, vcf2: VCF) -> VCF:
     return isec_out
 
 
-@task(container_image=main_img_fqn)  # TODO: generalize
+@task(container_image=main_img)  # TODO: generalize
 def reformat_alignments(als: list[Alignment], to_format: str) -> list[Alignment]:
     """
     Reformat alignment files to ensure they are in the correct format.

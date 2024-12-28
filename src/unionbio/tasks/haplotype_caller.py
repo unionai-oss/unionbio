@@ -4,11 +4,12 @@ from typing import List
 from flytekit import task, dynamic, current_context, Resources
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
-from unionbio.config import logger, main_img_fqn
+from unionbio.config import logger
+from unionbio.images import main_img
 from unionbio.types import Alignment, Reference, VCF
 
 
-@task(container_image=main_img_fqn, requests=Resources(cpu="4", mem="10Gi"))
+@task(container_image=main_img, requests=Resources(cpu="4", mem="10Gi"))
 def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
     """
     Call variants using HaplotypeCaller from GATK.

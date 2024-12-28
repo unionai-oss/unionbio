@@ -3,13 +3,13 @@ from flytekit import task, Resources
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
-from unionbio.config import parabricks_img_fqn
+from unionbio.images import parabricks_img
 from unionbio.types import Alignment, Reference, Reads, VCF
 
 
 @task(
     requests=Resources(gpu="1", mem="32Gi", cpu="32"),
-    container_image=parabricks_img_fqn,
+    container_image=parabricks_img,
 )
 def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
     """
@@ -65,7 +65,7 @@ def pb_fq2bam(reads: Reads, sites: VCF, ref: Reference) -> Alignment:
 
 @task(
     requests=Resources(gpu="1", mem="32Gi", cpu="32"),
-    container_image=parabricks_img_fqn,
+    container_image=parabricks_img,
 )
 def basic_align(indir: FlyteDirectory) -> FlyteFile:
     """
@@ -156,7 +156,7 @@ def basic_align(indir: FlyteDirectory) -> FlyteFile:
 
 @task(
     requests=Resources(gpu="1", mem="32Gi", cpu="32"),
-    container_image=parabricks_img_fqn,
+    container_image=parabricks_img,
 )
 def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
     """
@@ -201,7 +201,7 @@ def pb_deepvar(al: Alignment, ref: Reference) -> VCF:
 
 @task(
     requests=Resources(gpu="1", mem="32Gi", cpu="32"),
-    container_image=parabricks_img_fqn,
+    container_image=parabricks_img,
 )
 def pb_haplocall(al: Alignment, ref: Reference) -> VCF:
     """

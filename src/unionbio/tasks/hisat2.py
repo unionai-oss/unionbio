@@ -5,7 +5,8 @@ from flytekit import kwtypes, task, Resources, current_context, TaskMetadata
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask, subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
-from unionbio.config import remote_ref, main_img_fqn, logger
+from unionbio.config import remote_ref, logger
+from unionbio.images import main_img
 from unionbio.types import Alignment, Reads
 
 
@@ -23,7 +24,7 @@ hisat2_index = ShellTask(
     debug=True,
     metadata=TaskMetadata(retries=3, cache=True, cache_version=remote_ref),
     requests=Resources(cpu="4", mem="10Gi"),
-    container_image=main_img_fqn,
+    container_image=main_img,
     script="""
     mkdir {outputs.idx}
     hisat2-build {inputs.ref} {outputs.idx}/hs2_idx
@@ -36,7 +37,7 @@ hisat2_index = ShellTask(
 
 
 @task(
-    container_image=main_img_fqn,
+    container_image=main_img,
     requests=Resources(cpu="4", mem="10Gi"),
 )
 def hisat2_align_paired_reads(idx: FlyteDirectory, fs: Reads) -> Alignment:

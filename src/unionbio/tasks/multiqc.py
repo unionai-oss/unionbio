@@ -6,11 +6,12 @@ from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from typing import List
 from pathlib import Path
-from unionbio.config import logger, main_img_fqn
+from unionbio.config import logger
+from unionbio.images import main_img
 from unionbio.types import Alignment, Reads, VCF
 
 
-@task(container_image=main_img_fqn, enable_deck=True)
+@task(container_image=main_img, enable_deck=True)
 def render_multiqc(
     fqc: FlyteDirectory,
     filt_reps: List[Reads] | None,

@@ -5,12 +5,13 @@ from flytekit import task, Resources, dynamic
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
-from unionbio.config import main_img_fqn, logger
+from unionbio.images import main_img
+from unionbio.config import logger
 from unionbio.types import Alignment, Reads, Reference
 
 
 @task(
-    container_image=main_img_fqn,
+    container_image=main_img,
     requests=Resources(cpu="4", mem="10Gi"),
 )
 def bowtie2_index(ref: Reference) -> Reference:
@@ -47,7 +48,7 @@ def bowtie2_index(ref: Reference) -> Reference:
 
 
 @task(
-    container_image=main_img_fqn,
+    container_image=main_img,
     requests=Resources(cpu="4", mem="10Gi"),
 )
 def bowtie2_align_paired_reads(idx: Reference, fs: Reads) -> Alignment:
@@ -96,7 +97,7 @@ def bowtie2_align_paired_reads(idx: Reference, fs: Reads) -> Alignment:
     return alignment
 
 
-@dynamic(container_image=main_img_fqn)
+@dynamic(container_image=main_img)
 def bowtie2_align_samples(idx: Reference, samples: List[Reads]) -> List[Alignment]:
     """
     Process samples through bowtie2.

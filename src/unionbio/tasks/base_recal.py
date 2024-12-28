@@ -3,11 +3,12 @@ from pathlib import Path
 from flytekit import task, dynamic, current_context
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
-from unionbio.config import main_img_fqn, logger
+from unionbio.images import main_img
+from unionbio.config import logger
 from unionbio.types import Reference, Alignment, VCF
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img)
 def base_recalibrator(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
     """
     Recalibrate base quality scores using GATK's BaseRecalibrator.

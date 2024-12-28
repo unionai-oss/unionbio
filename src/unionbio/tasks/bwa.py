@@ -5,12 +5,13 @@ from flytekit import task, Resources, current_context, dynamic
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
-from unionbio.config import remote_ref, main_img_fqn, logger
+from unionbio.config import remote_ref, logger
+from unionbio.images import main_img
 from unionbio.types import Reference, Reads, Alignment
 
 
 @task(
-    container_image=main_img_fqn,
+    container_image=main_img,
     requests=Resources(cpu="4", mem="10Gi"),
     cache=True,
     cache_version=remote_ref,
@@ -48,7 +49,7 @@ def bwa_index(ref: Reference) -> Reference:
 
 
 @task(
-    container_image=main_img_fqn,
+    container_image=main_img,
     requests=Resources(cpu="4", mem="10Gi"),
 )
 def bwa_align(ref: Reference, reads: Reads, rgtag: str = "") -> Alignment:
@@ -98,7 +99,7 @@ def bwa_align(ref: Reference, reads: Reads, rgtag: str = "") -> Alignment:
     return al_out
 
 
-@dynamic(container_image=main_img_fqn)
+@dynamic(container_image=main_img)
 def bwa_align_samples(idx: Reference, samples: List[Reads]) -> List[Alignment]:
     """
     Process samples through BWA.

@@ -10,7 +10,8 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import subproc_execute
 from union.actor import ActorEnvironment
-from unionbio.config import colabfold_img_fqn, logger
+from unionbio.config import logger
+from unionbio.images import colabfold_img
 from unionbio.types import Protein
 
 DB_LOC = "/home/flytekit/colabfold_dbs"
@@ -26,7 +27,7 @@ actor = ActorEnvironment(
         mem="100Gi",
         gpu="1",
     ),
-    container_image=colabfold_img_fqn,
+    container_image=colabfold_img,
 )
 
 
@@ -213,7 +214,7 @@ def af_predict_local(
     return prot
 
 
-@task(container_image=colabfold_img_fqn, requests=Resources(cpu="10", mem="50Gi", gpu="1"))
+@task(container_image=colabfold_img, requests=Resources(cpu="10", mem="50Gi", gpu="1"))
 def af_predict_hosted(prot: Protein, outdir: str | None = None) -> Protein:
     outdir = outdir or str(
         Path(current_context().working_directory).joinpath("outputs")
@@ -241,7 +242,7 @@ def af_predict_hosted(prot: Protein, outdir: str | None = None) -> Protein:
     return prot
 
 
-@task(enable_deck=True, container_image=colabfold_img_fqn)
+@task(enable_deck=True, container_image=colabfold_img)
 def visualize(af_res: Protein) -> FlyteFile:
     import plotly
     from graphein.protein.config import ProteinGraphConfig

@@ -2,11 +2,12 @@ from typing import List
 from flytekit import dynamic, task
 from flytekit.extras.tasks.shell import subproc_execute
 from flytekit.types.file import FlyteFile
-from unionbio.config import main_img_fqn, logger
+from unionbio.config import logger
+from unionbio.images import main_img
 from unionbio.types import Alignment
 
 
-@task(container_image=main_img_fqn)
+@task(container_image=main_img)
 def sort_sam(al: Alignment) -> Alignment:
     """
     Sort an alignment file using GATK's SortSam tool.

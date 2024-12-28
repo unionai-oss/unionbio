@@ -1,5 +1,10 @@
+import re
 import docker
-from .config import proj_rt, main_img_test_fqn, colabfold_img_test_fqn
+from pathlib import Path
+from flytekit.image_spec.image_spec import ImageBuildEngine
+from .config import main_img_test_fqn, colabfold_img_test_fqn, parabricks_img_test_fqn
+from unionbio.images import build_scope, main_img, parabricks_img, colabfold_img
+from unionbio.config import project_rt, ws_rt
 
 
 def run_pytest_in_docker(fqn: str, test_prefix: str, rt: str = None, dr: list = None):
@@ -15,12 +20,12 @@ def run_pytest_in_docker(fqn: str, test_prefix: str, rt: str = None, dr: list = 
             runtime=rt,
             device_requests=dr,
             volumes={
-                proj_rt.joinpath("tests"): {
+                project_rt.joinpath("tests"): {
                     "bind": "/root/tests",
                     "mode": "rw",
                 },
                 # Mount unionbio so it's discoverable in PYTHONPATH
-                proj_rt.joinpath("src/unionbio"): {
+                project_rt.joinpath("src/unionbio"): {
                     "bind": "/root/src/unionbio",
                     "mode": "rw",
                 },
@@ -57,7 +62,7 @@ def test_main():
 def test_colabfold():
     run_pytest_in_docker(
         colabfold_img_test_fqn,
-        "colabfold/test_colabfold.py",
+        "colabfold",
         rt="nvidia",
         dr=[
             docker.types.DeviceRequest(
@@ -66,3 +71,61 @@ def test_colabfold():
             )
         ],
     )
+
+## Images ##
+
+# Updates test config with test image FQNs
+def update_img_config(config_path: Path, fqns: dict[str, str]):
+    with open(config_path, "r") as f:
+        cfg_content = f.read()
+
+    for var, tag in fqns.items():
+        cfg_content = re.sub(rf"{var} = .+", f'{var} = "{tag}"', cfg_content)
+
+    with open(config_path, "w") as f:
+        f.write(cfg_content)
+
+# Updates workspace YAMLs with test image FQNs
+def update_ws_config(config_path: Path, fqn: str):
+    with open(config_path, "r") as file:
+        yaml_data = file.readlines()
+
+    # Manually parsing instead of using yaml library to preserve structure
+    lines_out = []
+    for line in yaml_data:
+        if line.startswith("container_image:"):
+            ll = line.split(": ")
+            ll[1] = f"{fqn}\n"
+            lines_out.append(": ".join(ll))
+        else:
+            lines_out.append(line)
+
+    with open(config_path, "w") as file:
+        file.writelines(lines_out)
+
+# Entrypoint for building test images in scope
+def build_test():
+    build_specs = []
+    fqns = {}
+
+    # Prepare builds
+    for img_str in build_scope:
+        spec = eval(img_str)
+        spec.tag_format = "{spec_hash}-test"
+        spec.source_root = project_rt
+        ns = spec.with_packages(["pytest"]).with_apt_packages(["screen", "htop"])
+        fqn = ns.image_name()
+        fqns[f"{img_str}_test_fqn"] = fqn
+        build_specs.append(ns)
+
+        # Update workspace config
+        try:
+            ws_cfg_path = ws_rt.joinpath(img_str.replace("_img", ""), "ws.yaml")
+            update_ws_config(ws_cfg_path, fqn)
+        except FileNotFoundError:
+            print(f"Workspace config not found for {img_str}")
+
+    for spec in build_specs:
+        ImageBuildEngine().build(spec)
+        
+    update_img_config(Path("tests/config.py"), fqns)

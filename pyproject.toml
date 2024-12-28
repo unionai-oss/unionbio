@@ -16,8 +16,8 @@ kubernetes = "^31.0.0"
 flytekitplugins-pod = "^1.13.5"
 
 [tool.poetry.scripts]
-image-builder = "images:build"
-test-image-builder = "images:build_test"
+image-builder = "src.unionbio.images:build"
+test-image-builder = "tests.runner:build_test"
 main-tests = "tests.runner:test_main"
 cf-tests = "tests.runner:test_colabfold"
 
