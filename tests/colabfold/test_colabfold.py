@@ -1,6 +1,5 @@
 import os
 import subprocess
-from time import sleep
 from pathlib import Path
 from unionbio.types.protein import Protein
 from unionbio.tasks.colabfold import cf_search, af_predict_local
@@ -60,4 +59,8 @@ def test_af_predict_local(tmp_path):
         ],
     )
     assert isinstance(predict_out, Protein)
-    assert compare_dirs(tmp_path.joinpath("af_predict", "predict_out"), Path(predict_out.predict_out.path), mode="exists")
+    assert compare_dirs(
+        tmp_path.joinpath("af_predict", "predict_out"),
+        Path(predict_out.predict_out.path),
+        mode="exists",
+    )

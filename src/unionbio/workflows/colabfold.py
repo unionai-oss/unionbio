@@ -13,7 +13,9 @@ from unionbio.tasks.utils import fetch_remote_protein
 
 
 @workflow
-def cf_wf(db_uris: list[str], mmcif_uri: str, fasta: str = remote_protein_fasta) -> FlyteFile:
+def cf_wf(
+    db_uris: list[str], mmcif_uri: str, fasta: str = remote_protein_fasta
+) -> FlyteFile:
     db_path = sync_dbs(uris=db_uris)
     mmcif_path = sync_mmcif(uri=mmcif_uri)
     prot = fetch_remote_protein(urls=[fasta])

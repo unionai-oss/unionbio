@@ -2,8 +2,8 @@ import re
 import docker
 from pathlib import Path
 from flytekit.image_spec.image_spec import ImageBuildEngine
-from .config import main_img_test_fqn, colabfold_img_test_fqn, parabricks_img_test_fqn
-from unionbio.images import build_scope, main_img, parabricks_img, colabfold_img
+from .config import main_img_test_fqn, colabfold_img_test_fqn
+from unionbio.images import build_scope
 from unionbio.config import project_rt, ws_rt
 
 
@@ -72,7 +72,9 @@ def test_colabfold():
         ],
     )
 
+
 ## Images ##
+
 
 # Updates test config with test image FQNs
 def update_img_config(config_path: Path, fqns: dict[str, str]):
@@ -84,6 +86,7 @@ def update_img_config(config_path: Path, fqns: dict[str, str]):
 
     with open(config_path, "w") as f:
         f.write(cfg_content)
+
 
 # Updates workspace YAMLs with test image FQNs
 def update_ws_config(config_path: Path, fqn: str):
@@ -102,6 +105,7 @@ def update_ws_config(config_path: Path, fqn: str):
 
     with open(config_path, "w") as file:
         file.writelines(lines_out)
+
 
 # Entrypoint for building test images in scope
 def build_test():
@@ -127,5 +131,5 @@ def build_test():
 
     for spec in build_specs:
         ImageBuildEngine().build(spec)
-        
+
     update_img_config(Path("tests/config.py"), fqns)

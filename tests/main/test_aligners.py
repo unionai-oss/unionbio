@@ -45,7 +45,9 @@ def test_bowtie2_index(tmp_path):
     ref = Reference(test_assets["ref_fn"], FlyteDirectory(path=tmp_path))
     idx = bowtie2_index(ref=ref)
     assert isinstance(idx, Reference)
-    assert compare_dirs(test_assets["bt2_idx_dir"], Path(idx.ref_dir.path), mode="exists")
+    assert compare_dirs(
+        test_assets["bt2_idx_dir"], Path(idx.ref_dir.path), mode="exists"
+    )
 
 
 def test_bowtie2_align(tmp_path):
@@ -71,7 +73,9 @@ def test_bwa_index(tmp_path):
         test_assets["ref_idx_path"],
         Path(indexed_ref.ref_dir.path).joinpath(f'{test_assets["ref_fn"]}.fai'),
     )
-    assert compare_dirs(test_assets["bwa_idx_dir"], Path(indexed_ref.ref_dir.path), mode="exists")
+    assert compare_dirs(
+        test_assets["bwa_idx_dir"], Path(indexed_ref.ref_dir.path), mode="exists"
+    )
 
 
 def test_bwa_align(tmp_path):

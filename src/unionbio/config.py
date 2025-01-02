@@ -1,4 +1,3 @@
-import os
 import logging
 from pathlib import Path
 
@@ -11,7 +10,7 @@ console_handler.setFormatter(
 logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-# Default paths
+# Default args
 remote_ref = "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/references/GRCh38_chr21.fasta"
 remote_reads = [
     "https://github.com/unionai-oss/unionbio/raw/main/tests/assets/sequences/subsampled/SRR812824-sub_1.fastq",
@@ -24,8 +23,6 @@ remote_protein_fasta = "https://rest.uniprot.org/uniprotkb/P42212.fasta"
 
 # Tool config
 fastp_cpu = "3"
-
-current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
 
 project_rt = Path(__file__).parent.parent.parent
 prod_rt = project_rt.joinpath("src")

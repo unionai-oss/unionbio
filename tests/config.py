@@ -1,4 +1,3 @@
-from pathlib import Path
 from unionbio.config import project_rt
 
 test_dir = project_rt.joinpath("tests")

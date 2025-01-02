@@ -4,7 +4,6 @@ import base64
 import subprocess
 from io import BytesIO
 from pathlib import Path
-from time import sleep
 from flytekit import task, current_context, Resources, Deck
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
@@ -144,7 +143,7 @@ def cf_search(
     logger.debug(f"Running MMSeqs search on {seq} with command:")
     logger.debug(" ".join(cmd))
     proc = subproc_execute(cmd)
-    # logger.debug(proc.output)
+    logger.debug(proc.output)
     logger.info(f"Created the following outputs in {time.time() - t} seconds:")
     logger.info(f"MSA files in {Path(outdir).resolve()}: {os.listdir(outdir)}")
 

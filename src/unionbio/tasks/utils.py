@@ -99,7 +99,9 @@ def fetch_remote_protein(urls: list[str]) -> Protein:
         fetch_file(url, workdir)
     prots = Protein.make_all(Path(workdir))
     if len(prots) > 1:
-        logger.warning(f"More than 1 Protein object created from provided URLs: {prots}. Returning index 0.")
+        logger.warning(
+            f"More than 1 Protein object created from provided URLs: {prots}. Returning index 0."
+        )
     return prots[0]
 
 

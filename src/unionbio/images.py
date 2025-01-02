@@ -1,8 +1,10 @@
+import os
 from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
-from unionbio.config import current_registry, prod_rt
+from unionbio.config import prod_rt
 
 union_version = "union==0.1.103"
+current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
 
 main_img = ImageSpec(
     name="main",
@@ -65,8 +67,8 @@ colabfold_img = ImageSpec(
     conda_packages=[
         "openmm==7.7.0",
         "pdbfixer",
-        "kalign2==2.04" ,
-        "hhsuite==3.3.0" ,
+        "kalign2==2.04",
+        "hhsuite==3.3.0",
         "mmseqs2==15.6f452",
     ],
     source_root=prod_rt,
@@ -88,11 +90,9 @@ build_scope = [
     "colabfold_img",
 ]
 
-def build():
 
+def build():
     # Prepare builds
     for img_str in build_scope:
         spec = eval(img_str)
         ImageBuildEngine().build(spec)
-
-
