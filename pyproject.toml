@@ -11,7 +11,7 @@ flytekit = "^1.12.0"
 docker = "<7.0.0"
 requests = "2.31.0"
 streamlit = "^1.36.0"
-union = "0.1.117"
+union = "^0.1.117"
 kubernetes = "^31.0.0"
 flytekitplugins-pod = "^1.13.5"
 

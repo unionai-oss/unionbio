@@ -1,17 +1,12 @@
 import os
 from flytekit import ImageSpec
 from flytekit.image_spec.image_spec import ImageBuildEngine
-from unionbio.config import prod_rt
 
-union_version = "union==0.1.103"
-current_registry = os.getenv("IMAGE_SPEC_REGISTRY", "docker.io/unionbio")
+union_version = "union==0.1.157"
 
 main_img = ImageSpec(
     name="main",
-    platform="linux/amd64",
-    python_version="3.12",
     packages=[union_version],
-    source_root=prod_rt,
     conda_channels=["bioconda"],
     conda_packages=[
         "samtools",
@@ -25,7 +20,6 @@ main_img = ImageSpec(
         "htslib",
         "multiqc",
     ],
-    registry=current_registry,
 )
 
 parabricks_img = ImageSpec(
@@ -34,8 +28,7 @@ parabricks_img = ImageSpec(
     platform="linux/amd64",
     python_version="3.12",
     packages=[union_version],
-    source_root=prod_rt,
-    registry=current_registry,
+    builder="docker",
 )
 
 colabfold_img = ImageSpec(
@@ -71,7 +64,6 @@ colabfold_img = ImageSpec(
         "hhsuite==3.3.0",
         "mmseqs2==15.6f452",
     ],
-    source_root=prod_rt,
     commands=[
         # Install gcloud
         'echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
@@ -80,7 +72,6 @@ colabfold_img = ImageSpec(
         | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
         apt-get update -y && apt-get install google-cloud-cli -y',
     ],
-    registry=current_registry,
 )
 
 # Determines which images will be built for prod or test

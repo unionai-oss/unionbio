@@ -9,7 +9,7 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.types.file import FlyteFile
 from flytekit.extras.tasks.shell import subproc_execute
 from unionbio.config import logger
-from unionbio.images import main_img, parabricks_img
+from unionbio.images import main_img#, parabricks_img
 from unionbio.tasks.helpers import fetch_file
 from unionbio.types import Reads, Reference, VCF, Alignment, Protein
 
@@ -188,41 +188,40 @@ def check_fastqc_reports(rep_dir: FlyteDirectory) -> str:
 
     return "PASS"
 
+# @task(container_image=parabricks_img)
+# def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
+#     """
+#     Compares two BAM files and returns True if they are identical, False otherwise.
 
-@task(container_image=parabricks_img)
-def compare_bams(in1: FlyteFile, in2: FlyteFile) -> bool:
-    """
-    Compares two BAM files and returns True if they are identical, False otherwise.
+#     Args:
+#         in1 (FlyteFile): The first input BAM file.
+#         in2 (FlyteFile): The second input BAM file.
 
-    Args:
-        in1 (FlyteFile): The first input BAM file.
-        in2 (FlyteFile): The second input BAM file.
+#     Returns:
+#         bool: True if the BAM files are identical, False otherwise.
+#     """
+#     in1.download()
+#     in2.download()
 
-    Returns:
-        bool: True if the BAM files are identical, False otherwise.
-    """
-    in1.download()
-    in2.download()
+#     cmp1 = [
+#         "bam",
+#         "diff",
+#         "--in1",
+#         in1.path,
+#         "--in2",
+#         in2.path,
+#         "--noCigar",
+#         "--isize",
+#         "--flag",
+#         "--mate",
+#         "--mapQual",
+#     ]
 
-    cmp1 = [
-        "bam",
-        "diff",
-        "--in1",
-        in1.path,
-        "--in2",
-        in2.path,
-        "--noCigar",
-        "--isize",
-        "--flag",
-        "--mate",
-        "--mapQual",
-    ]
+#     result = subproc_execute(cmp1)
 
-    result = subproc_execute(cmp1)
+#     no_out = result.out == "" and result.err == ""
 
-    no_out = result.out == "" and result.err == ""
-
-    return no_out
+#     return no_out
 
 
 @task(
