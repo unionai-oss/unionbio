@@ -6,7 +6,7 @@ union_version = "union==0.1.157"
 
 main_img = ImageSpec(
     name="main",
-    packages=[union_version],
+    packages=[union_version, "flytekit==1.15.3"],
     conda_channels=["bioconda"],
     conda_packages=[
         "samtools",
@@ -20,6 +20,7 @@ main_img = ImageSpec(
         "htslib",
         "multiqc",
     ],
+    builder="union",
 )
 
 parabricks_img = ImageSpec(

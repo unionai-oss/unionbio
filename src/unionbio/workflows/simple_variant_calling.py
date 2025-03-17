@@ -61,6 +61,9 @@ def calling_wf(
     # Explicitly define task dependencies
     fqc_out >> filtered_samples
 
+    # Generate final multiqc report with preprocessing steps
+    render_multiqc(fqc=fqc_out, filt_reps=filtered_samples)
+
     # Generate a bowtie2 index or load it from cache
     idx = bwa_index(ref=ref)
 
@@ -75,8 +78,5 @@ def calling_wf(
 
     # Call Variants
     vcfs = hc_call_samples(ref=idx, als=bams)
-
-    # Generate final multiqc report with stats from all steps
-    render_multiqc(fqc=fqc_out, filt_reps=filtered_samples)
 
     return vcfs
