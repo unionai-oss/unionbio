@@ -55,6 +55,6 @@ def haplotype_caller(ref: Reference, al: Alignment) -> VCF:
     return vcf_out
 
 
-@dynamic
+@dynamic(container_image=main_img)
 def hc_call_samples(ref: Reference, als: List[Alignment]) -> List[VCF]:
     return [haplotype_caller(ref=ref, al=al) for al in als]

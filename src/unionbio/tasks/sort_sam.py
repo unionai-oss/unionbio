@@ -41,6 +41,6 @@ def sort_sam(al: Alignment) -> Alignment:
     return al
 
 
-@dynamic
+@dynamic(container_image=main_img)
 def sort_samples(als: List[Alignment]) -> List[Alignment]:
     return [sort_sam(al=al) for al in als]

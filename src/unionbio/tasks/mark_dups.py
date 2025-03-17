@@ -46,6 +46,6 @@ def mark_dups(al: Alignment) -> Alignment:
     return al
 
 
-@dynamic
+@dynamic(container_image=main_img)
 def mark_dups_samples(als: List[Alignment]) -> List[Alignment]:
     return [mark_dups(al=al) for al in als]

@@ -68,7 +68,7 @@ def base_recalibrator(ref: Reference, sites: VCF, al: Alignment) -> Alignment:
     return al
 
 
-@dynamic
+@dynamic(container_image=main_img)
 def recalibrate_samples(
     als: list[Alignment], sites: VCF, ref: Reference
 ) -> list[Alignment]:
