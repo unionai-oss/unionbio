@@ -8,7 +8,7 @@ ssh_config = {
     "username": "ubuntu",
 }
 
-echo_1_job = SlurmTask(
+bwa = SlurmTask(
     name="slurm-task",
     task_config=SlurmRemoteScript(
         ssh_config=ssh_config,
@@ -30,7 +30,27 @@ echo_1_job = SlurmTask(
     )
 )
 
-echo_2_job = SlurmTask(
+haplocall = SlurmTask(
+    name="slurm-task",
+    task_config=SlurmRemoteScript(
+        ssh_config=ssh_config,
+        batch_script_path="/home/ubuntu/pryce/scripts/haplocaller.sh",
+        batch_script_args=[
+            "-r",
+            "/home/ubuntu/pryce/outputs/GRCh38_chr21.fasta",
+            "-b",
+            "/home/ubuntu/pryce/outputs/SRR812824-sub.sorted.bam",
+            "-o",
+            "/home/ubuntu/pryce/outputs/VCFs",
+        ],
+        sbatch_conf={
+            "partition": "debug",
+            "job-name": "tiny-slurm",
+        }
+    )
+)
+
+echo_job = SlurmTask(
     name="slurm-task",
     task_config=SlurmRemoteScript(
         ssh_config=ssh_config,
@@ -45,10 +65,10 @@ echo_2_job = SlurmTask(
 
 
 @workflow
-def wf() -> None:
-    # t1 = echo_1_job()
-    t2 = echo_2_job()
-    # t1 >> t2
+def wf():
+    al = bwa()
+    call = haplocall()
+    al >> call
 
 if __name__ == "__main__":
     from flytekit.clis.sdk_in_container import pyflyte
