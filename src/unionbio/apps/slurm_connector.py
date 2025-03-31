@@ -4,7 +4,7 @@ from union.app import FlyteConnectorApp
 image = ImageSpec(
     name="flyteconnector",
     packages=[
-        "git+https://github.com/flyteorg/flytekit.git#plugins/flytekitplugins-slurm",
+        "flytekitplugins-slurm==1.15.3",
         "flytekit[connector]==1.16.0b0",
         "union",
         "union-runtime",
@@ -12,7 +12,6 @@ image = ImageSpec(
     apt_packages=["git", "build-essential", "libmagic1", "vim", "openssh-client", "ca-certificates"],
     env={"FLYTE_SDK_LOGGING_LEVEL": "10"},
     builder="union",
-    # registry="docker.io/unionbio",
 )
 
 slurm_connector_app = FlyteConnectorApp(

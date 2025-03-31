@@ -1,6 +1,6 @@
 import os
 from union import ImageSpec, task, workflow
-from flytekitplugins.slurm import SlurmScriptConfig, SlurmTask, SlurmFunctionConfig
+from flytekitplugins.slurm import SlurmRemoteScript, SlurmTask, SlurmFunction
 
 image = ImageSpec(
     name="slurm-connector-workflow",
@@ -11,12 +11,12 @@ image = ImageSpec(
 
 @task(
     container_image=image,
-    task_config=SlurmFunctionConfig(
+    task_config=SlurmFunction(
         ssh_config={
             "host": "44.223.100.92",
             "username": "ubuntu",
         },
-        sbatch_config={"partition": "debug", "job-name": "tiny-slurm", "output": "/home/ubuntu/fn_task.log"},
+        sbatch_conf={"partition": "debug", "job-name": "tiny-slurm", "output": "/home/ubuntu/fn_task.log"},
         script="""#!/bin/bash -i
 echo Run function with sbatch...
 # Run the user-defined task function
@@ -50,8 +50,8 @@ remote_config = {
         }
 
 bwa = SlurmTask(
-    name="slurm-task",
-    task_config=SlurmScriptConfig(
+    name="bwa",
+    task_config=SlurmRemoteScript(
         ssh_config=remote_config,
         batch_script_path="/home/ubuntu/pryce/scripts/bwa.sh",
         batch_script_args=[
@@ -64,7 +64,7 @@ bwa = SlurmTask(
             "-o",
             "/home/ubuntu/pryce/outputs/SRR812824-sub",
         ],
-        sbatch_config={
+        sbatch_conf={
             "partition": "debug",
             "job-name": "tiny-slurm",
         }
@@ -72,8 +72,8 @@ bwa = SlurmTask(
 )
 
 haplocall = SlurmTask(
-    name="slurm-task",
-    task_config=SlurmScriptConfig(
+    name="haplotype-caller",
+    task_config=SlurmRemoteScript(
         ssh_config=remote_config,
         batch_script_path="/home/ubuntu/pryce/scripts/haplocaller.sh",
         batch_script_args=[
@@ -84,7 +84,7 @@ haplocall = SlurmTask(
             "-o",
             "/home/ubuntu/pryce/outputs/VCFs",
         ],
-        sbatch_config={
+        sbatch_conf={
             "partition": "debug",
             "job-name": "tiny-slurm",
         }
@@ -94,11 +94,11 @@ haplocall = SlurmTask(
 echo_job = SlurmTask(
     name="slurm-task",
     container_image=image,
-    task_config=SlurmScriptConfig(
+    task_config=SlurmRemoteScript(
         ssh_config=remote_config,
         batch_script_path="/home/ubuntu/pryce/scripts/echo.sh",
         # batch_script_args=["1"],
-        sbatch_config={
+        sbatch_conf={
             "partition": "debug",
             "job-name": "tiny-slurm",
         }
