@@ -2,8 +2,14 @@ from union import ImageSpec, task, workflow
 from flytekitplugins.slurm import SlurmFunction
 
 image = ImageSpec(
-    name="slurm-connector-workflow",
-    packages=["git+https://github.com/flyteorg/flytekit.git#plugins/flytekitplugins-slurm"],
+    name="flyteconnector",
+    packages=[
+        "flytekitplugins-slurm==1.15.3",
+        "flytekit[connector]==1.16.0b0",
+        "union",
+        "union-runtime",
+    ],
+    apt_packages=["git", "build-essential", "libmagic1", "vim", "openssh-client", "ca-certificates"],
     env={"FLYTE_SDK_LOGGING_LEVEL": "10"},
     builder="union",
 )

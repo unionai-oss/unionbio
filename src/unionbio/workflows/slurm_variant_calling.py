@@ -9,7 +9,7 @@ image = ImageSpec(
 )
 
 remote_config = {
-    "host": "slurmgpu",
+    "host": "44.223.100.92",
     "username": "ubuntu",
 }
 
